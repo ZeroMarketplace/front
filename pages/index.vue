@@ -1,7 +1,5 @@
 <template>
   <div>
-    sadfjlaksdjf ;lasdkjf ;lasjdfl;k jasd;lf kj
-    <button>Click</button>
   </div>
 </template>
 

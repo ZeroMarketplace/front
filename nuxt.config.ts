@@ -14,10 +14,6 @@ export default defineNuxtConfig({
         'assets/css/style.scss'
     ],
 
-    vuetify: {
-        rtl: true
-    },
-
     build: {
         transpile: ['vuetify'],
     },
