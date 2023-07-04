@@ -34,7 +34,7 @@
             <div v-if="step === 1 || step === 3">
               <!--     Google Login Button       -->
               <v-btn v-if="step === 1"
-                     class="border rounded-lg w-100 bg-grey-lighten-3 mb-5"
+                     class="rounded-lg w-100 bg-grey-lighten-3 mb-5"
                      height="50">
                 <v-icon class="mx-1"
                         size="large"
@@ -49,7 +49,7 @@
                             v-model="form.phoneNumber"
                             :label="step === 3 ? 'شماره موبایل (تایید شده)' : 'شماره موبایل'"
                             placeholder="وارد کنید"
-                            :readonly="step === 3"
+                            :readonly="step === 3 || loading"
                             density="compact"
                             variant="outlined">
               </v-text-field>
@@ -111,7 +111,10 @@
             </div>
 
             <!--      Submit        -->
-            <v-btn class="rounded-lg w-100 bg-green text-center mt-3" height="50">
+            <v-btn class="rounded-lg w-100 bg-green text-center mt-3"
+                   @click="submit"
+                   :loading="loading"
+                   height="50">
               <p> ادامه </p>
               <v-icon class="mx-2 ml-n3">mdi-arrow-left</v-icon>
             </v-btn>
@@ -142,17 +145,25 @@ export default {
   },
   data() {
     return {
-      modal : false,
-      step  : 2,
-      action: 1,
-      form  : {
-        phoneNumber : "",
-        otp         : "",
+      modal     : false,
+      step      : 1,
+      action    : 1,
+      loading   : false,
+      validation: '',
+      form      : {
+        phoneNumber : '',
+        otp         : '',
+        password    : '',
         showPassword: false
       }
     }
   },
-  methods: {
+  computed: {
+    runtimeConfig() {
+      return useRuntimeConfig();
+    }
+  },
+  methods : {
     openModal() {
       this.modal = true;
     },
@@ -162,14 +173,74 @@ export default {
     togglePasswordVisible() {
       this.form.showPassword = !this.form.showPassword;
     },
-    submit() {
-      console.log(200);
-    },
     onOTPEntered(val) {
       console.log(val);
     },
     changeStep(val) {
       this.step = val;
+    },
+    async sendOTP() {
+      let response = await fetch(
+          this.runtimeConfig.public.apiUrl + 'auth/sendOTP', {
+            method : 'post',
+            headers: {'Content-Type': 'application/json'},
+            body   : JSON.stringify({phone: this.form.phoneNumber})
+          });
+
+      // OTP code sent
+      if (response.status === 200) {
+        this.step = 2;
+      } else {
+        // show error
+      }
+    },
+    async verifyOTP() {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'auth/verifyOTP', {
+            method : 'post',
+            headers: {'Content-Type': 'application/json'},
+            body   : JSON.stringify({
+              phone: this.form.phoneNumber,
+              code : this.form.otp
+            })
+          }).then(async response => {
+            // OTP code verified
+            if (response.status === 200) {
+              response        = await response.json();
+              this.validation = response.validation
+              this.step       = 3;
+            } else {
+              // show error
+            }
+      });
+    },
+    async login() {
+      let response = await fetch(
+          this.runtimeConfig.public.apiUrl + 'auth/login', {
+            method : 'post',
+            headers: {'Content-Type': 'application/json'},
+            body   : JSON.stringify({
+              phone     : this.form.phoneNumber,
+              password  : this.form.password,
+              validation: this.validation
+            })
+          });
+    },
+    async submit() {
+      let response;
+      this.loading = true;
+      switch (this.step) {
+        case 1:
+          await this.sendOTP();
+          break;
+        case 2:
+          await this.verifyOTP();
+          break;
+        case 3:
+          await this.login();
+          break;
+      }
+      this.loading = false;
     }
   }
 }

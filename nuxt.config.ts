@@ -21,4 +21,14 @@ export default defineNuxtConfig({
     buildModules: [],
 
     devtools: {enabled: true},
+
+    runtimeConfig: {
+        // The private keys which are only available within server-side
+
+        // Keys within public, will be also exposed to the client-side
+        public: {
+            apiUrl: 'http://localhost:5000/api/'
+        }
+    }
+
 })

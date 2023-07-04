@@ -12,7 +12,7 @@
       <!--  Search    -->
       <v-col class="pb-3 d-none d-md-inline" md="5" lg="6">
         <v-text-field
-            class="border rounded-xl px-4 pb-2 w-100"
+            class="border rounded-xl px-4 pb-2 w-75"
             variant="plain"
             density="compact"
             label="جستجو"
