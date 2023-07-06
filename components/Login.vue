@@ -149,7 +149,8 @@
 
 // action is 1-Sign up 2-Sign in
 
-import VOPTInput from "vue3-otp-input"
+import VOPTInput      from "vue3-otp-input"
+import {useUserStore} from "~/store/user";
 
 export default {
   components: {
@@ -290,13 +291,34 @@ export default {
             })
           }).then(async (response) => {
         const {$showMessage} = useNuxtApp();
-        if (response.status === 401) {
+        if (response.status === 200) {
+          // Login was successful
+
+          // set auth token
+          const userStore = useUserStore();
+          response        = await response.json();
+          userStore.$patch({
+            authenticated: true,
+            role         : response.role,
+            token        : response.token
+          });
+
+          // redirect to dashboard
+          $showMessage('خوش آمدید', 'success');
+          this.closeModal();
+          await navigateTo('/dashboard');
+
+        } else if (response.status === 401) {
+          // Password is wrong
           $showMessage('رمز عبور وارد شده اشتباه است', 'error');
+
         } else {
+          // other errors
           response = await response.json();
           if (response.message === 'validationExpired') {
             $showMessage('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
           }
+
         }
       });
     },

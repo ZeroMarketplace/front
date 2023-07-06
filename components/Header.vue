@@ -25,19 +25,27 @@
       <v-col class="pt-4 text-left" sm="6" md="4" lg="3">
 
         <!--   Profile     -->
-        <v-btn class="d-none d-md-inline" variant="plain" height="50" @click="openLoginDialog">
+        <v-btn class="d-none d-md-inline"
+               variant="plain" height="50"
+               @click="openProfile">
           <p>پروفایل</p>
           <v-icon class="mr-2" size="large">mdi-account-outline</v-icon>
         </v-btn>
 
-        <v-btn class="d-md-none rounded-lg" color="secondary" size="small" @click="openLoginDialog" icon>
+        <v-btn class="d-md-none rounded-lg"
+               color="secondary"
+               size="small"
+               @click="openProfile"
+               icon>
           <v-icon>mdi-account-outline</v-icon>
         </v-btn>
 
         <Login ref="login"/>
 
         <!--   Cart     -->
-        <v-btn class="d-none d-md-inline" variant="plain" height="50">
+        <v-btn class="d-none d-md-inline"
+               variant="plain"
+               height="50">
           <v-row>
             <v-col class="text-right">
               <p class="textSmall">سبد خرید </p>
@@ -50,11 +58,17 @@
           </v-row>
         </v-btn>
 
-        <v-btn class="d-md-none mx-1 rounded-lg" color="secondary" size="small" icon>
+        <v-btn class="d-md-none mx-1 rounded-lg"
+               color="secondary"
+               size="small"
+               icon>
           <v-icon>mdi-cart-outline</v-icon>
         </v-btn>
 
-        <v-btn class="d-md-none rounded-lg" color="secondary" size="small" icon>
+        <v-btn class="d-md-none rounded-lg"
+               color="secondary"
+               size="small"
+               icon>
           <v-icon>mdi-menu</v-icon>
         </v-btn>
 
@@ -68,11 +82,25 @@
 </template>
 
 <script>
+import {useUserStore} from "~/store/user";
+
 export default {
-  methods: {
-    openLoginDialog() {
-      this.$refs.login.openModal();
+  methods : {
+    async openProfile() {
+      if (this.user.authenticated) {
+        await navigateTo('/dashboard');
+      } else {
+        this.$refs.login.openModal();
+      }
     }
+  },
+  computed: {
+    user() {
+      return useUserStore();
+    }
+  },
+  mounted() {
+
   }
 }
 </script>
