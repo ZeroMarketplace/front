@@ -306,7 +306,7 @@ export default {
           // redirect to dashboard
           $showMessage('خوش آمدید', 'success');
           this.closeModal();
-          await navigateTo('/dashboard');
+          await navigateTo(response.role === 1 ? '/admin-dashboard' : '/dashboard');
 
         } else if (response.status === 401) {
           // Password is wrong

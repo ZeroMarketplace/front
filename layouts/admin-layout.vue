@@ -5,17 +5,10 @@
 <template>
   <v-app>
 
-    <!-- Header -->
-    <Header />
-
     <!-- Page   -->
-    <v-container class="px-md-16 mt-3" fluid>
+    <v-container class="ma-0 pa-0" fluid>
       <slot/>
     </v-container>
-
-
-    <!-- Footer -->
-    <Footer />
 
   </v-app>
 </template>
