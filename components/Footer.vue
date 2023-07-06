@@ -1,10 +1,13 @@
-<script setup lang="ts">
+<template>
+  <div>
+    <Notifier ref="notifier"/>
+  </div>
+</template>
+
+<script>
 
 </script>
 
-<template>
-
-</template>
 
 <style scoped>
 

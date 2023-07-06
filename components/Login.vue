@@ -16,8 +16,8 @@
                 </v-btn>
                 تایید پیامکی
               </p>
-              <p v-if="step === 3 && action === 2">تعیین رمز عبور</p>
-              <p v-if="step === 3 && action === 1">وارد کردن رمز عبور</p>
+              <p v-if="step === 3 && action === 1">تعیین رمز عبور</p>
+              <p v-if="step === 3 && action === 2">وارد کردن رمز عبور</p>
             </v-label>
 
             <!--     Close       -->
@@ -73,12 +73,22 @@
                     :num-inputs="5"
                     :should-auto-focus="true"
                     input-type="numeric"
-                    @on-complete="onOTPEntered"
                 />
               </div>
 
-              <v-label class="my-2 font-weight-bold" clickable="true">دریافت مجدد کد</v-label>
-              <v-label class="d-block my-2">1:30</v-label>
+              <!--            Timer          -->
+              <v-label v-if="timer.active"
+                       class="d-block my-2 ltrDirection text-pink font-weight-bold">
+                {{ '0' + timer.minutes }} : {{ timer.second < 10 ? '0' + timer.second : timer.second }}
+              </v-label>
+
+              <!--       reSend OTP code       -->
+              <v-label v-if="!timer.active"
+                       class="mb-2 text-pink"
+                       @click="sendOTP"
+                       :clickable="!timer.active">دریافت مجدد کد
+              </v-label>
+
             </div>
 
             <!--      STEP 3       -->
@@ -98,6 +108,7 @@
 
               <!--      Confirm Password      -->
               <v-text-field v-if="action === 1"
+                            v-model="form.confirmPassword"
                             class="mt-3"
                             label="تکرار رمز عبور"
                             placeholder="وارد کنید"
@@ -113,6 +124,7 @@
             <!--      Submit        -->
             <v-btn class="rounded-lg w-100 bg-green text-center mt-3"
                    @click="submit"
+                   :disabled="!validToSubmit"
                    :loading="loading"
                    height="50">
               <p> ادامه </p>
@@ -150,17 +162,39 @@ export default {
       action    : 1,
       loading   : false,
       validation: '',
+      timer     : {
+        active : false,
+        minutes: 1,
+        second : 60,
+        counter: null
+      },
       form      : {
-        phoneNumber : '',
-        otp         : '',
-        password    : '',
-        showPassword: false
+        phoneNumber    : '',
+        otp            : '',
+        password       : '',
+        confirmPassword: '',
+        showPassword   : false
       }
     }
   },
   computed: {
     runtimeConfig() {
       return useRuntimeConfig();
+    },
+    validToSubmit() {
+      if (this.step === 1 && this.form.phoneNumber.length === 11) {
+        return true;
+      } else if (this.step === 2 && this.form.otp.length === 5) {
+        return true;
+      } else if (this.step === 3) {
+        if (this.action === 2) {
+          return (this.form.password.length > 7);
+        } else {
+          return this.form.password.length > 7 && this.form.password === this.form.confirmPassword;
+        }
+      } else {
+        return false;
+      }
     }
   },
   methods : {
@@ -173,11 +207,28 @@ export default {
     togglePasswordVisible() {
       this.form.showPassword = !this.form.showPassword;
     },
-    onOTPEntered(val) {
-      console.log(val);
-    },
     changeStep(val) {
       this.step = val;
+    },
+    startTimer() {
+      this.timer.minutes = 1;
+      this.timer.second  = 60;
+      this.timer.active  = true;
+      this.timer.counter = setInterval(() => {
+        if (this.timer.second === 1) {
+          if (this.timer.minutes) {
+            this.timer.minutes--;
+            this.timer.second = 60;
+          } else {
+            this.timer.active  = false;
+            this.timer.minutes = 1;
+            this.timer.second  = 60;
+            clearInterval(this.timer.counter);
+          }
+        } else {
+          this.timer.second--;
+        }
+      }, 1000);
     },
     async sendOTP() {
       let response = await fetch(
@@ -189,9 +240,12 @@ export default {
 
       // OTP code sent
       if (response.status === 200) {
-        this.step = 2;
+        this.startTimer();
+        this.changeStep(2);
       } else {
         // show error
+        const {$showMessage} = useNuxtApp();
+        $showMessage('مشکلی در ارسال کد بوجود آمد. لطفا بعدا تلاش کنید', 'error');
       }
     },
     async verifyOTP() {
@@ -204,18 +258,28 @@ export default {
               code : this.form.otp
             })
           }).then(async response => {
-            // OTP code verified
-            if (response.status === 200) {
-              response        = await response.json();
-              this.validation = response.validation
-              this.step       = 3;
-            } else {
-              // show error
+        // OTP code verified
+        if (response.status === 200) {
+          response        = await response.json();
+          this.validation = response.validation;
+          this.action     = response.userIsExists ? 2 : 1;
+          this.changeStep(3);
+        } else {
+          // show error
+          const {$showMessage} = useNuxtApp();
+          response             = await response.json();
+          if (response.message) {
+            if (response.message === 'otpIsWrong') {
+              $showMessage('کد وارد شده صحیح نیست', 'error');
+            } else if (response.message === 'otpIsExpired') {
+              $showMessage('کد منقضی شده است. لطفا دوباره تلاش کنید', 'error');
             }
+          }
+        }
       });
     },
     async login() {
-      let response = await fetch(
+      await fetch(
           this.runtimeConfig.public.apiUrl + 'auth/login', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
@@ -224,10 +288,19 @@ export default {
               password  : this.form.password,
               validation: this.validation
             })
-          });
+          }).then(async (response) => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 401) {
+          $showMessage('رمز عبور وارد شده اشتباه است', 'error');
+        } else {
+          response = await response.json();
+          if (response.message === 'validationExpired') {
+            $showMessage('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
+          }
+        }
+      });
     },
     async submit() {
-      let response;
       this.loading = true;
       switch (this.step) {
         case 1:
