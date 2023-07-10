@@ -9,7 +9,7 @@
     <Header />
 
     <!-- Page   -->
-    <v-container class="px-md-16 mt-3" fluid>
+    <v-container class="px-md-16 mt-3 body"  fluid>
       <slot/>
     </v-container>
 

@@ -105,6 +105,6 @@ export default {
 
 <style scoped>
 .dashboardMenu {
-  min-height: 650px;
+  min-height: 100vh;
 }
 </style>

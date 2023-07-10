@@ -300,6 +300,8 @@ export default {
           userStore.$patch({
             authenticated: true,
             role         : response.role,
+            firstName    : response.firstName,
+            lastName     : response.lastName,
             token        : response.token
           });
 
@@ -337,6 +339,9 @@ export default {
       }
       this.loading = false;
     }
+  },
+  mounted() {
+    // const {signIn} = useAuth();
   }
 }
 </script>
