@@ -42,7 +42,7 @@
                     size="small"
                     color="secondary"
                     variant="elevated">
-              {{ getItem(form.parent).title }}
+              {{ form._parentTitle }}
             </v-chip>
 
             <v-row class="mt-2">
@@ -126,7 +126,8 @@
         <v-col cols="12">
           <v-icon class="mt-1" color="grey">mdi-list</v-icon>
           <v-label class="text-h6 text-black mx-3">دسته بندی‌ها</v-label>
-          <CategoryView :list="list"/>
+
+          <CategoryView :list="list" @setParent="setParent"/>
 
           <!--    Empty List Alert      -->
           <v-row v-if="!list.length" class="justify-center mt-5 mb-16">
@@ -163,11 +164,12 @@ export default {
       user   : {},
       loading: false,
       form   : {
-        title  : '',
-        titleEn: '',
-        icon   : '',
-        _parent: '',
-        valid  : false
+        title       : '',
+        titleEn     : '',
+        icon        : '',
+        _parent     : '',
+        _parentTitle: '',
+        valid       : false
       },
       rules  : {
         title  : [
@@ -212,6 +214,9 @@ export default {
           const {$showMessage} = useNuxtApp();
           if (response.status === 200) {
             $showMessage('عملیات با موفقت انجام شد', 'success');
+
+            // refresh list
+            await this.getCategories();
           } else {
             // show error
             $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -228,8 +233,13 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-
+        response  = await response.json();
+        this.list = response;
       });
+    },
+    setParent(data) {
+      this.form._parent      = data._id;
+      this.form._parentTitle = data.title;
     }
   },
   mounted() {

@@ -4,7 +4,7 @@
 
       <!--  Icon    -->
       <v-btn size="25"
-             v-if="item.children.length"
+             v-if="item.children && item.children.length"
              @click="activeChildren = !activeChildren"
              variant="text"
              icon>
@@ -33,15 +33,20 @@
       <v-icon size="15">mdi-pencil</v-icon>
     </v-btn>
 
-    <!--  Add   -->
+    <!--  Add  (Set Parent)  -->
     <v-btn class="float-left ml-3"
            color="secondary"
            size="30"
+           @click="setParent({_id: item._id, title: item.title})"
            icon>
       <v-icon size="15">mdi-plus</v-icon>
     </v-btn>
 
-    <CategoryView v-if="activeChildren" :list="item.children" class="mt-2 pb-2"/>
+    <!--  Children   -->
+    <CategoryView v-if="activeChildren"
+                  :list="item.children"
+                  @setParent="setParent"
+                  class="mt-2 pb-2"/>
 
   </v-list-item>
 </template>
@@ -55,6 +60,11 @@ export default {
       activeMenu    : true,
     }
   },
+  methods: {
+    setParent(data) {
+      this.$emit('setParent', {_id: data._id, title: data.title});
+    }
+  }
 }
 </script>
 
