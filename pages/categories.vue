@@ -38,6 +38,7 @@
             <!--    Parent      -->
             <v-chip v-if="form._parent"
                     prepend-icon="mdi-close"
+                    @click:append-inner="openIconsList"
                     class="mt-5"
                     size="small"
                     color="secondary"
@@ -108,7 +109,7 @@
                        height="40"
                        width="100"
                        variant="text"
-                       type="reset"
+                       @click="reset"
                        density="compact">
                   بازنگری
                 </v-btn>
@@ -127,11 +128,13 @@
           <v-icon class="mt-1" color="grey">mdi-list</v-icon>
           <v-label class="text-h6 text-black mx-3">دسته بندی‌ها</v-label>
 
-          <CategoryView :list="list" @setParent="setParent"/>
+          <CategoryView :list="list"
+                        @setParent="setParent"
+                        @setDelete="setDelete"
+                        @setEdit="setEdit"/>
 
           <!--    Empty List Alert      -->
           <v-row v-if="!list.length" class="justify-center mt-5 mb-16">
-
             <v-icon class="w-100 my-5"
                     size="100">
               mdi-information-outline
@@ -169,6 +172,7 @@ export default {
         icon        : '',
         _parent     : '',
         _parentTitle: '',
+        action      : 'insert',
         valid       : false
       },
       rules  : {
@@ -192,36 +196,102 @@ export default {
     openIconsList() {
       window.open('https://materialdesignicons.com/', '_blank');
     },
-    getItem(_id) {
-      return _id;
+    reset() {
+      this.form = {
+        title       : '',
+        titleEn     : '',
+        icon        : '',
+        _parent     : '',
+        _parentTitle: '',
+        action      : 'insert',
+        valid       : false
+      };
+    },
+    async insert() {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'categories', {
+            method : 'post',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              title  : this.form.title,
+              titleEn: this.form.titleEn,
+              icon   : this.form.icon,
+              _parent: this.form._parent,
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // refresh list
+          await this.getCategories();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
+    async edit() {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'categories', {
+            method : 'put',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              title  : this.form.title,
+              titleEn: this.form.titleEn,
+              icon   : this.form.icon,
+              _id    : this.form._id
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // refresh list
+          await this.getCategories();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
+    async delete(_id) {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'categories', {
+            method : 'delete',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              _id: _id
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // refresh list
+          await this.getCategories();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
     },
     async submit() {
       if (this.$refs.addCategoryForm.isValid) {
-        await fetch(
-            this.runtimeConfig.public.apiUrl + 'categories', {
-              method : 'post',
-              headers: {
-                'Content-Type' : 'application/json',
-                'authorization': 'Bearer ' + this.user.token
-              },
-              body   : JSON.stringify({
-                title  : this.form.title,
-                titleEn: this.form.titleEn,
-                icon   : this.form.icon,
-                _parent: this.form._parent,
-              })
-            }).then(async response => {
-          const {$showMessage} = useNuxtApp();
-          if (response.status === 200) {
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-
-            // refresh list
-            await this.getCategories();
-          } else {
-            // show error
-            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-          }
-        });
+        if (this.form.action === 'insert') {
+          await this.insert();
+        } else if (this.form.action === 'edit') {
+          await this.edit();
+        }
       }
     },
     async getCategories() {
@@ -237,10 +307,27 @@ export default {
         this.list = response;
       });
     },
+    setEdit(data) {
+      this.form = {
+        title       : data.title,
+        titleEn     : data.titleEn,
+        icon        : data.icon ?? '',
+        _parent     : '',
+        _parentTitle: '',
+        action      : 'edit',
+        _id         : data._id,
+        valid       : false
+      };
+    },
+    setDelete(data) {
+      if (confirm('آیا مطمئن هستید؟')) {
+        this.delete(data._id);
+      }
+    },
     setParent(data) {
       this.form._parent      = data._id;
       this.form._parentTitle = data.title;
-    }
+    },
   },
   mounted() {
     this.user = useUserStore();

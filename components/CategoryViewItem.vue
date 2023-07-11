@@ -14,6 +14,8 @@
       <!--  Title    -->
       {{ item.title }}
 
+      <!--      <a class="text-yellow">{{ ' #' + item.code }}</a>-->
+
     </v-list-item-title>
 
     <!--   Actions    -->
@@ -21,14 +23,16 @@
     <v-btn class="float-left ml-3"
            color="red"
            size="30"
+           @click="setDelete({_id: item._id})"
            icon>
-      <v-icon size="15">mdi-minus</v-icon>
+      <v-icon size="15">mdi-delete-outline</v-icon>
     </v-btn>
 
     <!--  Edit   -->
     <v-btn class="float-left ml-3"
            color="secondary"
            size="30"
+           @click="setEdit(item)"
            icon>
       <v-icon size="15">mdi-pencil</v-icon>
     </v-btn>
@@ -46,6 +50,8 @@
     <CategoryView v-if="activeChildren"
                   :list="item.children"
                   @setParent="setParent"
+                  @setEdit="setEdit"
+                  @setDelete="setDelete"
                   class="mt-2 pb-2"/>
 
   </v-list-item>
@@ -63,6 +69,12 @@ export default {
   methods: {
     setParent(data) {
       this.$emit('setParent', {_id: data._id, title: data.title});
+    },
+    setEdit(data) {
+      this.$emit('setEdit', data);
+    },
+    setDelete(data) {
+      this.$emit('setDelete', data);
     }
   }
 }

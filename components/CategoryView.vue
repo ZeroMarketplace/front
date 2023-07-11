@@ -1,6 +1,10 @@
 <template>
   <v-list class="w-100">
-    <CategoryViewItem v-for="item in list" @setParent="setParent" :item="item"/>
+    <CategoryViewItem v-for="item in list"
+                      @setEdit="setEdit"
+                      @setParent="setParent"
+                      @setDelete="setDelete"
+                      :item="item"/>
   </v-list>
 </template>
 
@@ -13,6 +17,12 @@ export default {
   methods: {
     setParent(data) {
       this.$emit('setParent', data);
+    },
+    setEdit(data) {
+      this.$emit('setEdit', data);
+    },
+    setDelete(data) {
+      this.$emit('setDelete', data);
     }
   }
 }
