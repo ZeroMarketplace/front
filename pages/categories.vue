@@ -297,8 +297,7 @@ export default {
           this.runtimeConfig.public.apiUrl + 'categories', {
             method : 'get',
             headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
+              'Content-Type' : 'application/json'
             }
           }).then(async response => {
         response  = await response.json();

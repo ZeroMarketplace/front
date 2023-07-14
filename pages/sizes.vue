@@ -21,17 +21,17 @@
           بازگشت
         </v-btn>
 
-        <v-label class="text-h6 text-black mx-3">مدیریت برند‌ها</v-label>
+        <v-label class="text-h6 text-black mx-3">مدیریت سایز‌ها</v-label>
       </v-row>
 
       <!--   Content     -->
       <v-row class="bg-white mr-2 ml-3 rounded-lg">
 
-        <!--    Add Brand   -->
+        <!--    Add Size   -->
         <v-col cols="12">
 
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">افزودن برند</v-label>
+          <v-label class="text-h6 text-black mx-3">افزودن سایز</v-label>
 
           <v-form @submit.prevent="submit" ref="addBrandForm">
 
@@ -44,7 +44,7 @@
                               label="عنوان"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.title"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -57,7 +57,7 @@
                               label="Title"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.titleEn"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -99,10 +99,10 @@
 
         <v-divider class="my-5"></v-divider>
 
-        <!--    Brands List   -->
+        <!--    Sizes List   -->
         <v-col cols="12" class="pb-16">
           <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
-          <v-label class="text-h6 text-black mx-3">برند‌ها</v-label>
+          <v-label class="text-h6 text-black mx-3">سایز‌ها</v-label>
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -171,13 +171,7 @@ export default {
         loading: false
       },
       rules  : {
-        title  : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        titleEn: [
+        notEmpty  : [
           value => {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
@@ -197,7 +191,7 @@ export default {
     },
     async insert() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
+          this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -213,7 +207,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getBrands();
+          await this.getSizes();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -222,7 +216,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
+          this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -239,7 +233,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getBrands();
+          await this.getSizes();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -248,7 +242,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
+          this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -263,7 +257,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getBrands();
+          await this.getSizes();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -283,10 +277,10 @@ export default {
         this.form.loading = false;
       }
     },
-    async getBrands() {
+    async getSizes() {
       this.loading = true;
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
+          this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json'
@@ -309,11 +303,11 @@ export default {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
-    },
+    }
   },
   mounted() {
     this.user = useUserStore();
-    this.getBrands();
+    this.getSizes();
   },
   computed: {
     runtimeConfig() {

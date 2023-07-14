@@ -33,7 +33,7 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن واحد</v-label>
 
-          <v-form @submit.prevent="submit" ref="addBrandForm">
+          <v-form @submit.prevent="submit" ref="addUnitForm">
 
             <v-row class="mt-2">
 
@@ -271,7 +271,7 @@ export default {
       });
     },
     async submit() {
-      if (this.$refs.addBrandForm.isValid) {
+      if (this.$refs.addUnitForm.isValid) {
         this.form.loading = true;
 
         if (this.form.action === 'insert') {
@@ -310,11 +310,7 @@ export default {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
-    },
-    setParent(data) {
-      this.form._parent      = data._id;
-      this.form._parentTitle = data.title;
-    },
+    }
   },
   mounted() {
     this.user = useUserStore();
