@@ -267,7 +267,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors', {
+          this.runtimeConfig.public.apiUrl + 'colors/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -276,8 +276,7 @@ export default {
             body   : JSON.stringify({
               title  : this.form.title,
               titleEn: this.form.titleEn,
-              color  : this.form.color,
-              _id    : this.form._id
+              color  : this.form.color
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -294,15 +293,12 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors', {
+          this.runtimeConfig.public.apiUrl + 'colors/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              _id: _id
-            })
+            }
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {

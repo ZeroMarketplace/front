@@ -50,7 +50,7 @@
       </v-row>
 
       <!--   Content     -->
-      <v-row class="bg-white mr-2 ml-3 rounded-lg">
+      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
 
         <!--    Products List   -->
         <v-col v-if="action === 'list'" cols="12" class="pb-16">

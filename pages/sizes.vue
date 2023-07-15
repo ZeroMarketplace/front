@@ -171,7 +171,7 @@ export default {
         loading: false
       },
       rules  : {
-        notEmpty  : [
+        notEmpty: [
           value => {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
@@ -216,7 +216,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'sizes', {
+          this.runtimeConfig.public.apiUrl + 'sizes/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -224,8 +224,7 @@ export default {
             },
             body   : JSON.stringify({
               title  : this.form.title,
-              titleEn: this.form.titleEn,
-              _id    : this.form._id
+              titleEn: this.form.titleEn
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -242,15 +241,12 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'sizes', {
+          this.runtimeConfig.public.apiUrl + 'sizes/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              _id: _id
-            })
+            }
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
@@ -283,7 +279,7 @@ export default {
           this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'get',
             headers: {
-              'Content-Type' : 'application/json'
+              'Content-Type': 'application/json'
             }
           }).then(async response => {
         response  = await response.json();

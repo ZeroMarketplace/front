@@ -6,11 +6,10 @@
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات کلی</v-label>
-
     <v-row class="px-7 pt-5">
 
       <!--      Name      -->
-      <v-col class="mt-md-0" cols="12" md="3">
+      <v-col class="mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
                       v-model="form.name"
                       label="نام کالا"
@@ -23,31 +22,31 @@
       </v-col>
 
       <!--      Category      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="3">
-        <v-combobox class="mt-3"
-                    v-model="form.categories"
-                    label="دسته بندی"
-                    :readonly="loading"
-                    :rules="rules.notEmptySelectableMultiple"
-                    :items="list.categories"
-                    item-title="title"
-                    item-value="_id"
-                    density="compact"
-                    variant="outlined"
-                    chips
-                    multiple>
-        </v-combobox>
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+        <v-autocomplete class="mt-3"
+                        v-model="form.categories"
+                        label="دسته بندی"
+                        :readonly="loading"
+                        :rules="rules.notEmptySelectableMultiple"
+                        :items="list.categories"
+                        item-title="title"
+                        item-value="_id"
+                        density="compact"
+                        variant="outlined"
+                        chips
+                        multiple>
+        </v-autocomplete>
       </v-col>
 
       <!--      Brand      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="3">
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-select class="mt-3"
                   v-model="form.brand"
                   label="برند"
                   :readonly="loading"
                   :rules="rules.notEmptySelectable"
                   :items="list.brands"
-                  item-title="title"
+                  item-title=".title"
                   item-value="_id"
                   density="compact"
                   variant="outlined">
@@ -55,8 +54,8 @@
       </v-col>
 
       <!--      Unit      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="3">
-        <v-select class="mt-3"
+      <v-col class="mt-n5 mt-md-n2" cols="12" md="4">
+        <v-select class=""
                   v-model="form.unit"
                   label="واحد"
                   :readonly="loading"
@@ -70,7 +69,7 @@
       </v-col>
 
       <!--      Barcode      -->
-      <v-col class="mt-n5 mt-md-n5" cols="12" md="3">
+      <v-col class="mt-n5 mt-md-n5" cols="12" md="4">
         <v-text-field class="mt-3"
                       v-model="form.barcode"
                       label="بارکد"
@@ -91,7 +90,7 @@
       </v-col>
 
       <!--      Iran Code      -->
-      <v-col class="mt-n5 mt-md-n5" cols="12" md="3">
+      <v-col class="mt-n5 mt-md-n5" cols="12" md="4">
         <v-text-field class="mt-3"
                       v-model="form.iranCode"
                       label="ایران کد"
@@ -128,10 +127,10 @@
              cols="12"
              md="4"
              class="">
-
         <v-card class="border rounded-lg bg-grey-lighten-4" variant="flat">
-          <v-card-title class="text-subtitle-2">
-            {{ form.name + ' ' + (variant.color.title ?? '') + ' سایز ' + (variant.size.title ?? '') }}
+
+          <v-card-title class="text-subtitle-2 mb-2">
+            {{ variant.title }}
 
             <!--  Delete Variant   -->
             <v-btn class="border float-end"
@@ -148,37 +147,39 @@
 
             <v-row class="px-7">
 
-              <!--      Colors     -->
+              <!--      Color     -->
               <v-col cols="12">
-                <v-combobox class="bg-white"
-                            v-model="variant.color"
-                            label="رنگ‌"
-                            :readonly="loading"
-                            :rules="rules.notEmptySelectable"
-                            :items="list.colors"
-                            item-title="title"
-                            item-value="_id"
-                            density="compact"
-                            variant="outlined"
-                            hide-details>
-                </v-combobox>
+                <v-select class="bg-white"
+                          v-model="variant.color"
+                          label="رنگ‌"
+                          :readonly="loading"
+                          :rules="rules.notEmptySelectable"
+                          :items="list.colors"
+                          @update:modelValue="createVariantsTitles"
+                          item-title="title"
+                          item-value="._id"
+                          density="compact"
+                          variant="outlined"
+                          hide-details>
+                </v-select>
               </v-col>
 
 
-              <!--      Sizes      -->
+              <!--      Size      -->
               <v-col class="mt-n5" cols="12">
-                <v-combobox class="mt-3 bg-white"
-                            v-model="variant.size"
-                            label="سایز"
-                            :readonly="loading"
-                            :rules="rules.notEmptySelectable"
-                            :items="list.sizes"
-                            item-title="title"
-                            item-value="_id"
-                            density="compact"
-                            variant="outlined"
-                            hide-details>
-                </v-combobox>
+                <v-select class="mt-3 bg-white"
+                          v-model="variant.size"
+                          label="سایز"
+                          :readonly="loading"
+                          :rules="rules.notEmptySelectable"
+                          :items="list.sizes"
+                          @update:modelValue="createVariantsTitles"
+                          item-title="title"
+                          item-value="_id"
+                          density="compact"
+                          variant="outlined"
+                          hide-details>
+                </v-select>
               </v-col>
 
             </v-row>
@@ -187,6 +188,11 @@
 
         </v-card>
       </v-col>
+
+      <div v-if="!form.variants.length" class="d-flex justify-center w-100 my-12">
+        <v-label>تنوع ندارد</v-label>
+      </div>
+
     </v-row>
 
 
@@ -232,7 +238,7 @@
 
     </v-row>
 
-    <!-- Physical characteristics properties   -->
+    <!-- Physical properties   -->
     <v-row class="mx-4">
 
       <!--   weight    -->
@@ -253,46 +259,140 @@
       </v-col>
 
       <!--   Dimensions    -->
-      <v-col cols="12" md="4">
-        <DimensionsInput :onText="onTextDimensionInput"
+      <v-col class="mt-n5 mt-md-0" cols="12" md="3">
+        <DimensionsInput @onText="onTextDimensionInput"
                          class="mt-3 mx-0"
                          first-label="طول"
                          second-label="عرض"
                          operation="*"
-                         unit="سانتی متر" :rules="rules.notEmpty"/>
+                         unit="سانتی متر"
+                         label="ابعاد"
+                         :notEmpty="true"/>
       </v-col>
 
+      <!--   Tags    -->
+      <v-col cols="12" md="6">
+        <v-text-field class="mt-3"
+                      v-model="form.tags"
+                      label="برچسب‌ها"
+                      placeholder="با عبارت - از هم جدا کنید"
+                      :readonly="loading"
+                      :rules="rules.notEmpty"
+                      density="compact"
+                      variant="outlined">
+        </v-text-field>
+      </v-col>
     </v-row>
 
     <v-divider class="my-10"></v-divider>
 
-    <!--  Physical characteristics   -->
-    <v-icon class="mt-1 mr-2" color="grey">mdi-clipboard-text-outline</v-icon>
-    <v-label class="text-black font-weight-bold mx-3">مشخصات فیزیکی</v-label>
-
-    <v-btn prepend-icon="mdi-plus"
-           class="bg-grey-darken-3 rounded-lg mr-5 ml-2"
-           height="30">
-      متنی
-    </v-btn>
-
-    <v-btn prepend-icon="mdi-plus"
-           class="bg-grey-darken-3 rounded-lg"
-           height="30">
-      دارای واحد
-    </v-btn>
-
-    <v-btn prepend-icon="mdi-plus"
-           class="bg-grey-darken-3 rounded-lg mx-2"
-           height="30">
-      ابعاد
-    </v-btn>
-
     <!--  Properties   -->
-    <v-row class="mt-5">
-      <v-col cols="12">
+    <v-icon class="mt-1 mr-2" color="grey">mdi-clipboard-text-outline</v-icon>
+    <v-label class="text-black font-weight-bold mx-3">ویژگی‌ها</v-label>
 
+    <!--  Add Property   -->
+    <v-btn class="border"
+           @click="addProperty"
+           size="30"
+           variant="outlined"
+           color="pink"
+           icon>
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
+
+    <!--  Properties List  -->
+    <v-row class="mt-5 mx-4 pb-12 d-flex justify-center">
+      <v-table class="w-100" v-if="form.properties.length">
+        <thead>
+        <th>عنوان</th>
+        <th>مقدار</th>
+        <th>عملیات</th>
+        </thead>
+        <tbody>
+        <tr v-for="(property, index) in form.properties" class="w-100 pa-0">
+
+          <!--      Title      -->
+          <td>
+            <v-text-field class=""
+                          v-model="property.title"
+                          label="عنوان"
+                          placeholder="وارد کنید"
+                          :readonly="loading"
+                          :rules="rules.notEmpty"
+                          density="compact"
+                          variant="outlined"
+                          hide-details>
+            </v-text-field>
+          </td>
+
+          <!--      Value      -->
+          <td>
+            <v-text-field class=""
+                          v-model="property.value"
+                          label="مقدار"
+                          placeholder="وارد کنید"
+                          :readonly="loading"
+                          :rules="rules.notEmpty"
+                          density="compact"
+                          variant="outlined"
+                          hide-details>
+            </v-text-field>
+          </td>
+
+          <!--    Actions      -->
+          <td class="text-center">
+            <!--  Delete Property   -->
+            <v-btn class="border"
+                   @click="deleteProperty(index)"
+                   size="30"
+                   variant="outlined"
+                   color="pink"
+                   icon>
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </td>
+
+        </tr>
+        </tbody>
+      </v-table>
+      <v-label v-if="!form.properties.length" class="mt-5">ویژگی ندارد</v-label>
+    </v-row>
+
+    <v-divider class="my-10"></v-divider>
+
+
+    <!--  Text Content   -->
+    <v-icon class="mt-1 mr-2" color="grey">mdi-text</v-icon>
+    <v-label class="text-black font-weight-bold mx-3">محتوای متنی</v-label>
+
+    <v-row class="mx-5">
+
+      <!--   Title    -->
+      <v-col cols="12" md="4">
+        <v-text-field class="mt-3"
+                      v-model="form.title"
+                      label="عنوان کالا"
+                      placeholder="وارد کنید"
+                      :readonly="loading"
+                      :rules="rules.notEmpty"
+                      density="compact"
+                      variant="outlined">
+        </v-text-field>
       </v-col>
+
+      <!--   Content    -->
+      <v-col class="mt-n8 mt-n5" cols="12" md="12">
+        <v-textarea class="mt-3"
+                    v-model="form.content"
+                    label="توضیحات"
+                    placeholder="وارد کنید"
+                    :readonly="loading"
+                    :rules="rules.notEmpty"
+                    density="compact"
+                    variant="outlined">
+        </v-textarea>
+      </v-col>
+
     </v-row>
 
 
@@ -339,26 +439,34 @@ export default {
       user   : {},
       loading: false,
       form   : {
-        name        : '',
-        categories  : [],
-        brand       : '',
-        unit        : '',
-        barcode     : '',
-        iranCode    : '',
-        sizes       : [],
-        colors      : [],
-        variants    : [
+        name           : '',
+        categories     : [],
+        brand          : null,
+        unit           : null,
+        barcode        : '',
+        iranCode       : '',
+        variants       : [
           {
-            color: '',
-            size : '',
+            color: null,
+            size : null,
             title: ''
           }
         ],
-        files       : [],
-        filesPreview: [],
-        properties  : [],
-        action      : 'insert',
-        loading     : false
+        files          : [],
+        filesPreview   : [],
+        dimensions     : {},
+        tags           : '',
+        physicalAddress: '',
+        properties     : [
+          {
+            title: '',
+            value: ''
+          }
+        ],
+        title          : '',
+        content        : '',
+        action         : 'insert',
+        loading        : false
       },
       rules  : {
         notEmpty                  : [
@@ -586,11 +694,20 @@ export default {
       });
       return result;
     },
+    addVariant() {
+      this.form.variants.push({color: null, size: null, title: ''});
+    },
     deleteVariant(index) {
       this.form.variants.splice(index, 1);
     },
-    addVariant() {
-      this.form.variants.push({color: '', size: '', title: ''});
+    createVariantsTitles() {
+      this.form.variants.forEach((variant) => {
+        variant.title =
+            this.form.name + ' ' +
+            (variant.color ? this.list.colors.find(color => color._id === variant.color).title : '') +
+            ' سایز ' +
+            (variant.size ? this.list.sizes.find(size => size._id === variant.size).title : '');
+      })
     },
     openFileDialog() {
       this.$refs.filesInput.click();
@@ -600,12 +717,24 @@ export default {
       this.form.files.forEach((file) => {
         this.form.filesPreview.push(URL.createObjectURL(file));
       });
-    }
+    },
+    onTextDimensionInput(data) {
+      this.form.dimensions = {
+        length: data.length,
+        width : data.width
+      };
+    },
+    addProperty() {
+      this.form.properties.push({
+        title: '',
+        value: ''
+      });
+    },
+    deleteProperty(index) {
+      this.form.properties.splice(index, 1);
+    },
   },
   watch  : {
-    variants(val) {
-      console.log(val);
-    },
     images() {
       this.createImagesPreview();
     }
@@ -622,12 +751,9 @@ export default {
     runtimeConfig() {
       return useRuntimeConfig();
     },
-    variants() {
-      return this.form.variants;
-    },
     images() {
       return this.form.files;
-    },
+    }
   }
 }
 </script>
