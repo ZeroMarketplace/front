@@ -208,6 +208,8 @@
       <!--   File Input    -->
       <v-col cols="12" md="3">
         <v-file-input v-model="form.files"
+                      :rules="rules.filesIsValid"
+                      validate-on="input lazy"
                       type="file"
                       class="d-none"
                       ref="filesInput"
@@ -216,6 +218,7 @@
         </v-file-input>
 
         <v-card class="border border-dashed border-opacity-100 h-100 w-100"
+                :class="form.filesError ? 'bg-red' : ''"
                 @click="openFileDialog"
                 variant="plain" link>
           <v-card-text>
@@ -454,6 +457,7 @@ export default {
         ],
         files          : [],
         filesPreview   : [],
+        filesError     : false,
         dimensions     : {},
         tags           : '',
         physicalAddress: '',
@@ -487,6 +491,46 @@ export default {
             return 'لطفا انتخاب کنید';
           }
         ],
+        filesIsValid              : [
+          value => {
+            let valid = true;
+            value.forEach((file) => {
+              // Allowing file type
+              let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+              // check format
+              if (!allowedExtensions.exec(file.name)) {
+                // show error
+                const {$showMessage} = useNuxtApp();
+                $showMessage('فرمت فایل انتخابی قابل قبول نیست', 'error');
+                valid = false;
+                return false;
+              }
+
+              // check size
+              if ((file.size / 1024 / 1024).toFixed(2) > 0.5) {
+                // show error
+                const {$showMessage} = useNuxtApp();
+                $showMessage('اندازه فایل بیش از حد مجاز است', 'error');
+                valid = false;
+                return false;
+              }
+
+            });
+
+            if (valid) {
+              this.createImagesPreview();
+              this.form.filesError = false;
+            } else {
+              this.form.filesPreview = [];
+              this.form.filesError   = true;
+            }
+
+            return valid;
+
+
+          }
+        ]
       },
       list   : {
         categories: [],
@@ -734,11 +778,7 @@ export default {
       this.form.properties.splice(index, 1);
     },
   },
-  watch  : {
-    images() {
-      this.createImagesPreview();
-    }
-  },
+  watch  : {},
   mounted() {
     this.user = useUserStore();
     this.getUnits();
@@ -750,9 +790,6 @@ export default {
   computed: {
     runtimeConfig() {
       return useRuntimeConfig();
-    },
-    images() {
-      return this.form.files;
     }
   }
 }
