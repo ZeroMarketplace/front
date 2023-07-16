@@ -27,7 +27,8 @@ export default defineNuxtConfig({
 
         // Keys within public, will be also exposed to the client-side
         public: {
-            apiUrl: 'http://localhost:5000/api/'
+            apiUrl: 'http://localhost:5000/api/',
+            staticsUrl: 'http://localhost:5000/'
         }
     }
 

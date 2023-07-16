@@ -4,31 +4,33 @@
 
     <v-label class="position-absolute bg-white text-subtitle-2 mt-n3 px-3">{{ label }}</v-label>
 
-    <v-col cols="3">
+    <v-col cols="4">
       <v-text-field class="mt-n3 mx-2 centeredText"
                     :placeholder="firstLabel"
                     :rules="rules.notEmpty"
                     v-model="length"
+                    type="number"
                     variant="underlined"
                     hide-details>
       </v-text-field>
     </v-col>
 
-    <v-col class="pt-3 text-center" cols="2">
+    <v-col class="pt-3 text-center" cols="1">
       {{ operation }}
     </v-col>
 
-    <v-col cols="3">
+    <v-col cols="4">
       <v-text-field class="mt-n3 mx-2 centeredText"
                     :placeholder="secondLabel"
                     :rules="rules.notEmpty"
                     v-model="width"
+                    type="number"
                     variant="underlined"
                     hide-details>
       </v-text-field>
     </v-col>
 
-    <v-col class="text-caption text-grey-darken-1 pt-3 text-end" cols="4">
+    <v-col class="text-caption text-grey-darken-1 pt-3 text-end" cols="3">
       {{ unit }}
     </v-col>
 

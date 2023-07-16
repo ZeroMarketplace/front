@@ -248,7 +248,7 @@
       <v-col cols="12" md="3">
         <v-text-field class="mt-3"
                       type="number"
-                      v-model="form.properties.weight"
+                      v-model="form.weight"
                       label="وزن"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -533,6 +533,7 @@ export default {
       },
       list   : {
         categories: [],
+        units     : [],
         brands    : [],
         colors    : [],
         sizes     : []
@@ -558,6 +559,7 @@ export default {
         files       : [],
         filesPreview: [],
         filesError  : false,
+        weight      : '',
         dimensions  : {},
         tags        : '',
         properties  : [
@@ -588,6 +590,7 @@ export default {
               barcode   : this.form.barcode,
               iranCode  : this.form.iranCode,
               variants  : this.form.variants,
+              weight    : Number(this.form.weight),
               dimensions: this.form.dimensions,
               tags      : this.form.tags,
               properties: this.form.properties,
@@ -696,8 +699,8 @@ export default {
         this.form.loading = false;
       }
     },
-    async getUnits() {
-      await fetch(
+    getUnits() {
+      fetch(
           this.runtimeConfig.public.apiUrl + 'units', {
             method : 'get',
             headers: {
@@ -708,8 +711,8 @@ export default {
         this.list.units = response;
       });
     },
-    async getBrands() {
-      await fetch(
+    getBrands() {
+      fetch(
           this.runtimeConfig.public.apiUrl + 'brands', {
             method : 'get',
             headers: {
@@ -720,8 +723,8 @@ export default {
         this.list.brands = response;
       });
     },
-    async getColors() {
-      await fetch(
+    getColors() {
+      fetch(
           this.runtimeConfig.public.apiUrl + 'colors', {
             method : 'get',
             headers: {
@@ -732,8 +735,8 @@ export default {
         this.list.colors = response;
       });
     },
-    async getSizes() {
-      await fetch(
+    getSizes() {
+      fetch(
           this.runtimeConfig.public.apiUrl + 'sizes', {
             method : 'get',
             headers: {
@@ -744,8 +747,8 @@ export default {
         this.list.sizes = response;
       });
     },
-    async getCategories() {
-      await fetch(
+    getCategories() {
+      fetch(
           this.runtimeConfig.public.apiUrl + 'categories', {
             method : 'get',
             headers: {
@@ -824,8 +827,8 @@ export default {
     },
     onTextDimensionInput(data) {
       this.form.dimensions = {
-        length: data.length,
-        width : data.width
+        length: Number(data.length),
+        width : Number(data.width)
       };
     },
     addProperty() {
@@ -841,11 +844,11 @@ export default {
   watch  : {},
   mounted() {
     this.user = useUserStore();
-    this.getUnits();
-    this.getCategories();
-    this.getBrands();
-    this.getColors();
-    this.getSizes();
+    if (!this.list.units.length) this.getUnits();
+    if (!this.list.categories.length) this.getCategories();
+    if (!this.list.brands.length) this.getBrands();
+    if (!this.list.colors.length) this.getColors();
+    if (!this.list.sizes.length) this.getSizes();
   },
   computed: {
     runtimeConfig() {

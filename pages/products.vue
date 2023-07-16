@@ -26,23 +26,28 @@
 
           <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت محصولات</v-label>
           <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن محصول</v-label>
+          <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش محصول</v-label>
         </v-col>
 
         <v-col class="text-end">
 
           <!--    Add Product     -->
           <v-btn class="bg-grey-darken-3 rounded-lg d-none d-sm-inline-flex"
-                 prepend-icon="mdi-image-plus-outline"
+                 :prepend-icon="action === 'add' || action === 'edit' ? 'mdi-view-list' : 'mdi-image-plus-outline'"
                  height="50"
+                 @click="togglePage"
                  variant="text">
-            افزودن محصول
+            <span v-if="action === 'add' || action === 'edit'">لیست محصولات</span>
+            <span v-if="action === 'list'">اضافه کردن محصول</span>
           </v-btn>
 
           <v-btn class="bg-grey-darken-3 d-inline-flex d-sm-none"
                  prepend-icon="mdi-image-plus-outline"
                  size="small"
+                 @click="togglePage"
                  icon>
-            <v-icon>mdi-image-plus-outline</v-icon>
+            <v-icon v-if="action === 'add' || action === 'edit'">mdi-view-list</v-icon>
+            <v-icon v-if="action === 'list'">mdi-image-plus-outline</v-icon>
           </v-btn>
 
         </v-col>
@@ -61,12 +66,33 @@
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="">
+          <v-list class="mx-5">
             <v-list-item v-for="item in list"
                          class="rounded border-b pa-2" link>
 
-              <!--      Title        -->
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <!--      Image        -->
+              <template v-slot:prepend>
+                <v-img class=""
+                       width="100"
+                       height="100"
+                       max-width="100"
+                       :src="staticsUrl + 'products/files/' + item.files"
+                       aspect-ratio="1/1"
+                       cover>
+                  <template v-slot:placeholder>
+                    <div class="d-flex align-center justify-center fill-height">
+                      <v-progress-circular indeterminate></v-progress-circular>
+                    </div>
+                  </template>
+                </v-img>
+              </template>
+
+
+              <!--      Name        -->
+              <v-list-item-title class="mr-2">
+                {{ item.name }}
+                <v-label class="d-block">۰ تومان</v-label>
+              </v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
@@ -101,7 +127,7 @@
 
         <!--    Add|Edit Product    -->
         <v-col v-if="action === 'add'" cols="12" class="pb-16">
-          <manage-products-add-product />
+          <manage-products-add-product/>
         </v-col>
 
       </v-row>
@@ -121,17 +147,18 @@ definePageMeta({
 export default {
   data() {
     return {
-      user   : {},
-      loading: true,
-      action : 'add',
-      list   : [],
+      user      : {},
+      loading   : true,
+      action    : 'list',
+      staticsUrl: '',
+      list      : [],
     }
   },
   methods: {
-    async getProducts() {
+    getProducts() {
       this.loading = true;
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
+      fetch(
+          this.runtimeConfig.public.apiUrl + 'products', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -140,8 +167,12 @@ export default {
           }).then(async response => {
         response  = await response.json();
         this.list = response;
+        this.loading = false;
       });
-      this.loading = false;
+    },
+    togglePage() {
+      if (this.action === 'add' || this.action === 'edit') this.action = 'list'
+      else this.action = 'add';
     },
     setEdit(data) {
       this.form = {
@@ -163,7 +194,10 @@ export default {
   },
   mounted() {
     this.user = useUserStore();
-    // this.getProducts();
+    this.getProducts();
+  },
+  created() {
+    this.staticsUrl = this.runtimeConfig.public.staticsUrl;
   },
   computed: {
     runtimeConfig() {
