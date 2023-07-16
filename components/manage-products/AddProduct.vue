@@ -442,35 +442,34 @@ export default {
       user   : {},
       loading: false,
       form   : {
-        name           : '',
-        categories     : [],
-        brand          : null,
-        unit           : null,
-        barcode        : '',
-        iranCode       : '',
-        variants       : [
+        name        : '',
+        categories  : [],
+        brand       : null,
+        unit        : null,
+        barcode     : '',
+        iranCode    : '',
+        variants    : [
           {
             color: null,
             size : null,
             title: ''
           }
         ],
-        files          : [],
-        filesPreview   : [],
-        filesError     : false,
-        dimensions     : {},
-        tags           : '',
-        physicalAddress: '',
-        properties     : [
+        files       : [],
+        filesPreview: [],
+        filesError  : false,
+        dimensions  : {},
+        tags        : '',
+        properties  : [
           {
             title: '',
             value: ''
           }
         ],
-        title          : '',
-        content        : '',
-        action         : 'insert',
-        loading        : false
+        title       : '',
+        content     : '',
+        action      : 'insert',
+        loading     : false
       },
       rules  : {
         notEmpty                  : [
@@ -543,30 +542,91 @@ export default {
   methods: {
     reset() {
       this.form = {
-        title  : '',
-        titleEn: '',
-        action : 'insert'
+        name        : '',
+        categories  : [],
+        brand       : null,
+        unit        : null,
+        barcode     : '',
+        iranCode    : '',
+        variants    : [
+          {
+            color: null,
+            size : null,
+            title: ''
+          }
+        ],
+        files       : [],
+        filesPreview: [],
+        filesError  : false,
+        dimensions  : {},
+        tags        : '',
+        properties  : [
+          {
+            title: '',
+            value: ''
+          }
+        ],
+        title       : '',
+        content     : '',
+        action      : 'insert',
+        loading     : false
       };
     },
     async insert() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
+          this.runtimeConfig.public.apiUrl + 'products', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
+              name      : this.form.name,
+              categories: this.form.categories,
+              brand     : this.form.brand,
+              unit      : this.form.unit,
+              barcode   : this.form.barcode,
+              iranCode  : this.form.iranCode,
+              variants  : this.form.variants,
+              dimensions: this.form.dimensions,
+              tags      : this.form.tags,
+              properties: this.form.properties,
+              title     : this.form.title,
+              content   : this.form.content
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+          if (this.form.files.length) {
+            response = await response.json();
+            await this.uploadFiles(response._id)
+          } else {
+            $showMessage('عملیات با موفقت انجام شد', 'success');
+          }
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
+    async uploadFiles(_id) {
+      // add files to form data
+      let filesForm = new FormData();
+      this.form.files.forEach((file) => {
+        filesForm.append('files', file);
+      });
 
-          // refresh list
-          await this.getUnits();
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'products/' + _id + '/files', {
+            method : 'post',
+            headers: {
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : filesForm
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -628,7 +688,7 @@ export default {
         this.form.loading = true;
 
         if (this.form.action === 'insert') {
-          // await this.insert();
+          await this.insert();
         } else if (this.form.action === 'edit') {
           // await this.edit();
         }
