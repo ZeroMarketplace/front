@@ -131,7 +131,7 @@
 
         <!--    Add|Edit Product    -->
         <v-col :class="action === 'add' ? '' : 'd-none'" cols="12" class="pb-16">
-          <manage-products-add-product ref="addProductPage" @exit="togglePage" @refresh="getProducts"/>
+          <products-add-product ref="addProductPage" @exit="togglePage" @refresh="getProducts"/>
         </v-col>
 
       </v-row>
