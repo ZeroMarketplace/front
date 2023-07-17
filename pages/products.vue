@@ -72,7 +72,8 @@
 
               <!--      Image        -->
               <template v-slot:prepend>
-                <v-img class=""
+
+                <v-img v-if="item.files"
                        width="100"
                        height="100"
                        max-width="100"
@@ -85,6 +86,9 @@
                     </div>
                   </template>
                 </v-img>
+
+                <!--        Icon        -->
+                <v-icon v-if="!item.files" class="mx-0" size="100">mdi-image-outline</v-icon>
               </template>
 
 
@@ -126,8 +130,8 @@
         </v-col>
 
         <!--    Add|Edit Product    -->
-        <v-col v-if="action === 'add'" cols="12" class="pb-16">
-          <manage-products-add-product/>
+        <v-col :class="action === 'add' ? '' : 'd-none'" cols="12" class="pb-16">
+          <manage-products-add-product ref="addProductPage" @exit="togglePage" @refresh="getProducts"/>
         </v-col>
 
       </v-row>
@@ -165,32 +169,34 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-        response  = await response.json();
-        this.list = response;
+        response     = await response.json();
+        this.list    = response;
         this.loading = false;
       });
     },
     togglePage() {
-      if (this.action === 'add' || this.action === 'edit') this.action = 'list'
+      if (this.action === 'add') this.action = 'list';
       else this.action = 'add';
     },
-    setEdit(data) {
-      this.form = {
-        title  : data.title,
-        titleEn: data.titleEn,
-        action : 'edit',
-        _id    : data._id
-      };
+    async setEdit(data) {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'products/' + data._id, {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        response = await response.json();
+        this.$refs.addProductPage.setEdit(response);
+        this.togglePage();
+      });
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
-    },
-    setParent(data) {
-      this.form._parent      = data._id;
-      this.form._parentTitle = data.title;
-    },
+    }
   },
   mounted() {
     this.user = useUserStore();

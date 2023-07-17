@@ -39,7 +39,7 @@
 
 <script>
 export default {
-  props: ['firstLabel', 'secondLabel', 'operation', 'unit', 'label', 'notEmpty'],
+  props: ['firstLabel', 'secondLabel', 'operation', 'unit', 'label', 'notEmpty', 'firstValue', 'secondValue'],
   data() {
     return {
       length: '',
@@ -56,7 +56,7 @@ export default {
   },
   methods: {
     setData() {
-      this.$emit('onText', {
+      this.$emit('input', {
         length: this.length,
         width : this.width
       });
@@ -69,7 +69,7 @@ export default {
     width(val) {
       this.setData();
     }
-  }
+  },
 }
 </script>
 

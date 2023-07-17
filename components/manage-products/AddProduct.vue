@@ -232,11 +232,20 @@
       </v-col>
 
       <!--   Previews    -->
-      <v-col v-for="filePreview in form.filesPreview"
+      <v-col v-for="(filePreview, index) in form.filesPreview"
              class=""
              cols="12"
              md="3">
-        <v-img :src="filePreview" class="w-100 h-100"></v-img>
+        <v-img :src="filePreview.src" class="w-100 h-100">
+          <v-btn v-if="filePreview.uploaded"
+                 class="mt-2 mr-2 border border-opacity-100"
+                 size="25"
+                 variant="elevated"
+                 @click="deleteFile(filePreview.name, index)"
+                 icon>
+            <v-icon color="red">mdi-delete</v-icon>
+          </v-btn>
+        </v-img>
       </v-col>
 
     </v-row>
@@ -263,14 +272,42 @@
 
       <!--   Dimensions    -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="3">
-        <DimensionsInput @onText="onTextDimensionInput"
-                         class="mt-3 mx-0"
-                         first-label="طول"
-                         second-label="عرض"
-                         operation="*"
-                         unit="سانتی متر"
-                         label="ابعاد"
-                         :notEmpty="true"/>
+        <v-row class="border border-opacity-50 rounded overflow-hidden px-3 mt-3"
+               no-gutters>
+
+          <v-label class="position-absolute bg-white text-subtitle-2 mt-n3 px-3">ابعاد</v-label>
+
+          <v-col cols="4">
+            <v-text-field class="mt-n3 mx-2 centeredText"
+                          placeholder="طول"
+                          :rules="rules.notEmpty"
+                          v-model="form.dimensions.length"
+                          type="number"
+                          variant="underlined"
+                          hide-details>
+            </v-text-field>
+          </v-col>
+
+          <v-col class="pt-3 text-center" cols="1">
+            *
+          </v-col>
+
+          <v-col cols="4">
+            <v-text-field class="mt-n3 mx-2 centeredText"
+                          placeholder="عرض"
+                          :rules="rules.notEmpty"
+                          v-model="form.dimensions.width"
+                          type="number"
+                          variant="underlined"
+                          hide-details>
+            </v-text-field>
+          </v-col>
+
+          <v-col class="text-caption text-grey-darken-1 pt-3 text-end" cols="3">
+            سانتی متر
+          </v-col>
+
+        </v-row>
       </v-col>
 
       <!--   Tags    -->
@@ -458,7 +495,11 @@ export default {
         files       : [],
         filesPreview: [],
         filesError  : false,
-        dimensions  : {},
+        weight      : '',
+        dimensions  : {
+          length: '',
+          width : ''
+        },
         tags        : '',
         properties  : [
           {
@@ -507,7 +548,7 @@ export default {
               }
 
               // check size
-              if ((file.size / 1024 / 1024).toFixed(2) > 0.5) {
+              if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
                 // show error
                 const {$showMessage} = useNuxtApp();
                 $showMessage('اندازه فایل بیش از حد مجاز است', 'error');
@@ -604,6 +645,9 @@ export default {
             response = await response.json();
             await this.uploadFiles(response._id)
           } else {
+            this.reset();
+            this.$emit('exit', true);
+            this.$emit('refresh', true);
             $showMessage('عملیات با موفقت انجام شد', 'success');
           }
         } else {
@@ -629,33 +673,71 @@ export default {
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
+          this.reset();
+          this.$emit('exit', true);
           $showMessage('عملیات با موفقت انجام شد', 'success');
         } else {
           // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+          $showMessage('مشکلی در بارگذاری فایل‌ها پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
         }
       });
     },
+    async deleteFile(fileName, index) {
+      if (confirm('آیا مطمئن هستید؟')) {
+        await fetch(
+            this.runtimeConfig.public.apiUrl + 'products/' + this.form._id + '/files/' + fileName, {
+              method : 'delete',
+              headers: {
+                'authorization': 'Bearer ' + this.user.token
+              }
+            }).then(async response => {
+          const {$showMessage} = useNuxtApp();
+          if (response.status === 200) {
+            // remove item from files preview
+            this.form.filesPreview.splice(index, 1);
+
+            $showMessage('عملیات با موفقت انجام شد', 'success');
+          } else {
+            // show error
+            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+          }
+        });
+      }
+    },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
+          this.runtimeConfig.public.apiUrl + 'products/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn,
-              _id    : this.form._id
+              name      : this.form.name,
+              categories: this.form.categories,
+              brand     : this.form.brand,
+              unit      : this.form.unit,
+              barcode   : this.form.barcode,
+              iranCode  : this.form.iranCode,
+              variants  : this.form.variants,
+              weight    : Number(this.form.weight),
+              dimensions: this.form.dimensions,
+              tags      : this.form.tags,
+              properties: this.form.properties,
+              title     : this.form.title,
+              content   : this.form.content
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+          if (this.form.files.length) {
+            await this.uploadFiles(this.form._id);
+          } else {
+            this.reset();
+            this.$emit('exit', true);
+            $showMessage('عملیات با موفقت انجام شد', 'success');
+          }
 
-          // refresh list
-          await this.getUnits();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -693,7 +775,7 @@ export default {
         if (this.form.action === 'insert') {
           await this.insert();
         } else if (this.form.action === 'edit') {
-          // await this.edit();
+          await this.edit();
         }
 
         this.form.loading = false;
@@ -761,20 +843,36 @@ export default {
     },
     setEdit(data) {
       this.form = {
-        title  : data.title,
-        titleEn: data.titleEn,
-        action : 'edit',
-        _id    : data._id
+        name        : data.name,
+        categories  : data.categories,
+        brand       : data.brand,
+        unit        : data.unit,
+        barcode     : data.barcode,
+        iranCode    : data.iranCode,
+        variants    : data.variants,
+        files       : [],
+        filesPreview: [],
+        filesError  : false,
+        weight      : data.weight,
+        dimensions  : data.dimensions,
+        tags        : data.tags,
+        properties  : data.properties,
+        title       : data.title,
+        content     : data.content,
+        _id         : data._id,
+        action      : 'edit'
       };
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+
+      if (data.files) {
+        data.files.forEach((filePreview) => {
+          this.form.filesPreview.push({
+            uploaded: true,
+            name    : filePreview,
+            src     : this.runtimeConfig.public.staticsUrl + 'products/files/' + filePreview
+          });
+        });
       }
-    },
-    setParent(data) {
-      this.form._parent      = data._id;
-      this.form._parentTitle = data.title;
+
     },
     reFormatCategories(list) {
       let result = [];
@@ -820,16 +918,19 @@ export default {
       this.$refs.filesInput.click();
     },
     createImagesPreview() {
+
+      let previews           = this.form.filesPreview;
       this.form.filesPreview = [];
-      this.form.files.forEach((file) => {
-        this.form.filesPreview.push(URL.createObjectURL(file));
+      previews.forEach((filePreview, index) => {
+        if (filePreview.uploaded) {
+          this.form.filesPreview.push(filePreview);
+        }
       });
-    },
-    onTextDimensionInput(data) {
-      this.form.dimensions = {
-        length: Number(data.length),
-        width : Number(data.width)
-      };
+
+      this.form.files.forEach((file) => {
+        this.form.filesPreview.push({src: URL.createObjectURL(file)});
+      });
+
     },
     addProperty() {
       this.form.properties.push({
