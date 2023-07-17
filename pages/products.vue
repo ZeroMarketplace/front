@@ -178,6 +178,28 @@ export default {
       if (this.action === 'add') this.action = 'list';
       else this.action = 'add';
     },
+
+    async delete(_id) {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'products/' + _id, {
+            method : 'delete',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // refresh list
+          this.getProducts();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
     async setEdit(data) {
       await fetch(
           this.runtimeConfig.public.apiUrl + 'products/' + data._id, {

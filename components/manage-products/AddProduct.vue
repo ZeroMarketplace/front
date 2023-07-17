@@ -744,30 +744,6 @@ export default {
         }
       });
     },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              _id: _id
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // refresh list
-          await this.getUnits();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
     async submit() {
       if (this.$refs.addProductForm.isValid) {
         this.form.loading = true;
