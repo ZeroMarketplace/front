@@ -13,13 +13,7 @@
 
       <!--    Title    -->
       <v-row class=" px-5 pt-5 mb-5">
-        <v-btn prepend-icon="mdi-arrow-right"
-               color="secondary"
-               size="small"
-               variant="flat"
-               rounded>
-          بازگشت
-        </v-btn>
+        <BackButton />
 
         <v-label class="text-h6 text-black mx-3">مدیریت واحد‌ها</v-label>
       </v-row>

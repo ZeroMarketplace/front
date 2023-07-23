@@ -17,21 +17,21 @@
         <v-col>
           <BackButton />
 
-          <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت محصولات</v-label>
-          <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن محصول</v-label>
-          <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش محصول</v-label>
+          <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت فاکتور‌های خرید</v-label>
+          <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن فاکتور</v-label>
+          <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش فاکتور</v-label>
         </v-col>
 
         <v-col class="text-end">
 
-          <!--    Add Product     -->
+          <!--    Add Purchase Invoice     -->
           <v-btn class="bg-grey-darken-3 rounded-lg d-none d-sm-inline-flex"
-                 :prepend-icon="action === 'add' || action === 'edit' ? 'mdi-view-list' : 'mdi-image-plus-outline'"
+                 :prepend-icon="action === 'add' || action === 'edit' ? 'mdi-view-list' : 'mdi-plus-outline'"
                  height="50"
                  @click="togglePage"
                  variant="text">
-            <span v-if="action === 'add' || action === 'edit'">لیست محصولات</span>
-            <span v-if="action === 'list'">افزودن محصول</span>
+            <span v-if="action === 'add' || action === 'edit'">لیست فاکتور‌ها</span>
+            <span v-if="action === 'list'">افزودن فاکتور</span>
           </v-btn>
 
           <v-btn class="bg-grey-darken-3 d-inline-flex d-sm-none"
@@ -40,20 +40,25 @@
                  @click="togglePage"
                  icon>
             <v-icon v-if="action === 'add' || action === 'edit'">mdi-view-list</v-icon>
-            <v-icon v-if="action === 'list'">mdi-image-plus-outline</v-icon>
+            <v-icon v-if="action === 'list'">mdi-plus-outline</v-icon>
           </v-btn>
 
         </v-col>
-
       </v-row>
 
       <!--   Content     -->
       <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
 
-        <!--    Products List   -->
-        <v-col v-if="action === 'list'" cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-archive-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">محصولات</v-label>
+        <!--    Add Purchase Invoice   -->
+        <v-col :class="action === 'add' ? '' : 'd-none'" cols="12">
+          <add-purchase-invoice/>
+        </v-col>
+
+
+        <!--    purchase-invoices List   -->
+        <v-col v-if="action === 'list'" class="pb-16" cols="12" >
+          <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
+          <v-label class="text-h6 text-black mx-3">فاکتور‌ها</v-label>
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -63,37 +68,11 @@
             <v-list-item v-for="item in list"
                          class="rounded border-b pa-2" link>
 
-              <!--      Image        -->
-              <template v-slot:prepend>
-
-                <v-img v-if="item.files"
-                       width="100"
-                       height="100"
-                       max-width="100"
-                       :src="staticsUrl + 'products/files/' + item.files"
-                       aspect-ratio="1/1"
-                       cover>
-                  <template v-slot:placeholder>
-                    <div class="d-flex align-center justify-center fill-height">
-                      <v-progress-circular indeterminate></v-progress-circular>
-                    </div>
-                  </template>
-                </v-img>
-
-                <!--        Icon        -->
-                <v-icon v-if="!item.files" class="mx-0" size="100">mdi-image-outline</v-icon>
-              </template>
-
-
-              <!--      Name        -->
-              <v-list-item-title class="mr-2">
-                {{ item.name }}
-                <v-label class="d-block">۰ تومان</v-label>
-              </v-list-item-title>
+              <!--      Title        -->
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
-
                 <!--  Delete   -->
                 <v-btn class="mx-2"
                        color="red"
@@ -122,11 +101,6 @@
 
         </v-col>
 
-        <!--    Add|Edit Product    -->
-        <v-col :class="action === 'add' ? '' : 'd-none'" cols="12" class="pb-16">
-          <products-add-product ref="addProductPage" @exit="togglePage" @refresh="getProducts"/>
-        </v-col>
-
       </v-row>
 
     </v-col>
@@ -135,37 +109,30 @@
 </template>
 
 <script>
-import {useUserStore} from "~/store/user";
+import {useUserStore}     from "~/store/user";
+import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
 
 definePageMeta({
   layout: "admin-layout"
 });
 
 export default {
+  components: {AddPurchaseInvoice},
   data() {
     return {
-      user      : {},
-      loading   : true,
-      action    : 'list',
-      staticsUrl: '',
-      list      : [],
+      user   : {},
+      action : 'list',
+      loading: true,
+      list   : [],
     }
   },
   methods: {
-    getProducts() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.apiUrl + 'products', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response     = await response.json();
-        this.list    = response;
-        this.loading = false;
-      });
+    reset() {
+      this.form = {
+        title  : '',
+        titleEn: '',
+        action : 'insert'
+      };
     },
     togglePage() {
       if (this.action === 'add') this.action = 'list';
@@ -173,7 +140,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + _id, {
+          this.runtimeConfig.public.apiUrl + 'units/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -185,26 +152,35 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          this.getProducts();
+          await this.getPurchaseInvoices();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
         }
       });
     },
-    async setEdit(data) {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + data._id, {
+    getPurchaseInvoices() {
+      this.loading = true;
+      fetch(
+          this.runtimeConfig.public.apiUrl + 'units', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-        response = await response.json();
-        this.$refs.addProductPage.setEdit(response);
-        this.togglePage();
+        response  = await response.json();
+        this.list = response;
       });
+      this.loading = false;
+    },
+    setEdit(data) {
+      this.form = {
+        title  : data.title,
+        titleEn: data.titleEn,
+        action : 'edit',
+        _id    : data._id
+      };
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
@@ -214,10 +190,7 @@ export default {
   },
   mounted() {
     this.user = useUserStore();
-    this.getProducts();
-  },
-  created() {
-    this.staticsUrl = this.runtimeConfig.public.staticsUrl;
+    this.getPurchaseInvoices();
   },
   computed: {
     runtimeConfig() {
