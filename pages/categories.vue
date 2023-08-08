@@ -13,7 +13,7 @@
 
       <!--    Title    -->
       <v-row class=" px-5 pt-5 mb-5">
-        <BackButton />
+        <BackButton/>
 
         <v-label class="text-h6 text-black mx-3">مدیریت دسته بندی</v-label>
       </v-row>
@@ -27,7 +27,7 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن دسته بندی</v-label>
 
-          <v-form @submit.prevent="submit" ref="addCategoryForm">
+          <v-form @submit.prevent="submit" ref="addCategoryForm" validate-on="input lazy">
 
             <!--    Parent      -->
             <v-chip v-if="form._parent"
@@ -40,16 +40,16 @@
               {{ form._parentTitle }}
             </v-chip>
 
-            <v-row class="mt-2">
+            <v-row class="mt-2 mx-5">
 
               <!--      Title      -->
               <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
+                <v-text-field class="mt-3"
                               v-model="form.title"
                               label="عنوان"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.title"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -57,12 +57,12 @@
 
               <!--      Title EN      -->
               <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
+                <v-text-field class="mt-3"
                               v-model="form.titleEn"
                               label="Title"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.titleEn"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -70,7 +70,7 @@
 
               <!--      Icon      -->
               <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
+                <v-text-field class="mt-3"
                               v-model="form.icon"
                               append-inner-icon="mdi-link"
                               @click:append-inner="openIconsList"
@@ -80,6 +80,21 @@
                               density="compact"
                               variant="outlined">
                 </v-text-field>
+              </v-col>
+
+              <!--      Properties      -->
+              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+                <v-select class="mt-3"
+                          v-model="form._properties"
+                          label="ویژگی‌ها"
+                          :readonly="loading"
+                          :items="properties"
+                          item-title=".title"
+                          item-value="_id"
+                          density="compact"
+                          variant="outlined"
+                          multiple>
+                </v-select>
               </v-col>
 
               <!--     Actions       -->
@@ -112,6 +127,7 @@
               </v-col>
 
             </v-row>
+
           </v-form>
 
         </v-col>
@@ -154,32 +170,34 @@ definePageMeta({
 export default {
   data() {
     return {
-      user   : {},
-      loading: true,
-      form   : {
+      user      : {},
+      loading   : true,
+      form      : {
         title       : '',
         titleEn     : '',
         icon        : '',
         _parent     : '',
         _parentTitle: '',
+        _properties : [],
         action      : 'insert',
         loading     : false,
       },
-      rules  : {
-        title  : [
+      rules     : {
+        notEmpty                  : [
           value => {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
           }
         ],
-        titleEn: [
+        notEmptySelectableMultiple: [
           value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
+            if (value.length) return true;
+            return 'لطفا انتخاب کنید';
           }
-        ]
+        ],
       },
-      list   : [],
+      list      : [],
+      properties: []
     }
   },
   methods: {
@@ -205,15 +223,19 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn,
-              icon   : this.form.icon,
-              _parent: this.form._parent,
+              title      : this.form.title,
+              titleEn    : this.form.titleEn,
+              icon       : this.form.icon,
+              _properties: this.form._properties,
+              _parent    : this.form._parent,
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
 
           // refresh list
           await this.getCategories();
@@ -234,7 +256,8 @@ export default {
             body   : JSON.stringify({
               title  : this.form.title,
               titleEn: this.form.titleEn,
-              icon   : this.form.icon
+              icon   : this.form.icon,
+              _properties: this.form._properties
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -281,19 +304,21 @@ export default {
         this.form.loading = false;
       }
     },
-    async getCategories() {
+    getCategories() {
       this.loading = true;
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json'
-            }
-          }).then(async response => {
-        response  = await response.json();
-        this.list = response;
-      });
-      this.loading = false;
+      fetch(this.runtimeConfig.public.apiUrl + 'categories', {method: 'get'})
+          .then(async response => {
+            response     = await response.json();
+            this.list    = response;
+            this.loading = false;
+          });
+    },
+    getProperties() {
+      fetch(this.runtimeConfig.public.apiUrl + 'properties', {method: 'get'})
+          .then(async response => {
+            response        = await response.json();
+            this.properties = response;
+          });
     },
     setEdit(data) {
       this.form = {
@@ -302,6 +327,7 @@ export default {
         icon        : data.icon ?? '',
         _parent     : '',
         _parentTitle: '',
+        _properties : data._properties,
         action      : 'edit',
         _id         : data._id
       };
@@ -319,6 +345,7 @@ export default {
   mounted() {
     this.user = useUserStore();
     this.getCategories();
+    this.getProperties();
   },
   computed: {
     runtimeConfig() {

@@ -13,27 +13,26 @@
 
       <!--    Title    -->
       <v-row class=" px-5 pt-5 mb-5">
-        <BackButton />
+        <BackButton/>
 
-        <v-label class="text-h6 text-black mx-3">مدیریت رنگ‌ها</v-label>
+        <v-label class="text-h6 text-black mx-3">مدیریت ویژگی‌ها</v-label>
       </v-row>
 
       <!--   Content     -->
-      <v-row class="bg-white mr-2 ml-3 rounded-lg">
+      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
 
-        <!--    Add Color   -->
+        <!--    Add Property   -->
         <v-col cols="12">
 
-          <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">افزودن رنگ</v-label>
+          <v-icon class="mr-2" color="grey">mdi-plus-circle-outline</v-icon>
+          <v-label class="text-h6 text-black mx-3">افزودن ویژگی</v-label>
 
-          <v-form @submit.prevent="submit" ref="addColorForm">
-
-            <v-row class="mt-2">
+          <v-form @submit.prevent="submit" ref="addBrandForm">
+            <v-row class="mt-2 mx-4">
 
               <!--      Title      -->
               <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
+                <v-text-field class="mt-3"
                               v-model="form.title"
                               label="عنوان"
                               placeholder="وارد کنید"
@@ -46,7 +45,7 @@
 
               <!--      Title EN      -->
               <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
+                <v-text-field class="mt-3"
                               v-model="form.titleEn"
                               label="Title"
                               placeholder="وارد کنید"
@@ -57,49 +56,75 @@
                 </v-text-field>
               </v-col>
 
-              <!--      Color      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
-                              v-model="form.color"
-                              label="رنگ"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                  <template v-slot:append-inner>
-                    <v-btn class="px-2" variant="text" @click="form.colorDialog = true">
-                      <v-icon class="mx-1">mdi-palette</v-icon>
-                      رنگ‌ها
+              <!--      Variant      -->
+              <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="4">
+                <v-checkbox class="mt-2"
+                            v-model="form.variant"
+                            :readonly="loading"
+                            label="قابلیت ایجاد تنوع بر اساس این ویژگی"
+                            hide-details
+                ></v-checkbox>
+              </v-col>
+
+              <!--      Values      -->
+              <v-col class="mr-5 pb-10" cols="12" md="12">
+                <v-label class="font-weight-bold mr-2">
+                  مقادیر
+
+                  <!--  Add Value   -->
+                  <v-btn class="border mr-3"
+                         @click="addValue"
+                         size="30"
+                         variant="outlined"
+                         color="pink"
+                         icon>
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+
+                </v-label>
+                <v-row v-for="(valueItem, index) in form.values">
+
+                  <!--         Title         -->
+                  <v-col>
+                    <v-text-field class="mt-3"
+                                  v-model="valueItem.title"
+                                  label="عنوان"
+                                  placeholder="وارد کنید"
+                                  :readonly="loading"
+                                  :rules="rules.notEmpty"
+                                  density="compact"
+                                  variant="outlined"
+                                  hide-details>
+                    </v-text-field>
+                  </v-col>
+
+                  <!--         Value         -->
+                  <v-col>
+                    <v-text-field class="mt-3 ltrDirection"
+                                  v-model="valueItem.value"
+                                  label="مقدار"
+                                  placeholder="وارد کنید"
+                                  :readonly="loading"
+                                  :rules="rules.notEmpty"
+                                  density="compact"
+                                  variant="outlined"
+                                  hide-details>
+                    </v-text-field>
+                  </v-col>
+
+                  <!--         Actions         -->
+                  <v-col class="text-center align-center">
+                    <!--  Delete Value   -->
+                    <v-btn class="border float-start mt-5"
+                           @click="deleteValue(index)"
+                           size="30"
+                           variant="outlined"
+                           color="pink"
+                           icon>
+                      <v-icon>mdi-delete</v-icon>
                     </v-btn>
-                  </template>
-                </v-text-field>
-
-                <!--        Color Dialog         -->
-                <v-dialog v-model="form.colorDialog">
-                  <v-row no-gutters>
-                    <v-col cols="12" sm="8" offset-sm="2" md="4" offset-md="4">
-                      <v-card class="pt-2" elevation="5">
-                        <v-card-title class="border-b mb-1">
-                          انتخاب رنگ
-                          <v-icon class="float-left"
-                                  @click="form.colorDialog = false">mdi-close
-                          </v-icon>
-                        </v-card-title>
-
-                        <v-card-text class="pa-0">
-                          <v-color-picker width="100%"
-                                          v-model="form.color"
-                                          show-swatches>
-
-                          </v-color-picker>
-                        </v-card-text>
-                      </v-card>
-
-                    </v-col>
-                  </v-row>
-                </v-dialog>
-
+                  </v-col>
+                </v-row>
               </v-col>
 
               <!--     Actions       -->
@@ -138,10 +163,10 @@
 
         <v-divider class="my-5"></v-divider>
 
-        <!--    Units List   -->
+        <!--    Properties List   -->
         <v-col cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-palette</v-icon>
-          <v-label class="text-h6 text-black mx-3">رنگ‌ها</v-label>
+          <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
+          <v-label class="text-h6 text-black mx-3">ویژگی‌ها</v-label>
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -152,10 +177,7 @@
                          class="rounded border-b pa-2" link>
 
               <!--      Title        -->
-              <v-list-item-title>
-                <v-icon class="mx-2" :color="item.color">mdi-circle</v-icon>
-                {{ item.title }}
-              </v-list-item-title>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
@@ -207,12 +229,17 @@ export default {
       user   : {},
       loading: true,
       form   : {
-        title      : '',
-        titleEn    : '',
-        color      : '',
-        action     : 'insert',
-        colorDialog: false,
-        loading    : false
+        title  : '',
+        titleEn: '',
+        variant: false,
+        values : [
+          {
+            title  : '',
+            value: ''
+          }
+        ],
+        action : 'insert',
+        loading: false
       },
       rules  : {
         notEmpty: [
@@ -220,7 +247,7 @@ export default {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
           }
-        ],
+        ]
       },
       list   : [],
     }
@@ -230,12 +257,19 @@ export default {
       this.form = {
         title  : '',
         titleEn: '',
+        variant: false,
+        values : [
+          {
+            title  : '',
+            value: ''
+          }
+        ],
         action : 'insert'
       };
     },
     async insert() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors', {
+          this.runtimeConfig.public.apiUrl + 'properties', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -244,7 +278,8 @@ export default {
             body   : JSON.stringify({
               title  : this.form.title,
               titleEn: this.form.titleEn,
-              color  : this.form.color
+              variant: this.form.variant,
+              values : this.form.values
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -252,7 +287,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getColors();
+          await this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -261,7 +296,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors/' + this.form._id, {
+          this.runtimeConfig.public.apiUrl + 'properties/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -270,7 +305,8 @@ export default {
             body   : JSON.stringify({
               title  : this.form.title,
               titleEn: this.form.titleEn,
-              color  : this.form.color
+              variant: this.form.variant,
+              values : this.form.values
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -278,7 +314,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getColors();
+          await this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -287,7 +323,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors/' + _id, {
+          this.runtimeConfig.public.apiUrl + 'properties/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -299,7 +335,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getColors();
+          await this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -307,7 +343,7 @@ export default {
       });
     },
     async submit() {
-      if (this.$refs.addColorForm.isValid) {
+      if (this.$refs.addBrandForm.isValid) {
         this.form.loading = true;
 
         if (this.form.action === 'insert') {
@@ -319,10 +355,10 @@ export default {
         this.form.loading = false;
       }
     },
-    async getColors() {
+    async getProperties() {
       this.loading = true;
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'colors', {
+          this.runtimeConfig.public.apiUrl + 'properties', {
             method : 'get',
             headers: {
               'Content-Type': 'application/json'
@@ -337,7 +373,8 @@ export default {
       this.form = {
         title  : data.title,
         titleEn: data.titleEn,
-        color  : data.color,
+        variant: data.variant,
+        values : data.values,
         action : 'edit',
         _id    : data._id
       };
@@ -347,10 +384,19 @@ export default {
         this.delete(data._id);
       }
     },
+    addValue() {
+      this.form.values.push({
+        title  : '',
+        value: ''
+      });
+    },
+    deleteValue(index) {
+      this.form.values.splice(index, 1);
+    },
   },
   mounted() {
     this.user = useUserStore();
-    this.getColors();
+    this.getProperties();
   },
   computed: {
     runtimeConfig() {

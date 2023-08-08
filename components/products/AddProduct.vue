@@ -110,90 +110,50 @@
     <v-icon class="mt-1 mr-2" color="grey">mdi-tag-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">تنوع کالا</v-label>
 
-    <!--  Add Variant   -->
-    <v-btn class="border"
-           @click="addVariant"
-           size="30"
-           variant="outlined"
-           color="pink"
-           icon>
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
-
     <!--   Variants List   -->
-    <v-row class="px-7 mt-2">
-      <v-col v-for="(variant, index) in form.variants"
-             :key="index"
-             cols="12"
-             md="4"
-             class="">
-        <v-card class="border rounded-lg bg-grey-lighten-4" variant="flat">
+    <div class="px-8 mt-2">
 
-          <v-card-title class="text-subtitle-2 mb-2">
-            {{ variant.title }}
+      <!--   Chip Input   -->
+      <v-row v-for="(property,propertyIndex) in list.categoryProperties.filter(p => p.variant === true)"
+             class="mt-2">
+        <!--    Title    -->
+        <v-col class="" cols="12" md="2">
+          <v-label class="mx-2">{{ property.title }}</v-label>
+        </v-col>
 
-            <!--  Delete Variant   -->
-            <v-btn class="border float-end"
-                   @click="deleteVariant(index)"
-                   size="30"
-                   variant="outlined"
-                   color="pink"
-                   icon>
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </v-card-title>
+        <!--    Values    -->
+        <v-col cols="12" md="10">
+          <v-chip-group column
+                        multiple>
 
-          <v-card-text class="px-0 pt-0 pb-8">
+            <v-chip v-for="(value,valueIndex) in property.values"
+                    class="mx-2"
+                    variant="outlined"
+                    @click="addVariant(property._id,value.code)" filter>
 
-            <v-row class="px-7">
+              <template v-slot:prepend>
+                <!--       Color         -->
+                <v-icon class="mx-1"
+                        v-if="/^#([0-9A-F]{3}){1,2}$/i.test(value.value)"
+                        :color="value.value">
+                  mdi-circle
+                </v-icon>
+              </template>
 
-              <!--      Color     -->
-              <v-col cols="12">
-                <v-select class="bg-white"
-                          v-model="variant.color"
-                          label="رنگ‌"
-                          :readonly="loading"
-                          :rules="rules.notEmptySelectable"
-                          :items="list.colors"
-                          @update:modelValue="createVariantsTitles"
-                          item-title="title"
-                          item-value="._id"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
-                </v-select>
-              </v-col>
+              {{ value.title }}
+
+            </v-chip>
+          </v-chip-group>
+        </v-col>
 
 
-              <!--      Size      -->
-              <v-col class="mt-n5" cols="12">
-                <v-select class="mt-3 bg-white"
-                          v-model="variant.size"
-                          label="سایز"
-                          :readonly="loading"
-                          :rules="rules.notEmptySelectable"
-                          :items="list.sizes"
-                          @update:modelValue="createVariantsTitles"
-                          item-title="title"
-                          item-value="_id"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
-                </v-select>
-              </v-col>
-
-            </v-row>
-
-          </v-card-text>
-
-        </v-card>
-      </v-col>
+      </v-row>
 
       <div v-if="!form.variants.length" class="d-flex justify-center w-100 my-12">
         <v-label>تنوع ندارد</v-label>
       </div>
 
-    </v-row>
+    </div>
 
 
     <v-divider class="my-5"></v-divider>
@@ -479,38 +439,33 @@ export default {
       user   : {},
       loading: false,
       form   : {
-        name        : '',
-        categories  : [],
-        brand       : null,
-        unit        : null,
-        barcode     : '',
-        iranCode    : '',
-        variants    : [
-          {
-            color: null,
-            size : null,
-            title: ''
-          }
-        ],
-        files       : [],
-        filesPreview: [],
-        filesError  : false,
-        weight      : '',
-        dimensions  : {
+        name         : '',
+        categories   : [],
+        brand        : null,
+        unit         : null,
+        barcode      : '',
+        iranCode     : '',
+        variants     : [],
+        variantsProps: [],
+        files        : [],
+        filesPreview : [],
+        filesError   : false,
+        weight       : '',
+        dimensions   : {
           length: '',
           width : ''
         },
-        tags        : '',
-        properties  : [
+        tags         : '',
+        properties   : [
           {
             title: '',
             value: ''
           }
         ],
-        title       : '',
-        content     : '',
-        action      : 'insert',
-        loading     : false
+        title        : '',
+        content      : '',
+        action       : 'insert',
+        loading      : false
       },
       rules  : {
         notEmpty                  : [
@@ -573,11 +528,12 @@ export default {
         ]
       },
       list   : {
-        categories: [],
-        units     : [],
-        brands    : [],
-        colors    : [],
-        sizes     : []
+        categories        : [],
+        units             : [],
+        brands            : [],
+        colors            : [],
+        sizes             : [],
+        categoryProperties: []
       },
     }
   },
@@ -781,37 +737,10 @@ export default {
         this.list.brands = response;
       });
     },
-    getColors() {
-      fetch(
-          this.runtimeConfig.public.apiUrl + 'colors', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(async response => {
-        response         = await response.json();
-        this.list.colors = response;
-      });
-    },
-    getSizes() {
-      fetch(
-          this.runtimeConfig.public.apiUrl + 'sizes', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(async response => {
-        response        = await response.json();
-        this.list.sizes = response;
-      });
-    },
     getCategories() {
       fetch(
           this.runtimeConfig.public.apiUrl + 'categories', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
+            method: 'get',
           }).then(async response => {
         response             = await response.json();
         this.list.categories = this.reFormatCategories(response);
@@ -875,8 +804,71 @@ export default {
       });
       return result;
     },
-    addVariant() {
-      this.form.variants.push({color: null, size: null, title: ''});
+    getCategoryProperties(val) {
+      if (this.form.categories.length) {
+        fetch(
+            this.runtimeConfig.public.apiUrl + 'categories/' + val[0] + '/properties', {
+              method: 'get',
+            }).then(async response => {
+          response                     = await response.json();
+          this.list.categoryProperties = response;
+        });
+      }
+    },
+    addVariant(propertyId, valueCode) {
+      // create property array
+      if (!this.form.variantsProps[propertyId]) this.form.variantsProps[propertyId] = [];
+
+      // toggle value
+      if (this.form.variantsProps[propertyId].includes(valueCode))
+        this.form.variantsProps[propertyId].splice(this.form.variantsProps[propertyId].indexOf(valueCode), 1)
+      else
+        this.form.variantsProps[propertyId].push(valueCode);
+
+      // every property
+      this.form.variantsProps.forEach((variantProp, propIndex) => {
+        let variant = [];
+        // every value of property
+        variantProp.forEach((propValue) => {
+          // add prop value
+          variant.push({
+            property: variantProp,
+            value   : propValue
+          });
+
+
+
+          if(this.form.variantsProps.length > 1) {
+            // every other properties
+            this.form.variantsProps.forEach((variantJProp, propIndexJ) => {
+              if (propIndex !== propIndexJ) {
+
+                // every value of other properties
+                variantJProp.forEach((propJValue) => {
+                  variant.push({
+                    property: variantJProp,
+                    value   : propJValue
+                  });
+
+                  // add to variants
+                  // if (!this.form.variants.includes(variant))
+                  console.log(variant);
+                    this.form.variants.push(variant);
+
+                });
+
+              }
+            });
+          } else {
+            this.form.variants.push(variant);
+          }
+
+        });
+
+      });
+
+      console.log(this.form.variants);
+
     },
     deleteVariant(index) {
       this.form.variants.splice(index, 1);
@@ -918,18 +910,23 @@ export default {
       this.form.properties.splice(index, 1);
     },
   },
-  watch  : {},
+  watch  : {
+    categories(val) {
+      this.getCategoryProperties(val);
+    }
+  },
   mounted() {
     this.user = useUserStore();
     if (!this.list.units.length) this.getUnits();
     if (!this.list.categories.length) this.getCategories();
     if (!this.list.brands.length) this.getBrands();
-    if (!this.list.colors.length) this.getColors();
-    if (!this.list.sizes.length) this.getSizes();
   },
   computed: {
     runtimeConfig() {
       return useRuntimeConfig();
+    },
+    categories() {
+      return this.form.categories;
     }
   }
 }
