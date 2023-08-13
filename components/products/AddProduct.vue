@@ -114,7 +114,7 @@
     <div class="px-8 mt-2">
 
       <!--   Chip Input   -->
-      <v-row v-for="(property,propertyIndex) in list.categoryProperties.filter(p => p.variant === true)"
+      <v-row v-for="property in list.categoryProperties.filter(p => p.variant === true)"
              class="mt-2">
         <!--    Title    -->
         <v-col class="" cols="12" md="2">
@@ -129,7 +129,7 @@
             <v-chip v-for="(value,valueIndex) in property.values"
                     class="mx-2"
                     variant="outlined"
-                    @click="addVariant(property._id,value.code)" filter>
+                    @click="togglePropertyVariant(property._id,value.code)" filter>
 
               <template v-slot:prepend>
                 <!--       Color         -->
@@ -146,9 +146,57 @@
           </v-chip-group>
         </v-col>
 
-
       </v-row>
 
+
+      <!--   List   -->
+      <v-table v-if="form.variants.length" class="w-100 text-center my-6">
+
+        <thead>
+        <tr>
+          <th v-for="props in form.variantsProps"
+              class="text-center">
+            {{ this.list.categoryProperties.find(prop => prop._id === props._id).title ?? '' }}
+          </th>
+          <th class="text-center">
+            <v-icon>mdi-cog</v-icon>
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr v-for="(variant,index) in form.variants">
+
+          <!--     Properties     -->
+          <td v-for="props in  form.variantsProps">
+            <v-label v-for="property in variant.properties">
+              <span v-if="props._id === property.propertyId">
+                {{ getPropertyValue(property.propertyId, property.value).title }}
+              </span>
+            </v-label>
+          </td>
+
+          <!--   Actions     -->
+          <td>
+            <!--  Delete Property   -->
+            <v-btn class="border mx-5"
+                   @click="deleteVariant(index)"
+                   size="30"
+                   variant="outlined"
+                   color="pink"
+                   icon>
+              <v-icon>mdi-delete</v-icon>
+
+            </v-btn>
+          </td>
+        </tr>
+
+        </tbody>
+
+      </v-table>
+
+      <!--   Empty    -->
       <div v-if="!form.variants.length" class="d-flex justify-center w-100 my-12">
         <v-label>تنوع ندارد</v-label>
       </div>
@@ -309,7 +357,7 @@
         <th>عملیات</th>
         </thead>
         <tbody>
-        <tr v-for="(property, index) in form.properties" class="w-100 pa-0">
+        <tr v-for="(property, index) in form.properties" class="w-100 pa-1">
 
           <!--      Title      -->
           <td>
@@ -317,7 +365,7 @@
                           v-model="property.title"
                           label="عنوان"
                           placeholder="وارد کنید"
-                          :readonly="loading"
+                          :readonly="loading || property._id"
                           :rules="rules.notEmpty"
                           density="compact"
                           variant="outlined"
@@ -327,16 +375,32 @@
 
           <!--      Value      -->
           <td>
-            <v-text-field class=""
-                          v-model="property.value"
-                          label="مقدار"
-                          placeholder="وارد کنید"
-                          :readonly="loading"
-                          :rules="rules.notEmpty"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
+            <v-text-field
+                v-if="!property._id || (property._id && !list.categoryProperties.find(p => p._id === property._id).values.length)"
+                class=""
+                v-model="property.value"
+                label="مقدار"
+                placeholder="وارد کنید"
+                :readonly="loading"
+                :rules="rules.notEmpty"
+                density="compact"
+                variant="outlined"
+                hide-details>
             </v-text-field>
+
+            <v-select v-if="property._id && list.categoryProperties.find(p => p._id === property._id).values.length"
+                      class="mt-3"
+                      v-model="property.value"
+                      label="مقدار"
+                      :readonly="loading"
+                      :rules="rules.notEmptySelectable"
+                      :items="list.categoryProperties.find(p => p._id === property._id).values"
+                      item-title=".title"
+                      item-value="_id"
+                      density="compact"
+                      variant="outlined"
+                      hide-details>
+            </v-select>
           </td>
 
           <!--    Actions      -->
@@ -456,12 +520,7 @@ export default {
           width : ''
         },
         tags         : '',
-        properties   : [
-          {
-            title: '',
-            value: ''
-          }
-        ],
+        properties   : [],
         title        : '',
         content      : '',
         action       : 'insert',
@@ -572,6 +631,23 @@ export default {
       };
     },
     async insert() {
+
+      console.log({
+        name      : this.form.name,
+        categories: this.form.categories,
+        brand     : this.form.brand,
+        unit      : this.form.unit,
+        barcode   : this.form.barcode,
+        iranCode  : this.form.iranCode,
+        variants  : this.form.variants,
+        weight    : Number(this.form.weight),
+        dimensions: this.form.dimensions,
+        tags      : this.form.tags,
+        properties: this.form.properties,
+        title     : this.form.title,
+        content   : this.form.content
+      });
+
       await fetch(
           this.runtimeConfig.public.apiUrl + 'products', {
             method : 'post',
@@ -601,9 +677,9 @@ export default {
             response = await response.json();
             await this.uploadFiles(response._id)
           } else {
-            this.reset();
-            this.$emit('exit', true);
-            this.$emit('refresh', true);
+            // this.reset();
+            // this.$emit('exit', true);
+            // this.$emit('refresh', true);
             $showMessage('عملیات با موفقت انجام شد', 'success');
           }
         } else {
@@ -806,72 +882,113 @@ export default {
     },
     getCategoryProperties(val) {
       if (this.form.categories.length) {
-        fetch(
-            this.runtimeConfig.public.apiUrl + 'categories/' + val[0] + '/properties', {
-              method: 'get',
-            }).then(async response => {
-          response                     = await response.json();
-          this.list.categoryProperties = response;
-        });
+        fetch(this.runtimeConfig.public.apiUrl + 'categories/' + val[0] + '/properties', {method: 'get'})
+            .then(async response => {
+              response                     = await response.json();
+              this.list.categoryProperties = response;
+
+              // add category properties
+              response.filter(property => property.variant === false).forEach((property) => {
+                this.form.properties.push({
+                  title: property.title,
+                  value: '',
+                  _id  : property._id
+                });
+              });
+
+            });
       }
     },
-    addVariant(propertyId, valueCode) {
-      // create property array
-      if (!this.form.variantsProps[propertyId]) this.form.variantsProps[propertyId] = [];
+    createPropertyVariants(variant, propsChecked) {
 
-      // toggle value
-      if (this.form.variantsProps[propertyId].includes(valueCode))
-        this.form.variantsProps[propertyId].splice(this.form.variantsProps[propertyId].indexOf(valueCode), 1)
-      else
-        this.form.variantsProps[propertyId].push(valueCode);
+      // every other properties
+      this.form.variantsProps.forEach((variantProp) => {
+        if (!propsChecked.includes(variantProp._id)) {
+          // add to checked
+          propsChecked.push(variantProp._id);
 
-      // every property
-      this.form.variantsProps.forEach((variantProp, propIndex) => {
-        let variant = [];
-        // every value of property
-        variantProp.forEach((propValue) => {
-          // add prop value
-          variant.push({
-            property: variantProp,
-            value   : propValue
+          // every value of other properties
+          variantProp.values.forEach((propValue) => {
+
+            // create the value sample
+            let propertyObject = {propertyId: variantProp._id, value: propValue};
+
+            // add the value sample
+            variant.properties.push(propertyObject);
+
+            // add to variants
+            this.form.variants.push(structuredClone(variant));
+
+            // create variants of this value
+            this.createPropertyVariants(structuredClone(variant), structuredClone(propsChecked));
+
+            variant.properties.splice(variant.properties.indexOf(propertyObject), 1);
+
           });
+        }
+      });
 
+      return true;
+    },
+    reCreateVariants() {
+      // remove if is not selected value
+      this.form.variantsProps.forEach((prop, index) => {
+        if (!prop.values.length) {
+          this.form.variantsProps.splice(index, 1);
+        }
+      });
 
+      // reCreate variants
+      // every property
+      this.form.variants = [];
+      if (this.form.variantsProps.length) {
 
-          if(this.form.variantsProps.length > 1) {
-            // every other properties
-            this.form.variantsProps.forEach((variantJProp, propIndexJ) => {
-              if (propIndex !== propIndexJ) {
+        // get the first property
+        let variantProp = this.form.variantsProps[0];
 
-                // every value of other properties
-                variantJProp.forEach((propJValue) => {
-                  variant.push({
-                    property: variantJProp,
-                    value   : propJValue
-                  });
+        // every value of property
+        variantProp.values.forEach((propValue) => {
 
-                  // add to variants
-                  // if (!this.form.variants.includes(variant))
-                  console.log(variant);
-                    this.form.variants.push(variant);
+          // create base variant
+          let variant = {properties: []};
 
-                });
+          // add base prop value
+          variant.properties.push({propertyId: variantProp._id, value: propValue});
 
-              }
-            });
+          // check exists other properties
+          if (this.form.variantsProps.length > 1) {
+            this.createPropertyVariants(structuredClone(variant), [variantProp._id]);
           } else {
             this.form.variants.push(variant);
           }
 
         });
 
-      });
+      }
 
-      console.log(this.form.variants);
+    },
+    togglePropertyVariant(propertyId, valueCode) {
+
+      // create property array
+      let variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
+      if (!variantProp) {
+        this.form.variantsProps.push({_id: propertyId, values: []});
+        variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
+      }
+
+      // toggle value
+      if (variantProp.values.includes(valueCode))
+        variantProp.values.splice(variantProp.values.indexOf(valueCode), 1)
+      else
+        variantProp.values.push(valueCode);
+
+      // refresh variants list
+      this.reCreateVariants();
 
     },
     deleteVariant(index) {
-      this.form.variants.splice(index, 1);
+      if (confirm('آیا مطمئن هستید؟'))
+        this.form.variants.splice(index, 1);
     },
     createVariantsTitles() {
       this.form.variants.forEach((variant) => {
@@ -881,6 +998,10 @@ export default {
             ' سایز ' +
             (variant.size ? this.list.sizes.find(size => size._id === variant.size).title : '');
       })
+    },
+    getPropertyValue(propertyId, valueCode) {
+      let property = this.list.categoryProperties.find(prop => prop._id === propertyId);
+      return property.values.find(value => value.code === valueCode);
     },
     openFileDialog() {
       this.$refs.filesInput.click();
@@ -909,9 +1030,26 @@ export default {
     deleteProperty(index) {
       this.form.properties.splice(index, 1);
     },
+    cloneObject(obj) {
+      if (null == obj || "object" != typeof obj) return obj;
+      let copy = obj.constructor();
+      for (let attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+      }
+      return copy;
+    },
+    copyArrayObject(array) {
+      return JSON.parse(JSON.stringify(array));
+    }
   },
   watch  : {
-    categories(val) {
+    categories(val, oldVal) {
+      // remove all variants
+      if (val[0] !== oldVal[0]) {
+        this.form.variants      = [];
+        this.form.variantsProps = [];
+      }
+
       this.getCategoryProperties(val);
     }
   },
