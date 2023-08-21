@@ -699,6 +699,7 @@ export default {
         if (response.status === 200) {
           this.reset();
           this.$emit('exit', true);
+          this.$emit('refresh', true);
           $showMessage('عملیات با موفقت انجام شد', 'success');
         } else {
           // show error
@@ -825,21 +826,22 @@ export default {
       this.reset();
 
       // set data
-      this.form.name       = data.name;
-      this.form.properties = data.properties;
-      this.form.categories = data._categories;
-      this.form.brand      = data._brand;
-      this.form.unit       = data._unit;
-      this.form.barcode    = data.barcode;
-      this.form.iranCode   = data.iranCode;
-      this.form.variants   = data.variants;
-      this.form.weight     = data.weight;
-      this.form.dimensions = data.dimensions;
-      this.form.tags       = data.tags;
-      this.form.title      = data.title;
-      this.form.content    = data.content;
-      this.form._id        = data._id;
-      this.form.action     = 'edit';
+      this.form.name         = data.name;
+      this.form.properties   = data.properties;
+      this.form.categories   = data._categories;
+      this.form.brand        = data._brand;
+      this.form.unit         = data._unit;
+      this.form.barcode      = data.barcode;
+      this.form.iranCode     = data.iranCode;
+      this.form.variants     = data.variants;
+      this.form.lastVariants = data.variants;
+      this.form.weight       = data.weight;
+      this.form.dimensions   = data.dimensions;
+      this.form.tags         = data.tags;
+      this.form.title        = data.title;
+      this.form.content      = data.content;
+      this.form._id          = data._id;
+      this.form.action       = 'edit';
 
       // set files
       if (data.files) {
@@ -857,15 +859,18 @@ export default {
         variant.properties.forEach((property) => {
           let variantProp = this.form.variantsProps.find(prop => prop._id === property.propertyId);
           if (variantProp) {
-            variantProp.values.push(property.value);
+            if (!variantProp.values.includes(property.value))
+              variantProp.values.push(property.value);
           } else {
             this.form.variantsProps.push({
               _id   : property.propertyId,
               values: [property.value]
             });
           }
+
           // add to variants values
-          this.form.variantsValues.push(property.value);
+          if (!this.form.variantsValues.includes(property.value))
+            this.form.variantsValues.push(property.value);
         });
       });
 
@@ -975,23 +980,13 @@ export default {
       // toggle value
       if (variantProp.values.includes(valueCode)) {
         variantProp.values.splice(variantProp.values.indexOf(valueCode), 1);
-
-        // remove variants have property
-        this.form.variants.forEach((variant, index) => {
-          variant.properties.forEach((prop) => {
-            if (prop.value === valueCode) {
-              this.form.variants.splice(this.form.variants.indexOf(variant), 1);
-            }
-          });
-        });
       } else {
         variantProp.values.push(valueCode);
-        this.reCreateVariants();
       }
 
 
       // refresh variants list
-      //this.reCreateVariants();
+      this.reCreateVariants();
 
     },
     reCreateVariants() {
@@ -1008,6 +1003,8 @@ export default {
 
         // get the first property
         let variantProp = this.form.variantsProps[0];
+
+        this.form.variants = [];
 
         // every value of property
         variantProp.values.forEach((propValue) => {
@@ -1029,6 +1026,19 @@ export default {
 
         });
 
+      } else {
+        this.form.variants = [];
+      }
+
+      // set last variants code's
+      if (this.form.action === 'edit') {
+        this.form.variants.forEach((variant) => {
+          this.form.lastVariants.forEach((lVariant) => {
+            if (JSON.stringify(variant.properties) === JSON.stringify(lVariant.properties)) {
+              variant.code = lVariant.code;
+            }
+          });
+        });
       }
 
     },
