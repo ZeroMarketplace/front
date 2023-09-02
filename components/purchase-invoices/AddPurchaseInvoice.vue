@@ -14,7 +14,7 @@
                         label="کاربر"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
-                        :items="[]"
+                        :items="list.users"
                         item-title="title"
                         item-value="_id"
                         density="compact"
@@ -48,11 +48,11 @@
       <!--   Warehouse   -->
       <v-col class="mt-n8 mt-md-0" cols="12" md="4">
         <v-select class="mt-3"
-                  v-model="form.user"
+                  v-model="form.warehouse"
                   label="انبار"
                   :readonly="loading"
                   :rules="rules.notEmptySelectable"
-                  :items="[]"
+                  :items="list.warehouses"
                   item-title="title"
                   item-value="_id"
                   density="compact"
@@ -101,7 +101,7 @@
       <v-col class="pa-1 mt-2" cols="12" md="3">
         <v-autocomplete class="w-100"
                         v-model="product.code"
-                        label="نام کالا"
+                        label="نام یا کد کالا"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
                         :items="[]"
@@ -338,16 +338,16 @@
 </template>
 
 <script>
-
+import {useUserStore} from "~/store/user";
 
 export default {
-  computed: {},
   data() {
     return {
       form   : {
-        user    : null,
-        dateTime: undefined,
-        products: [
+        user     : null,
+        dateTime : undefined,
+        warehouse: null,
+        products : [
           {
             code    : '',
             count   : 0,
@@ -361,7 +361,7 @@ export default {
             total   : 0,
           }
         ],
-        total   : 0
+        total    : 0
       },
       rules  : {
         notEmpty          : [
@@ -376,6 +376,10 @@ export default {
             return 'لطفا انتخاب کنید';
           }
         ],
+      },
+      list   : {
+        users     : [],
+        warehouses: []
       },
       loading: false,
       action : 'edit'
@@ -427,7 +431,57 @@ export default {
       // this.form.products[index].total = product.sum
       //     - (product.discount * product.sum / 100) // minus discount
       this.calculateInvoiceTotal();
+    },
+    getUsers() {
+      this.loading = true;
+      fetch(
+          this.runtimeConfig.public.apiUrl + 'users', {
+            method : 'get',
+            headers: {'authorization': 'Bearer ' + this.user.token}
+          }).then(async response => {
+        response = await response.json();
+
+        // set title of users
+        response.forEach((user) => {
+          user.title = (user.firstName && user.lastName) ? (user.firstName + ' ' + user.lastName) : user.phone;
+        });
+
+        this.list.users = response;
+        this.loading    = false;
+      });
+    },
+    getWarehouses() {
+      this.loading = true;
+      fetch(
+          this.runtimeConfig.public.apiUrl + 'warehouses', {
+            method : 'get',
+            headers: {'authorization': 'Bearer ' + this.user.token}
+          }).then(async response => {
+        response             = await response.json();
+        this.list.warehouses = response;
+        this.loading         = false;
+      });
+    },
+    getProducts() {
+
+    },
+    searchProduct() {
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        doneTyping(event.target.value);
+      }, waitTime);
     }
+  },
+  mounted() {
+    this.user = useUserStore();
+    this.getUsers();
+    this.getWarehouses();
+  },
+  computed: {
+    runtimeConfig() {
+      return useRuntimeConfig();
+    },
   }
 }
 </script>

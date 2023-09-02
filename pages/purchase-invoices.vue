@@ -57,7 +57,7 @@
 
         <!--    purchase-invoices List   -->
         <v-col v-if="action === 'list'" class="pb-16" cols="12" >
-          <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
+          <v-icon class="mt-1 mr-2" color="grey">mdi-receipt-text-edit-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">فاکتور‌ها</v-label>
 
           <!--    loading      -->

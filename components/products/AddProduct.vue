@@ -96,7 +96,6 @@
                       label="ایران کد"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -278,7 +277,6 @@
                       label="وزن"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
           <template v-slot:append-inner>
@@ -297,7 +295,6 @@
           <v-col cols="4">
             <v-text-field class="mt-n3 mx-2 centeredText"
                           placeholder="طول"
-                          :rules="rules.notEmpty"
                           v-model="form.dimensions.length"
                           type="number"
                           variant="underlined"
@@ -312,7 +309,6 @@
           <v-col cols="4">
             <v-text-field class="mt-n3 mx-2 centeredText"
                           placeholder="عرض"
-                          :rules="rules.notEmpty"
                           v-model="form.dimensions.width"
                           type="number"
                           variant="underlined"
@@ -334,7 +330,6 @@
                       label="برچسب‌ها"
                       placeholder="با عبارت - از هم جدا کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -460,7 +455,6 @@
                     label="توضیحات"
                     placeholder="وارد کنید"
                     :readonly="loading"
-                    :rules="rules.notEmpty"
                     density="compact"
                     variant="outlined">
         </v-textarea>
@@ -828,7 +822,6 @@ export default {
       // set data
       this.form.name         = data.name;
       this.form.properties   = data.properties;
-      this.form.categories   = data._categories;
       this.form.brand        = data._brand;
       this.form.unit         = data._unit;
       this.form.barcode      = data.barcode;
@@ -841,6 +834,7 @@ export default {
       this.form.title        = data.title;
       this.form.content      = data.content;
       this.form._id          = data._id;
+      this.form.categories   = data._categories;
       this.form.action       = 'edit';
 
       // set files
@@ -918,7 +912,8 @@ export default {
                     _id  : property._id
                   });
                 } else {
-                  this.form.properties.find(prop => prop._id === property._id).title = property.title;
+                  let propertyFind = this.form.properties.find(prop => prop._id === property._id);
+                  if (propertyFind) propertyFind.title = property.title;
                 }
               });
 

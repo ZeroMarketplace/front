@@ -2,7 +2,7 @@
 // @ts-ignore
 
 export default defineNuxtConfig({
-    title: 'Test',
+    title: 'Zero',
 
     app: {
         pageTransition: {name: 'page', mode: 'out-in'}
@@ -27,8 +27,8 @@ export default defineNuxtConfig({
 
         // Keys within public, will be also exposed to the client-side
         public: {
-            apiUrl: 'http://localhost:5000/api/',
-            staticsUrl: 'http://localhost:5000/'
+            apiUrl: 'https://zerowear.ir/api/',
+            staticsUrl: 'https://zerowear.ir/'
         }
     }
 

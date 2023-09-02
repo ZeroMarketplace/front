@@ -118,7 +118,7 @@
           </v-list>
 
           <!--    Empty List Alert      -->
-          <EmptyList class="py-16" :list="list" :loading="loading"/>
+          <EmptyList :list="list" :loading="loading"/>
 
         </v-col>
 

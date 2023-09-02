@@ -165,16 +165,15 @@
 
         <!--    Properties List   -->
         <v-col cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
+          <v-icon class="mt-1 mr-2" color="grey">mdi-order-bool-descending-variant</v-icon>
           <v-label class="text-h6 text-black mx-3">ویژگی‌ها</v-label>
 
           <!--    loading      -->
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="">
-            <v-list-item v-for="item in list"
-                         class="rounded border-b pa-2" link>
+          <v-list class="mx-5">
+            <v-list-item v-for="item in list" class="rounded border-b pa-2" link>
 
               <!--      Title        -->
               <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -234,7 +233,7 @@ export default {
         variant: false,
         values : [
           {
-            title  : '',
+            title: '',
             value: ''
           }
         ],
@@ -260,7 +259,7 @@ export default {
         variant: false,
         values : [
           {
-            title  : '',
+            title: '',
             value: ''
           }
         ],
@@ -355,19 +354,19 @@ export default {
         this.form.loading = false;
       }
     },
-    async getProperties() {
+    getProperties() {
       this.loading = true;
-      await fetch(
+      fetch(
           this.runtimeConfig.public.apiUrl + 'properties', {
             method : 'get',
             headers: {
               'Content-Type': 'application/json'
             }
           }).then(async response => {
-        response  = await response.json();
-        this.list = response;
+        response     = await response.json();
+        this.list    = response;
+        this.loading = false;
       });
-      this.loading = false;
     },
     setEdit(data) {
       this.form = {
@@ -386,7 +385,7 @@ export default {
     },
     addValue() {
       this.form.values.push({
-        title  : '',
+        title: '',
         value: ''
       });
     },

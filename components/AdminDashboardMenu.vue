@@ -10,17 +10,38 @@
 
     <!-- list  -->
     <v-list class="bg-grey-darken-3 pa-5 rounded-xl">
-      <v-list-item
-          v-for="(item,i) in list"
-          :key="i"
-          :value="item"
-          class="pa-5 mt-3 rounded-lg"
-          rounded="rounded">
+      <v-list-item v-for="(item,i) in list"
+                   :key="i"
+                   :value="item"
+                   class="pa-5 mt-3 rounded-lg"
+                   rounded="rounded"
+                   :to="item.link ?? ''"
+                   :link="!item.items">
+
         <template v-slot:prepend>
           <v-icon :icon="item.icon"></v-icon>
         </template>
 
         <v-list-item-title v-text="item.text"></v-list-item-title>
+        <v-list-item-media v-if="item.items">
+
+          <v-list-item v-for="(childItem,i) in item.items"
+                       :key="i"
+                       :value="item"
+                       class=""
+                       rounded="rounded"
+                       :to="childItem.link ?? ''"
+                       link>
+            <template v-slot:prepend>
+              <v-icon :icon="childItem.icon"></v-icon>
+            </template>
+
+            <v-list-item-title v-text="childItem.text"></v-list-item-title>
+          </v-list-item>
+
+        </v-list-item-media>
+
+
       </v-list-item>
     </v-list>
 
@@ -51,51 +72,73 @@ export default {
       list: [
         {
           text: 'داشبورد',
-          link: '/dashboard',
-          icon: 'mdi-view-dashboard',
-          role: ['admin', 'user']
+          link: '/admin-dashboard',
+          icon: 'mdi-view-dashboard'
         },
         {
           text: 'لیست فروش',
-          link: '/dashboard',
-          icon: 'mdi-cart',
-          role: ['admin']
+          icon: 'mdi-cart'
         },
         {
           text: 'فاکتور فروش',
-          link: '/dashboard',
-          icon: 'mdi-cart-outline',
-          role: ['admin']
+          icon: 'mdi-receipt-text-edit'
+        },
+        {
+          text: 'فاکتور خرید',
+          icon: 'mdi-receipt-text-edit-outline',
+          link:'/purchase-invoices'
         },
         {
           text: 'محصولات من',
-          link: '/dashboard',
-          icon: 'mdi-cart-outline',
-          role: ['admin']
+          link: '/products',
+          icon: 'mdi-cart-outline'
         },
         {
           text: 'سفارشات من',
-          link: '/dashboard',
-          icon: 'mdi-cart-outline',
-          role: ['user']
+          icon: 'mdi-cart-outline'
+        },
+        {
+          text: 'انبار‌ها',
+          icon: 'mdi-warehouse',
+          link: "/warehouses"
         },
         {
           text: 'اطلاعات پروفایل',
-          link: '/dashboard',
-          icon: 'mdi-card-account-details-outline',
-          role: ['admin', 'user']
+          icon: 'mdi-card-account-details-outline'
         },
         {
           text: 'اعلانات',
-          link: '/dashboard',
-          icon: 'mdi-bell-outline',
-          role: ['admin', 'user']
+          icon: 'mdi-bell-outline'
         },
         {
           text: 'تیکت‌ها',
-          link: '/dashboard',
-          icon: 'mdi-cart',
-          role: ['admin', 'user']
+          icon: 'mdi-cart'
+        },
+        {
+          text : 'تنظیمات',
+          icon : 'mdi-cog',
+          items: [
+            {
+              text: 'دسته بندی‌ها',
+              link: '/categories',
+              icon: 'mdi-file-tree'
+            },
+            {
+              text: 'برند‌ها',
+              link: '/brands',
+              icon: 'mdi-material-design'
+            },
+            {
+              text: 'ویژگی‌ها',
+              link: '/properties',
+              icon: 'mdi-order-bool-descending-variant'
+            },
+            {
+              text: 'واحد‌ها',
+              link: '/units',
+              icon: 'mdi-scale'
+            }
+          ]
         }
       ]
     }

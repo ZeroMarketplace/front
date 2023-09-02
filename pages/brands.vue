@@ -19,7 +19,7 @@
       </v-row>
 
       <!--   Content     -->
-      <v-row class="bg-white mr-2 ml-3 rounded-lg">
+      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
 
         <!--    Add Brand   -->
         <v-col cols="12">
@@ -27,7 +27,7 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن برند</v-label>
 
-          <v-form @submit.prevent="submit" ref="addBrandForm">
+          <v-form class="mx-5" @submit.prevent="submit" ref="addBrandForm">
 
             <v-row class="mt-2">
 
@@ -102,7 +102,7 @@
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="">
+          <v-list class="mx-5">
             <v-list-item v-for="item in list"
                          class="rounded border-b pa-2" link>
 

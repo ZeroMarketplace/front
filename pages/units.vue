@@ -13,7 +13,7 @@
 
       <!--    Title    -->
       <v-row class=" px-5 pt-5 mb-5">
-        <BackButton />
+        <BackButton/>
 
         <v-label class="text-h6 text-black mx-3">مدیریت واحد‌ها</v-label>
       </v-row>
@@ -27,7 +27,7 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن واحد</v-label>
 
-          <v-form @submit.prevent="submit" ref="addUnitForm">
+          <v-form class="mx-5" @submit.prevent="submit" ref="addUnitForm">
 
             <v-row class="mt-2">
 
@@ -95,14 +95,14 @@
 
         <!--    Units List   -->
         <v-col cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-material-design</v-icon>
+          <v-icon class="mt-1 mr-2" color="grey">mdi-scale</v-icon>
           <v-label class="text-h6 text-black mx-3">واحد‌ها</v-label>
 
           <!--    loading      -->
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="">
+          <v-list class="mx-5">
             <v-list-item v-for="item in list"
                          class="rounded border-b pa-2" link>
 
@@ -273,9 +273,9 @@ export default {
         this.form.loading = false;
       }
     },
-    async getUnits() {
+    getUnits() {
       this.loading = true;
-      await fetch(
+      fetch(
           this.runtimeConfig.public.apiUrl + 'units', {
             method : 'get',
             headers: {
@@ -283,10 +283,10 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-        response  = await response.json();
-        this.list = response;
+        response     = await response.json();
+        this.list    = response;
+        this.loading = false;
       });
-      this.loading = false;
     },
     setEdit(data) {
       this.form = {
