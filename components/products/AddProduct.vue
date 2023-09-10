@@ -352,6 +352,28 @@
       <v-icon>mdi-plus</v-icon>
     </v-btn>
 
+    <!--  Add Dynamic Properties  -->
+    <v-row class="mt-5 mx-4 pb-12 d-flex justify-center">
+      <v-chip-group v-model="form.dynamicProperties"
+                    class="overflow-hidden"
+                    column
+                    multiple>
+
+        <v-chip v-for="value in list.categoryProperties.filter(p => !p.variant)"
+                :key="value._id"
+                :value="value._id"
+                class="mx-2"
+                variant="outlined"
+                @click="toggleDynamicProperty(value._id,value.title)"
+                filter>
+
+          {{ value.title }}
+
+        </v-chip>
+
+      </v-chip-group>
+    </v-row>
+
     <!--  Properties List  -->
     <v-row class="mt-5 mx-4 pb-12 d-flex justify-center">
       <v-table class="w-100" v-if="form.properties.length">
@@ -506,29 +528,30 @@ export default {
       user   : {},
       loading: false,
       form   : {
-        name          : '',
-        categories    : [],
-        brand         : null,
-        unit          : null,
-        barcode       : '',
-        iranCode      : '',
-        variants      : [],
-        variantsProps : [],
-        variantsValues: [],
-        files         : [],
-        filesPreview  : [],
-        filesError    : false,
-        weight        : '',
-        dimensions    : {
+        name             : '',
+        categories       : [],
+        brand            : null,
+        unit             : null,
+        barcode          : '',
+        iranCode         : '',
+        variants         : [],
+        variantsProps    : [],
+        variantsValues   : [],
+        files            : [],
+        filesPreview     : [],
+        filesError       : false,
+        weight           : '',
+        dimensions       : {
           length: '',
           width : ''
         },
-        tags          : '',
-        properties    : [],
-        title         : '',
-        content       : '',
-        action        : 'insert',
-        loading       : false
+        tags             : '',
+        properties       : [],
+        dynamicProperties: [],
+        title            : '',
+        content          : '',
+        action           : 'insert',
+        loading          : false
       },
       rules  : {
         notEmpty                  : [
@@ -601,29 +624,30 @@ export default {
   methods: {
     reset() {
       this.form = {
-        name          : '',
-        categories    : [],
-        brand         : null,
-        unit          : null,
-        barcode       : '',
-        iranCode      : '',
-        variants      : [],
-        variantsProps : [],
-        variantsValues: [],
-        files         : [],
-        filesPreview  : [],
-        filesError    : false,
-        weight        : '',
-        dimensions    : {
+        name             : '',
+        categories       : [],
+        brand            : null,
+        unit             : null,
+        barcode          : '',
+        iranCode         : '',
+        variants         : [],
+        variantsProps    : [],
+        variantsValues   : [],
+        files            : [],
+        filesPreview     : [],
+        filesError       : false,
+        weight           : '',
+        dimensions       : {
           length: '',
           width : ''
         },
-        tags          : '',
-        properties    : [],
-        title         : '',
-        content       : '',
-        action        : 'insert',
-        loading       : false
+        tags             : '',
+        properties       : [],
+        dynamicProperties: [],
+        title            : '',
+        content          : '',
+        action           : 'insert',
+        loading          : false
       };
     },
     async insert() {
@@ -868,6 +892,13 @@ export default {
         });
       });
 
+      // set dynamic properties
+      data.properties.forEach((property) => {
+        if (property._id) {
+          this.form.dynamicProperties.push(property._id);
+        }
+      });
+
     },
     reFormatCategories(list) {
       let result = [];
@@ -903,15 +934,9 @@ export default {
 
               this.$forceUpdate();
 
-              // add category dynamic properties
+              // set dynamic properties in edit mode
               response.filter(property => property.variant === false).forEach((property) => {
-                if (this.form.action === 'insert') {
-                  this.form.properties.push({
-                    title: property.title,
-                    value: '',
-                    _id  : property._id
-                  });
-                } else {
+                if (this.form.action === 'edit') {
                   let propertyFind = this.form.properties.find(prop => prop._id === property._id);
                   if (propertyFind) propertyFind.title = property.title;
                 }
@@ -1088,6 +1113,22 @@ export default {
         title: '',
         value: ''
       });
+    },
+    toggleDynamicProperty(id, title) {
+      // add property
+      if (!this.form.properties.find(p => p._id === id)) {
+        this.form.properties.push({
+          title: title,
+          value: '',
+          _id  : id
+        });
+      } else {
+        // remove property
+        this.form.properties.splice(
+            this.form.properties.indexOf(this.form.properties.find(p => p._id === id)),
+            1
+        );
+      }
     },
     deleteProperty(index) {
       this.form.properties.splice(index, 1);

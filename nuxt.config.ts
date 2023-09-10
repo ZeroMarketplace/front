@@ -27,8 +27,8 @@ export default defineNuxtConfig({
 
         // Keys within public, will be also exposed to the client-side
         public: {
-            apiUrl: 'https://zerowear.ir/api/',
-            staticsUrl: 'https://zerowear.ir/'
+            apiUrl: 'http://localhost:5000/api/',
+            staticsUrl: 'http://localhost:5000/'
         }
     }
 
