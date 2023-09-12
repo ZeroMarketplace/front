@@ -27,13 +27,12 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن دسته بندی</v-label>
 
-          <v-form @submit.prevent="submit" ref="addCategoryForm" validate-on="input lazy">
+          <v-form @submit.prevent="submit" ref="addCategoryForm">
 
             <!--    Parent      -->
             <v-chip v-if="form._parent"
-                    prepend-icon="mdi-close"
                     @click:append-inner="openIconsList"
-                    class="mt-5"
+                    class="mt-5 mr-7"
                     size="small"
                     color="secondary"
                     variant="elevated">
@@ -84,17 +83,17 @@
 
               <!--      Properties      -->
               <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-select class="mt-3"
-                          v-model="form._properties"
-                          label="ویژگی‌ها"
-                          :readonly="loading"
-                          :items="properties"
-                          item-title=".title"
-                          item-value="_id"
-                          density="compact"
-                          variant="outlined"
-                          multiple>
-                </v-select>
+                <v-autocomplete class="mt-3"
+                                v-model="form._properties"
+                                label="ویژگی‌ها"
+                                :readonly="loading"
+                                :items="properties"
+                                item-title=".title"
+                                item-value="_id"
+                                density="compact"
+                                variant="outlined"
+                                multiple>
+                </v-autocomplete>
               </v-col>
 
               <!--     Actions       -->
@@ -205,14 +204,11 @@ export default {
       window.open('https://materialdesignicons.com/', '_blank');
     },
     reset() {
-      this.form = {
-        title       : '',
-        titleEn     : '',
-        icon        : '',
-        _parent     : '',
-        _parentTitle: '',
-        action      : 'insert'
-      };
+      this.$refs.addCategoryForm.reset();
+      this.form._parent      = '';
+      this.form._parentTitle = '';
+      this.form.action       = 'insert';
+      this.form.loading      = false;
     },
     async insert() {
       await fetch(
@@ -254,15 +250,18 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn,
-              icon   : this.form.icon,
+              title      : this.form.title,
+              titleEn    : this.form.titleEn,
+              icon       : this.form.icon,
               _properties: this.form._properties
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
 
           // refresh list
           await this.getCategories();
@@ -340,6 +339,7 @@ export default {
     setParent(data) {
       this.form._parent      = data._id;
       this.form._parentTitle = data.title;
+      this.form._properties  = data._properties;
     },
   },
   mounted() {

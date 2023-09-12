@@ -13,7 +13,7 @@
 
       <!--    Title    -->
       <v-row class=" px-5 pt-5 mb-5">
-        <BackButton />
+        <BackButton/>
 
         <v-label class="text-h6 text-black mx-3">مدیریت برند‌ها</v-label>
       </v-row>
@@ -27,8 +27,10 @@
           <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن برند</v-label>
 
-          <v-form class="mx-5" @submit.prevent="submit" ref="addBrandForm">
-
+          <v-form class="mx-5"
+                  validate-on="lazy"
+                  @submit.prevent="submit"
+                  ref="addBrandForm">
             <v-row class="mt-2">
 
               <!--      Title      -->
@@ -114,7 +116,7 @@
                 <!--  Delete   -->
                 <v-btn class="mx-2"
                        color="red"
-                       size="25"
+                       size="30"
                        @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
@@ -123,7 +125,7 @@
                 <!--  Edit   -->
                 <v-btn class="mx-2"
                        color="secondary"
-                       size="25"
+                       size="30"
                        @click="setEdit(item)"
                        icon>
                   <v-icon size="15">mdi-pencil</v-icon>
@@ -183,11 +185,9 @@ export default {
   },
   methods: {
     reset() {
-      this.form = {
-        title  : '',
-        titleEn: '',
-        action : 'insert'
-      };
+      this.$refs.addBrandForm.reset();
+      this.form.action  = 'insert';
+      this.form.loading = false;
     },
     async insert() {
       await fetch(
@@ -205,6 +205,9 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
 
           // refresh list
           await this.getBrands();
@@ -230,6 +233,9 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
 
           // refresh list
           await this.getBrands();
@@ -273,19 +279,13 @@ export default {
         this.form.loading = false;
       }
     },
-    async getBrands() {
+    getBrands() {
       this.loading = true;
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json'
-            }
-          }).then(async response => {
-        response  = await response.json();
-        this.list = response;
+      fetch(this.runtimeConfig.public.apiUrl + 'brands', {method: 'get',}).then(async response => {
+        response     = await response.json();
+        this.list    = response;
+        this.loading = false;
       });
-      this.loading = false;
     },
     setEdit(data) {
       this.form = {

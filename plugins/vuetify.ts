@@ -9,22 +9,27 @@ export default defineNuxtPlugin(nuxtApp => {
         rtl: true,
         components,
         directives,
-        themes: {
-            myCustomTheme: {
-                dark: false,
-                colors: {
-                    background: '#FFFFFF',
-                    surface: '#FFFFFF',
-                    primary: '#6200EE',
-                    'primary-darken-1': '#3700B3',
-                    secondary: '#d4deec',
-                    'secondary-darken-1': '#5094b4',
-                    error: '#B00020',
-                    info: '#2196F3',
-                    success: '#4CAF50',
-                    warning: '#FB8C00',
+        theme:{
+            defaultTheme:'zeroLight',
+            themes: {
+                zeroLight: {
+                    dark: false,
+                    colors: {
+                        background: '#FFFFFF',
+                        surface: '#FFFFFF',
+                        primary: '#6200EE',
+                        'primary-darken-1': '#3700B3',
+                        secondary: '#F5A44E',
+                        'secondary-darken-1': '#5094b4',
+                        error: '#B00020',
+                        info: '#2196F3',
+                        success: '#4CAF50',
+                        warning: '#FB8C00',
+                        pink:'#EC407A',
+                    },
+                    cspNonce: 'dQw4w9WgXcQ'
                 },
-            },
+            }
         },
     })
 

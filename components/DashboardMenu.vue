@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboardMenu bg-grey-darken-3 w-100 h-100 rounded-xl">
+  <div class="dashboardMenu bg-grey-darken-3 w-100 mb-5 mt-3 rounded-xl">
 
     <!-- list  -->
     <v-list class="bg-grey-darken-3 pa-5 rounded-xl">

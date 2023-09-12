@@ -15,7 +15,7 @@
       <v-row class=" px-5 pt-5 mb-5">
 
         <v-col>
-          <BackButton />
+          <BackButton/>
 
           <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت محصولات</v-label>
           <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن محصول</v-label>
@@ -97,16 +97,25 @@
                 <!--  Delete   -->
                 <v-btn class="mx-2"
                        color="red"
-                       size="25"
+                       size="30"
                        @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
 
+                <!--  Copy   -->
+                <v-btn class="mx-2"
+                       color="secondary"
+                       size="30"
+                       @click="setCopy(item)"
+                       icon>
+                  <v-icon size="15">mdi-content-copy</v-icon>
+                </v-btn>
+
                 <!--  Edit   -->
                 <v-btn class="mx-2"
                        color="secondary"
-                       size="25"
+                       size="30"
                        @click="setEdit(item)"
                        icon>
                   <v-icon size="15">mdi-pencil</v-icon>
@@ -203,6 +212,20 @@ export default {
           }).then(async response => {
         response = await response.json();
         this.$refs.addProductPage.setEdit(response);
+        this.togglePage();
+      });
+    },
+    async setCopy(data) {
+      await fetch(
+          this.runtimeConfig.public.apiUrl + 'products/' + data._id, {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        response = await response.json();
+        this.$refs.addProductPage.setCopy(response);
         this.togglePage();
       });
     },

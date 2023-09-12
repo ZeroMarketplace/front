@@ -1,15 +1,15 @@
 <template>
-  <v-container class="bg-white px-1 px-md-16 border-b" fluid>
+  <v-container class="bg-white px-1 px-md-16 border-0-md" fluid>
 
     <!--  Top Bar  -->
-    <v-row class="">
+    <v-row>
 
       <!--  Name And Logo  -->
-      <v-col class="pt-4 pt-md-5" cols="7" sm="7" md="3">
+      <v-col class="pt-2 pb-0 pt-md-5">
 
         <!--   Menu Icon   -->
-        <v-btn class="d-md-none mr-1 rounded-lg"
-               color="secondary"
+        <v-btn class="d-inline-block mt-n10 d-md-none mr-1 rounded-lg"
+               variant="text"
                size="small"
                @click="navigationMenu = true"
                icon>
@@ -22,14 +22,29 @@
                              elevation="24">
         </v-navigation-drawer>
 
-        <h2 class="d-none d-md-inline font-weight-bold">فروشگاه زیرو</h2>
-        <p class="d-md-none d-inline-block font-weight-bold mt-1 mr-2">فروشگاه زیرو</p>
+        <!--   Logo     -->
+        <NuxtLink to="/">
+          <v-img class="mt-n2 w-75 d-none d-md-inline-block"
+                 src="/img/logo.png"
+                 max-height="60">
+          </v-img>
+        </NuxtLink>
+
+        <NuxtLink class="d-inline-block mx-2 w-50" to="/">
+          <img class="mt-n2 d-md-none"
+               width="108"
+               src="/img/logo.png"/>
+        </NuxtLink>
+
+
+        <!--        <h2 class="d-none d-md-inline font-weight-bold">فروشگاه زیرو</h2>-->
+        <!--        <p class="d-md-none d-inline-block font-weight-bold mt-1 mr-2">فروشگاه زیرو</p>-->
       </v-col>
 
       <!--  Search    -->
-      <v-col class="pb-3 d-none d-md-inline" md="5" lg="6">
+      <v-col class="pb-3 d-none d-md-inline">
         <v-text-field
-            class="border rounded-xl px-4 pb-2 w-75"
+            class="border rounded-xl px-4 pb-2 w-100"
             variant="plain"
             density="compact"
             label="جستجو"
@@ -39,10 +54,10 @@
       </v-col>
 
       <!--  Icons    -->
-      <v-col class="pt-4 text-left" cols="5" sm="5" md="4" lg="3">
+      <v-col class="pt-1 pb-0 pt-md-4 text-end">
 
         <!--   Profile     -->
-        <v-btn class="d-none d-md-inline"
+        <v-btn class="d-none d-md-inline mx-1 px-2"
                variant="text"
                height="50"
                @click="openProfile">
@@ -51,7 +66,7 @@
         </v-btn>
 
         <v-btn class="d-md-none rounded-lg"
-               color="secondary"
+               variant="text"
                size="small"
                @click="openProfile"
                icon>
@@ -61,13 +76,13 @@
         <Login ref="login"/>
 
         <!--   Cart     -->
-        <v-btn class="d-none d-md-inline"
+        <v-btn class="d-none d-md-inline mx-1 px-2"
                variant="text"
                height="50">
           <v-row>
             <v-col class="text-right">
               <p class="textSmall">سبد خرید </p>
-              <p class="text-pink mx-1 textSmall">(4)</p>
+              <p class="text-pink mx-1 my-2 textSmall">(4)</p>
               <p class="font-weight-thin mt-n1">۴ عدد</p>
             </v-col>
             <v-col class="mt-3 mr-n5">
@@ -77,7 +92,7 @@
         </v-btn>
 
         <v-btn class="d-md-none mx-1 rounded-lg"
-               color="secondary"
+               variant="text"
                size="small"
                icon>
           <v-icon>mdi-cart-outline</v-icon>

@@ -40,32 +40,32 @@
 
       <!--      Brand      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-select class="mt-3"
-                  v-model="form.brand"
-                  label="برند"
-                  :readonly="loading"
-                  :rules="rules.notEmptySelectable"
-                  :items="list.brands"
-                  item-title=".title"
-                  item-value="_id"
-                  density="compact"
-                  variant="outlined">
-        </v-select>
+        <v-autocomplete class="mt-3"
+                        v-model="form.brand"
+                        label="برند"
+                        :readonly="loading"
+                        :rules="rules.notEmptySelectable"
+                        :items="list.brands"
+                        item-title=".title"
+                        item-value="_id"
+                        density="compact"
+                        variant="outlined">
+        </v-autocomplete>
       </v-col>
 
       <!--      Unit      -->
       <v-col class="mt-n5 mt-md-n2" cols="12" md="4">
-        <v-select class=""
-                  v-model="form.unit"
-                  label="واحد"
-                  :readonly="loading"
-                  :rules="rules.notEmptySelectable"
-                  :items="list.units"
-                  item-title="title"
-                  item-value="_id"
-                  density="compact"
-                  variant="outlined">
-        </v-select>
+        <v-autocomplete class=""
+                        v-model="form.unit"
+                        label="واحد"
+                        :readonly="loading"
+                        :rules="rules.notEmptySelectable"
+                        :items="list.units"
+                        item-title="title"
+                        item-value="_id"
+                        density="compact"
+                        variant="outlined">
+        </v-autocomplete>
       </v-col>
 
       <!--      Barcode      -->
@@ -225,7 +225,7 @@
       <v-col cols="12" md="3">
         <v-file-input v-model="form.files"
                       :rules="rules.filesIsValid"
-                      validate-on="input lazy"
+                      validate-on="input"
                       type="file"
                       class="d-none"
                       ref="filesInput"
@@ -292,7 +292,7 @@
 
           <v-label class="position-absolute bg-white text-subtitle-2 mt-n3 px-3">ابعاد</v-label>
 
-          <v-col cols="4">
+          <v-col cols="3">
             <v-text-field class="mt-n3 mx-2 centeredText"
                           placeholder="طول"
                           v-model="form.dimensions.length"
@@ -302,11 +302,11 @@
             </v-text-field>
           </v-col>
 
-          <v-col class="pt-3 text-center" cols="1">
+          <v-col class="pt-3 text-center" cols="2">
             *
           </v-col>
 
-          <v-col cols="4">
+          <v-col cols="3">
             <v-text-field class="mt-n3 mx-2 centeredText"
                           placeholder="عرض"
                           v-model="form.dimensions.width"
@@ -316,7 +316,7 @@
             </v-text-field>
           </v-col>
 
-          <v-col class="text-caption text-grey-darken-1 pt-3 text-end" cols="3">
+          <v-col class="text-caption text-grey-darken-1 pt-3 text-end" cols="4">
             سانتی متر
           </v-col>
 
@@ -334,6 +334,7 @@
                       variant="outlined">
         </v-text-field>
       </v-col>
+
     </v-row>
 
     <v-divider class="my-5"></v-divider>
@@ -414,19 +415,19 @@
                 hide-details>
             </v-text-field>
 
-            <v-select v-if="property._id && getPropertyValues(property._id).length"
-                      class="mt-3"
-                      v-model="property.value"
-                      label="مقدار"
-                      :readonly="loading"
-                      :rules="rules.notEmptySelectable"
-                      :items="getPropertyValues(property._id)"
-                      item-title="title"
-                      item-value="code"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-            </v-select>
+            <v-autocomplete v-if="property._id && getPropertyValues(property._id).length"
+                            class="mt-3"
+                            v-model="property.value"
+                            label="مقدار"
+                            :readonly="loading"
+                            :rules="rules.notEmptySelectable"
+                            :items="getPropertyValues(property._id)"
+                            item-title="title"
+                            item-value="code"
+                            density="compact"
+                            variant="outlined"
+                            hide-details>
+            </v-autocomplete>
           </td>
 
           <!--    Actions      -->
@@ -598,7 +599,6 @@ export default {
               }
 
             });
-
             if (valid) {
               this.createImagesPreview();
               this.form.filesError = false;
@@ -606,9 +606,7 @@ export default {
               this.form.filesPreview = [];
               this.form.filesError   = true;
             }
-
             return valid;
-
 
           }
         ]
@@ -623,32 +621,17 @@ export default {
   },
   methods: {
     reset() {
-      this.form = {
-        name             : '',
-        categories       : [],
-        brand            : null,
-        unit             : null,
-        barcode          : '',
-        iranCode         : '',
-        variants         : [],
-        variantsProps    : [],
-        variantsValues   : [],
-        files            : [],
-        filesPreview     : [],
-        filesError       : false,
-        weight           : '',
-        dimensions       : {
-          length: '',
-          width : ''
-        },
-        tags             : '',
-        properties       : [],
-        dynamicProperties: [],
-        title            : '',
-        content          : '',
-        action           : 'insert',
-        loading          : false
-      };
+      this.$refs.addProductForm.reset();
+      this.form.files             = [];
+      this.form.variants          = [];
+      this.form.variantsProps     = [];
+      this.form.variantsValues    = [];
+      this.form.filesPreview      = [];
+      this.form.filesError        = false;
+      this.form.properties        = [];
+      this.form.dynamicProperties = [];
+      this.form.action            = 'insert';
+      this.form.loading           = false;
     },
     async insert() {
 
@@ -900,6 +883,17 @@ export default {
       });
 
     },
+    setCopy(data) {
+      this.setEdit(data);
+
+      // wait for load data
+      setTimeout(() => {
+        this.form.action       = 'insert';
+        this.form.files        = [];
+        this.form.filesPreview = [];
+        this.form.filesError   = false;
+      }, 1000);
+    },
     reFormatCategories(list) {
       let result = [];
       let lastChildren;
@@ -1104,7 +1098,11 @@ export default {
       });
 
       this.form.files.forEach((file) => {
-        this.form.filesPreview.push({src: URL.createObjectURL(file)});
+        let fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = (e) => {
+          this.form.filesPreview.push({src: e.target.result});
+        };
       });
 
     },
@@ -1131,6 +1129,10 @@ export default {
       }
     },
     deleteProperty(index) {
+      // remove from dynamic properties chip input
+      if (this.form.properties[index]._id)
+        this.form.dynamicProperties.splice(this.form.dynamicProperties.indexOf(this.form.properties[index]._id), 1);
+
       this.form.properties.splice(index, 1);
     },
     cloneObject(obj) {

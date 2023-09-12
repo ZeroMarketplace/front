@@ -38,7 +38,7 @@
                               label="عنوان"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.title"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -51,7 +51,7 @@
                               label="Title"
                               placeholder="وارد کنید"
                               :readonly="loading"
-                              :rules="rules.titleEn"
+                              :rules="rules.notEmpty"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -114,7 +114,7 @@
                 <!--  Delete   -->
                 <v-btn class="mx-2"
                        color="red"
-                       size="25"
+                       size="30"
                        @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
@@ -123,7 +123,7 @@
                 <!--  Edit   -->
                 <v-btn class="mx-2"
                        color="secondary"
-                       size="25"
+                       size="30"
                        @click="setEdit(item)"
                        icon>
                   <v-icon size="15">mdi-pencil</v-icon>
@@ -165,29 +165,21 @@ export default {
         loading: false
       },
       rules  : {
-        title  : [
+        notEmpty: [
           value => {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
           }
         ],
-        titleEn: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ]
       },
       list   : [],
     }
   },
   methods: {
     reset() {
-      this.form = {
-        title  : '',
-        titleEn: '',
-        action : 'insert'
-      };
+      this.$refs.addUnitForm.reset();
+      this.form.loading = false;
+      this.form.action  = 'insert';
     },
     async insert() {
       await fetch(
@@ -206,8 +198,11 @@ export default {
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
+          // reset form
+          this.reset();
+
           // refresh list
-          await this.getUnits();
+          this.getUnits();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -231,8 +226,11 @@ export default {
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
+          // reset form
+          this.reset();
+
           // refresh list
-          await this.getUnits();
+          this.getUnits();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -253,7 +251,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getUnits();
+          this.getUnits();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -275,14 +273,7 @@ export default {
     },
     getUnits() {
       this.loading = true;
-      fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
+      fetch(this.runtimeConfig.public.apiUrl + 'units', {method: 'get',}).then(async response => {
         response     = await response.json();
         this.list    = response;
         this.loading = false;

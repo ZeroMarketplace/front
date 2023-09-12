@@ -25,7 +25,7 @@
       <v-btn class="mx-2"
              color="secondary"
              size="30"
-             @click="setParent({_id: item._id, title: item.title})"
+             @click="setParent({_id: item._id, title: item.title, _properties: item._properties})"
              icon>
         <v-icon size="15">mdi-plus</v-icon>
       </v-btn>
@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     setParent(data) {
-      this.$emit('setParent', {_id: data._id, title: data.title});
+      this.$emit('setParent', {_id: data._id, title: data.title, _properties: data._properties});
     },
     setEdit(data) {
       this.$emit('setEdit', data);

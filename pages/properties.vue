@@ -27,7 +27,7 @@
           <v-icon class="mr-2" color="grey">mdi-plus-circle-outline</v-icon>
           <v-label class="text-h6 text-black mx-3">افزودن ویژگی</v-label>
 
-          <v-form @submit.prevent="submit" ref="addBrandForm">
+          <v-form @submit.prevent="submit" ref="addPropertyForm">
             <v-row class="mt-2 mx-4">
 
               <!--      Title      -->
@@ -61,7 +61,7 @@
                 <v-checkbox class="mt-2"
                             v-model="form.variant"
                             :readonly="loading"
-                            label="قابلیت ایجاد تنوع بر اساس این ویژگی"
+                            label="ایجاد تنوع"
                             hide-details
                 ></v-checkbox>
               </v-col>
@@ -183,7 +183,7 @@
                 <!--  Delete   -->
                 <v-btn class="mx-2"
                        color="red"
-                       size="25"
+                       size="30"
                        @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
@@ -192,7 +192,7 @@
                 <!--  Edit   -->
                 <v-btn class="mx-2"
                        color="secondary"
-                       size="25"
+                       size="30"
                        @click="setEdit(item)"
                        icon>
                   <v-icon size="15">mdi-pencil</v-icon>
@@ -253,18 +253,11 @@ export default {
   },
   methods: {
     reset() {
-      this.form = {
-        title  : '',
-        titleEn: '',
-        variant: false,
-        values : [
-          {
-            title: '',
-            value: ''
-          }
-        ],
-        action : 'insert'
-      };
+      this.$refs.addPropertyForm.reset();
+      this.form.values  = [{title: '', value: ''}];
+      this.form.variant = false;
+      this.form.action  = 'insert';
+      this.form.loading = false;
     },
     async insert() {
       await fetch(
@@ -285,8 +278,11 @@ export default {
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
+          // reset form
+          this.reset();
+
           // refresh list
-          await this.getProperties();
+          this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -312,8 +308,11 @@ export default {
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
+          // reset form
+          this.reset();
+
           // refresh list
-          await this.getProperties();
+          this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -334,7 +333,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          await this.getProperties();
+          this.getProperties();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -342,7 +341,7 @@ export default {
       });
     },
     async submit() {
-      if (this.$refs.addBrandForm.isValid) {
+      if (this.$refs.addPropertyForm.isValid) {
         this.form.loading = true;
 
         if (this.form.action === 'insert') {
@@ -356,13 +355,7 @@ export default {
     },
     getProperties() {
       this.loading = true;
-      fetch(
-          this.runtimeConfig.public.apiUrl + 'properties', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(async response => {
+      fetch(this.runtimeConfig.public.apiUrl + 'properties', {method: 'get',}).then(async response => {
         response     = await response.json();
         this.list    = response;
         this.loading = false;
