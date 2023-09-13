@@ -18,6 +18,8 @@ export default defineNuxtConfig({
         transpile: ['vuetify'],
     },
 
+    modules: ["nuxt-security"],
+
     buildModules: [],
 
     devtools: {enabled: true},
