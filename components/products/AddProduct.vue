@@ -105,115 +105,6 @@
 
     <v-divider class="my-5"></v-divider>
 
-    <!--    Variants     -->
-    <v-icon class="mt-1 mr-2" color="grey">mdi-tag-outline</v-icon>
-    <v-label class="text-black font-weight-bold mx-3">تنوع کالا</v-label>
-
-    <!--   Variants List   -->
-    <div class="px-8 mt-2">
-
-      <!--   Chip Input   -->
-      <v-chip-group v-model="form.variantsValues"
-                    class="overflow-hidden"
-                    column
-                    multiple>
-
-        <v-row v-for="property in list.categoryProperties.filter(p => p.variant === true)"
-               class="mt-2">
-          <!--    Title    -->
-          <v-col class="" cols="12" md="2">
-            <v-label class="mx-2">{{ property.title }}</v-label>
-          </v-col>
-
-          <!--    Values    -->
-          <v-col cols="12" md="10">
-
-
-            <v-chip v-for="(value) in property.values"
-                    :key="value.code"
-                    :value="value.code"
-                    class="mx-2"
-                    variant="outlined"
-                    @click="togglePropertyVariant(property._id,value.code)"
-                    filter>
-
-              <template v-slot:prepend>
-                <!--       Color         -->
-                <v-icon class="mx-1"
-                        v-if="/^#([0-9A-F]{3}){1,2}$/i.test(value.value)"
-                        :color="value.value">
-                  mdi-circle
-                </v-icon>
-              </template>
-
-              {{ value.title }}
-
-            </v-chip>
-
-          </v-col>
-
-        </v-row>
-
-      </v-chip-group>
-
-
-      <!--   List   -->
-      <v-table v-if="form.variants.length" class="w-100 text-center my-6">
-
-        <thead>
-        <tr>
-          <th v-for="props in form.variantsProps"
-              class="text-center">
-            {{ getVariantProps(props._id).title ?? '' }}
-          </th>
-          <th class="text-center">
-            <v-icon>mdi-cog</v-icon>
-          </th>
-        </tr>
-        </thead>
-
-        <tbody>
-
-        <tr v-for="(variant,index) in form.variants">
-
-          <!--     Properties     -->
-          <td v-for="props in  form.variantsProps">
-            <v-label v-for="property in variant.properties">
-              <span v-if="props._id === property.propertyId">
-                {{ getPropertyValue(property.propertyId, property.value).title }}
-              </span>
-            </v-label>
-          </td>
-
-          <!--   Actions     -->
-          <td>
-            <!--  Delete Property   -->
-            <v-btn class="border mx-5"
-                   @click="deleteVariant(index)"
-                   size="30"
-                   variant="outlined"
-                   color="pink"
-                   icon>
-              <v-icon>mdi-delete</v-icon>
-
-            </v-btn>
-          </td>
-        </tr>
-
-        </tbody>
-
-      </v-table>
-
-      <!--   Empty    -->
-      <div v-if="!form.variants.length" class="d-flex justify-center w-100 my-12">
-        <v-label>تنوع ندارد</v-label>
-      </div>
-
-    </div>
-
-
-    <v-divider class="my-5"></v-divider>
-
     <!--  Physical characteristics   -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-clipboard-text-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات فیزیکی</v-label>
@@ -339,6 +230,115 @@
 
     <v-divider class="my-5"></v-divider>
 
+    <!--    Variants     -->
+    <v-icon class="mt-1 mr-2" color="grey">mdi-tag-outline</v-icon>
+    <v-label class="text-black font-weight-bold mx-3">تنوع کالا</v-label>
+
+    <!--   Variants List   -->
+    <div class="px-5 mt-2">
+
+      <!--   Chip Input   -->
+      <v-chip-group v-model="form.variantsValues"
+                    class="overflow-hidden"
+                    column
+                    multiple>
+
+        <v-row v-for="property in list.categoryProperties.filter(p => p.variant === true)"
+               class="mt-2">
+          <!--    Title    -->
+          <v-col class="" cols="12" md="2">
+            <v-label class="mx-2">{{ property.title }}</v-label>
+          </v-col>
+
+          <!--    Values    -->
+          <v-col cols="12" md="10" class="pt-0">
+
+
+            <v-chip v-for="(value) in property.values"
+                    :key="value.code"
+                    :value="value.code"
+                    class="mx-2"
+                    variant="outlined"
+                    @click="togglePropertyVariant(property._id,value.code)"
+                    filter>
+
+              <template v-slot:prepend>
+                <!--       Color         -->
+                <v-icon class="mx-1"
+                        v-if="/^#([0-9A-F]{3}){1,2}$/i.test(value.value)"
+                        :color="value.value">
+                  mdi-circle
+                </v-icon>
+              </template>
+
+              {{ value.title }}
+
+            </v-chip>
+
+          </v-col>
+
+        </v-row>
+
+      </v-chip-group>
+
+      <!--   List   -->
+      <v-table v-if="form.variants.length" class="w-100 px-4 mt-8">
+
+        <thead>
+        <tr>
+          <th v-for="props in form.variantsProps" class="text-center font-weight-bold">
+            {{ getVariantProps(props._id).title ?? '' }}
+          </th>
+          <th class="text-center">
+            <v-icon>mdi-cog</v-icon>
+          </th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr v-for="(variant,index) in form.variants" class="w-100 pa-1 text-center">
+
+          <!--     Properties     -->
+          <td v-for="props in  form.variantsProps" class="flex-grow-1">
+            <v-label v-for="property in variant.properties">
+              <span v-if="props._id === property.propertyId">
+                {{ getPropertyValue(property.propertyId, property.value).title }}
+              </span>
+            </v-label>
+          </td>
+
+          <!--   Actions     -->
+          <td class="text-center w-25">
+            <!--  Delete Property   -->
+            <v-btn class="border"
+                   @click="deleteVariant(index)"
+                   size="30"
+                   variant="outlined"
+                   color="pink"
+                   icon>
+              <v-icon>mdi-delete</v-icon>
+
+            </v-btn>
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </v-table>
+
+      <!--   Empty    -->
+      <div v-if="!form.variants.length" class="d-flex justify-center w-100 my-12">
+        <v-label>تنوع ندارد</v-label>
+      </div>
+
+    </div>
+
+
+    <v-divider class="my-5 "></v-divider>
+
     <!--  Properties   -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-clipboard-text-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">ویژگی‌ها</v-label>
@@ -376,15 +376,17 @@
     </v-row>
 
     <!--  Properties List  -->
-    <v-row class="mt-5 mx-4 pb-12 d-flex justify-center">
+    <v-row class="mt-5 mx-8 pb-12 d-flex justify-center">
       <v-table class="w-100" v-if="form.properties.length">
         <thead>
-        <th>عنوان</th>
-        <th>مقدار</th>
-        <th>عملیات</th>
+        <tr>
+          <th class="text-center">عنوان</th>
+          <th class="text-center">مقدار</th>
+          <th class="text-center"><v-icon>mdi-cog</v-icon></th>
+        </tr>
         </thead>
         <tbody>
-        <tr v-for="(property, index) in form.properties" class="w-100 pa-1">
+        <tr v-for="(property, index) in form.properties" class="w-100 pa-0">
 
           <!--      Title      -->
           <td>

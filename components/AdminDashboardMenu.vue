@@ -94,8 +94,9 @@ export default {
           icon: 'mdi-cart-outline'
         },
         {
-          text: 'سفارشات من',
-          icon: 'mdi-cart-outline'
+          text: 'حساب‌ها',
+          icon: 'mdi-wallet-bifold-outline',
+          link: '/accounts'
         },
         {
           text: 'انبار‌ها',

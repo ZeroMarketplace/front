@@ -42,7 +42,7 @@
         <v-row>
           <!--   Links    -->
           <v-col v-for="section in links" cols="6">
-            <v-label class="text-pink d-block font-weight-bold">{{ section.title }}</v-label>
+            <v-label class="text-secondary d-block font-weight-bold">{{ section.title }}</v-label>
             <NuxtLink v-for="link in section.links"
                       :to="link.to"
                       class="text-caption d-block my-2">
@@ -55,7 +55,7 @@
 
       <!--   Symbols  -->
       <v-col cols="12" md="4">
-        <v-label class="text-pink d-block font-weight-bold">نماد‌ها</v-label>
+        <v-label class="text-secondary d-block font-weight-bold">نماد‌ها</v-label>
         <a referrerpolicy="origin"
            target="_blank"
            href="https://trustseal.enamad.ir/?id=241154&amp;Code=gABBONVarBBpvMmUbB52">
@@ -70,7 +70,7 @@
     </v-row>
 
     <!--  Social Media   -->
-    <v-row class="bg-orange d-flex justify-center justify-between">
+    <v-row class="bg-orange justify-center justify-between d-none">
       <a v-for="item in socialMedia"
          class="mx-2"
          target="_blank"

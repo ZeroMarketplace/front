@@ -141,7 +141,7 @@ export default {
   methods : {
     async openProfile() {
       if (this.user.authenticated) {
-        await navigateTo(this.user.role === 1 ? '/admin-dashboard' : '/dashboard');
+        await navigateTo(this.user.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } else {
         this.$refs.login.openModal();
       }
