@@ -1,12 +1,12 @@
 <template>
   <v-row v-if="!loading && !list.length" class="justify-center my-16 py-16">
-    <v-icon class="w-100 my-5"
+    <v-icon class="w-100 my-5 text-red-lighten-2"
             size="100">
-      mdi-not-equal
+      mdi-file-alert-outline
     </v-icon>
 
-    <v-label class="text-pink">
-      متاسفانه هیچ داده‌ای یافت نشد
+    <v-label class="text-black">
+      داده‌ای یافت نشد
     </v-label>
   </v-row>
 </template>

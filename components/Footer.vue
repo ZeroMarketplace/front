@@ -118,6 +118,6 @@ export default {
 
 <style scoped>
 .transparentColor {
-  background-color: #f5f5f5 !important;
+  background-color: #ebeaea !important;
 }
 </style>

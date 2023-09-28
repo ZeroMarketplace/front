@@ -7,7 +7,7 @@
     </v-col>
 
     <!--  Page   -->
-    <v-col cols="12" md="9">
+    <v-col cols="12" md="9" class="min-h-screen">
 
       <AdminHeaderBar class="mb-3"/>
 
@@ -17,24 +17,51 @@
         <!--    Title And Action    -->
         <v-col cols="12">
           <v-row>
-            <!--            -->
-            <v-col>
-              <v-icon class="mt-1 mr-2" color="grey">mdi-wallet-bifold-outline</v-icon>
+            <!--      Title      -->
+            <v-col cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-wallet-bifold-outline
+              </v-icon>
 
-              <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">حساب‌ها</v-label>
-              <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن حساب</v-label>
-              <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش حساب</v-label>
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="grey">
+                mdi-wallet-plus-outline
+              </v-icon>
+
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="grey">
+                mdi-wallet-bifold-outline
+              </v-icon>
+
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">حساب‌ها</span>
+                <span v-if="action === 'add'">افزودن حساب</span>
+                <span v-if="action === 'edit'">ویرایش حساب</span>
+              </v-label>
             </v-col>
 
-            <v-col></v-col>
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-wallet-plus-outline</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-wallet-plus-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-wallet-bifold-outline</v-icon>
+              </v-btn>
+            </v-col>
+
           </v-row>
         </v-col>
 
         <!--    Add Account   -->
-
+        <v-col v-if="action === 'add' || action === 'edit'"
+               cols="12"
+               class="px-8 pb-4  pt-0">
+          <AccountsAddAccount/>
+        </v-col>
 
         <!--    Accounts List   -->
-        <v-col cols="12" class="pb-16">
+        <v-col v-if="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -143,6 +170,12 @@ export default {
         this.delete(data._id);
       }
     },
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = 'add';
+    }
   },
   mounted() {
     this.user = useUserStore();
@@ -158,5 +191,8 @@ export default {
 
 
 <style scoped>
-
+.actionToggleButton {
+  left: 20px;
+  bottom: 20px;
+}
 </style>

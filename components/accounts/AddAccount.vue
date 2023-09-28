@@ -1,18 +1,16 @@
 <template>
   <v-form class=""
-          validate-on="lazy"
           @submit.prevent="submit"
           ref="addAccountForm">
     <v-row class="mt-2">
-oi
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
+        <v-text-field class=""
                       v-model="form.title"
                       label="عنوان"
                       placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.title"
+                      :readonly="form.loading"
+                      :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -20,12 +18,55 @@ oi
 
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
+        <v-text-field class="ltrDirection"
                       v-model="form.titleEn"
                       label="Title"
                       placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.titleEn"
+                      :readonly="form.loading"
+                      :rules="rules.notEmpty"
+                      density="compact"
+                      variant="outlined">
+        </v-text-field>
+      </v-col>
+
+      <!--     type      -->
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+        <v-select class="ltrDirection"
+                      v-model="form.titleEn"
+                      label="نوع حساب"
+                      placeholder="انتخاب کنید"
+                      :readonly="form.loading"
+                      :rules="rules.notEmpty"
+                      density="compact"
+                      variant="outlined">
+        </v-select>
+      </v-col>
+
+      <!--      Balance      -->
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+        <v-text-field class="ltrDirection"
+                      v-model="form.balance"
+                      label="مانده حساب"
+                      placeholder="وارد کنید"
+                      :readonly="form.loading"
+                      :rules="rules.notEmpty"
+                      type="number"
+                      density="compact"
+                      variant="outlined">
+          <template v-slot:append-inner>
+            تومان
+          </template>
+        </v-text-field>
+      </v-col>
+
+      <!--      Description      -->
+      <v-col class="mt-n5 mt-md-0" cols="12" md="8">
+        <v-text-field class=""
+                      v-model="form.description"
+                      label="توضیحات"
+                      placeholder="وارد کنید"
+                      :readonly="form.loading"
+                      :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -65,9 +106,12 @@ oi
 </template>
 
 <script>
+import {useUserStore} from "~/store/user";
+
 export default {
   data() {
     return {
+      user : {},
       form : {
         title  : '',
         titleEn: '',
@@ -75,13 +119,7 @@ export default {
         loading: false
       },
       rules: {
-        title  : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        titleEn: [
+        notEmpty: [
           value => {
             if (value) return true;
             return 'پر کردن این فیلد اجباری است';
@@ -164,6 +202,14 @@ export default {
 
         this.form.loading = false;
       }
+    },
+  },
+  mounted() {
+    this.user = useUserStore();
+  },
+  computed: {
+    runtimeConfig() {
+      return useRuntimeConfig();
     },
   }
 }
