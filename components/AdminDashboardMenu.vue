@@ -9,40 +9,36 @@
     </div>
 
     <!-- list  -->
-    <v-list class="bg-grey-darken-3 pa-5 rounded-xl">
-      <v-list-item v-for="(item,i) in list"
-                   :key="i"
-                   :value="item"
-                   class="pa-5 mt-3 rounded-lg"
+    <v-list v-for="(item,i) in list"
+            :key="i"
+            :value="item"
+            class="bg-grey-darken-3 pa-2 rounded-xl">
+      <v-list-item v-if="!item.items" class="pa-5 mt-3 rounded-lg"
                    rounded="rounded"
                    :to="item.link ?? ''"
                    :link="!item.items">
-
         <template v-slot:prepend>
           <v-icon :icon="item.icon"></v-icon>
         </template>
-
         <v-list-item-title v-text="item.text"></v-list-item-title>
-        <v-list-item-media v-if="item.items">
-
-          <v-list-item v-for="(childItem,i) in item.items"
-                       :key="i"
-                       :value="item"
-                       class=""
-                       rounded="rounded"
-                       :to="childItem.link ?? ''"
-                       link>
-            <template v-slot:prepend>
-              <v-icon :icon="childItem.icon"></v-icon>
-            </template>
-
-            <v-list-item-title v-text="childItem.text"></v-list-item-title>
-          </v-list-item>
-
-        </v-list-item-media>
-
-
       </v-list-item>
+
+      <v-list-subheader class="text-white font-weight-bold" v-if="item.items">{{ item.text }}</v-list-subheader>
+
+      <v-list-item v-if="item.items" v-for="(childItem,i) in item.items"
+                   :key="i"
+                   :value="item"
+                   class=""
+                   rounded="rounded"
+                   :to="childItem.link ?? ''"
+                   link>
+        <template v-slot:prepend>
+          <v-icon :icon="childItem.icon"></v-icon>
+        </template>
+
+        <v-list-item-title v-text="childItem.text"></v-list-item-title>
+      </v-list-item>
+
     </v-list>
 
     <v-divider class="mx-6"></v-divider>
@@ -86,7 +82,7 @@ export default {
         {
           text: 'فاکتور خرید',
           icon: 'mdi-receipt-text-edit-outline',
-          link:'/purchase-invoices'
+          link: '/purchase-invoices'
         },
         {
           text: 'محصولات من',
