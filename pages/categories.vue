@@ -59,7 +59,7 @@
         </v-col>
 
         <!--    Category List   -->
-        <v-col v-show="action === 'list'" cols="12" class="pb-16 py-14">
+        <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -71,7 +71,7 @@
                                     @setEdit="setEdit"/>
 
           <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
+          <EmptyList class="py-16 mb-16" :list="list" :loading="loading"/>
 
         </v-col>
 
