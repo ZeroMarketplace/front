@@ -282,7 +282,7 @@
       </v-chip-group>
 
       <!--   List   -->
-      <v-table v-if="form.variants.length" class="w-100 px-4 mt-8">
+      <v-table v-if="form.variants.length" class="w-100 px-2 mt-8">
 
         <thead>
         <tr>
@@ -377,7 +377,7 @@
     </v-row>
 
     <!--  Properties List  -->
-    <v-row class="mt-1 mx-10 pb-12 d-flex justify-center">
+    <v-row class="mt-1 mx-12 pb-12 d-flex justify-center">
       <v-table class="w-100" v-if="form.properties.length">
         <thead>
         <tr>
@@ -912,7 +912,7 @@ export default {
             result.push(childItem);
 
             if (childItem.children) {
-              lastChildren = this.formatCategory(childItem.children);
+              lastChildren = this.reFormatCategory(childItem.children);
               lastChildren.forEach((childItemJ) => {
                 childItemJ.title = childItem.title + " | " + childItemJ.title;
                 result.push(childItemJ);
@@ -1142,7 +1142,7 @@ export default {
     }
   },
   watch  : {
-    categories(val, oldVal) {
+    selectedCategories(val, oldVal) {
       // remove all variants
       if (oldVal && oldVal[0]) {
         if (val[0] !== oldVal[0]) {
@@ -1164,7 +1164,7 @@ export default {
     runtimeConfig() {
       return useRuntimeConfig();
     },
-    categories() {
+    selectedCategories() {
       return this.form.categories;
     }
   }

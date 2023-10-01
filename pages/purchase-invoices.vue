@@ -12,7 +12,7 @@
       <AdminHeaderBar class="mb-3"/>
 
       <!--   Content     -->
-      <v-row class="bg-white mr-1 ml-4 rounded-lg">
+      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
         <!--    Title And Action    -->
         <v-col cols="12">
@@ -20,21 +20,21 @@
             <!--      Title      -->
             <v-col class="mt-2" cols="9">
               <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-archive-outline
+                mdi-receipt-text-outline
               </v-icon>
 
               <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-archive-plus-outline
+                mdi-receipt-text-plus-outline
               </v-icon>
 
               <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-archive-outline
+                mdi-receipt-text-outline
               </v-icon>
 
               <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">محصولات</span>
-                <span v-if="action === 'add'">افزودن محصول</span>
-                <span v-if="action === 'edit'">ویرایش محصول</span>
+                <span v-if="action === 'list'">فاکتور‌ها</span>
+                <span v-if="action === 'add'">افزودن فاکتور</span>
+                <span v-if="action === 'edit'">ویرایش فاکتور</span>
               </v-label>
             </v-col>
 
@@ -44,9 +44,9 @@
                      size="small"
                      @click="toggleAction"
                      icon>
-                <v-icon v-if="action === 'list'">mdi-archive-plus-outline</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-archive-outline</v-icon>
-                <v-icon v-if="action === 'add'">mdi-archive-outline</v-icon>
+                <v-icon v-if="action === 'list'">mdi-receipt-text-plus-outline</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-receipt-text-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-receipt-text-outline</v-icon>
               </v-btn>
             </v-col>
           </v-row>
@@ -128,22 +128,15 @@ export default {
     }
   },
   methods: {
-    reset() {
-      this.form = {
-        title  : '',
-        titleEn: '',
-        action : 'insert'
-      };
-    },
     toggleAction() {
       if (this.action === 'add' || this.action === 'edit')
         this.action = 'list';
       else
-        this.action = this.$refs.addPurchaseInvoices.form.action;
+        this.action = this.$refs.addPurchaseInvoices.action;
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'units/' + _id, {
+          this.runtimeConfig.public.apiUrl + 'purchase-invoices/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -165,7 +158,7 @@ export default {
     getPurchaseInvoices() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
+          this.runtimeConfig.public.apiUrl + 'purchase-invoices', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -178,12 +171,7 @@ export default {
       this.loading = false;
     },
     setEdit(data) {
-      this.form = {
-        title  : data.title,
-        titleEn: data.titleEn,
-        action : 'edit',
-        _id    : data._id
-      };
+
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {

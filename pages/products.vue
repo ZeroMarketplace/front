@@ -154,11 +154,10 @@ definePageMeta({
 export default {
   data() {
     return {
-      user      : {},
-      loading   : true,
-      action    : 'list',
-      staticsUrl: '',
-      list      : [],
+      user   : {},
+      loading: true,
+      action : 'list',
+      list   : [],
     }
   },
   methods: {

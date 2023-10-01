@@ -1,5 +1,5 @@
 <template>
-  <v-row v-if="!loading && !list.length" class="justify-center my-16 py-16">
+  <v-row v-if="!loading && !list.length" class="justify-center my-8 py-16">
     <v-icon class="w-100 my-5 text-red-lighten-2"
             size="100">
       mdi-file-alert-outline

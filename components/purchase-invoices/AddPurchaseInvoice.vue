@@ -14,7 +14,7 @@
                         label="کاربر"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
-                        :items="list.users"
+                        :items="users"
                         item-title="title"
                         item-value="_id"
                         density="compact"
@@ -52,7 +52,7 @@
                   label="انبار"
                   :readonly="loading"
                   :rules="rules.notEmptySelectable"
-                  :items="list.warehouses"
+                  :items="warehouses"
                   item-title="title"
                   item-value="_id"
                   density="compact"
@@ -343,7 +343,7 @@ import {useUserStore} from "~/store/user";
 export default {
   data() {
     return {
-      form   : {
+      form      : {
         user     : null,
         dateTime : undefined,
         warehouse: null,
@@ -363,7 +363,7 @@ export default {
         ],
         total    : 0
       },
-      rules  : {
+      rules     : {
         notEmpty          : [
           value => {
             if (value) return true;
@@ -377,12 +377,10 @@ export default {
           }
         ],
       },
-      list   : {
-        users     : [],
-        warehouses: []
-      },
-      loading: false,
-      action : 'edit'
+      users     : [],
+      warehouses: [],
+      loading   : false,
+      action    : 'add'
     }
   },
   methods: {
@@ -390,9 +388,9 @@ export default {
       if (this.$refs.addPurchaseInvoiceForm.isValid) {
         this.form.loading = true;
 
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
+        if (this.action === 'add') {
+          await this.add();
+        } else if (this.action === 'edit') {
           await this.edit();
         }
 
@@ -446,8 +444,8 @@ export default {
           user.title = (user.firstName && user.lastName) ? (user.firstName + ' ' + user.lastName) : user.phone;
         });
 
-        this.list.users = response;
-        this.loading    = false;
+        this.users   = response;
+        this.loading = false;
       });
     },
     getWarehouses() {
@@ -457,9 +455,9 @@ export default {
             method : 'get',
             headers: {'authorization': 'Bearer ' + this.user.token}
           }).then(async response => {
-        response             = await response.json();
-        this.list.warehouses = response;
-        this.loading         = false;
+        response        = await response.json();
+        this.warehouses = response;
+        this.loading    = false;
       });
     },
     getProducts() {

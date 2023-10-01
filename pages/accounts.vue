@@ -61,7 +61,7 @@
         </v-col>
 
         <!--    Accounts List   -->
-        <v-col v-show="action === 'list'" cols="12">
+        <v-col v-show="action === 'list'" cols="12" class="pb-16 py-7">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
