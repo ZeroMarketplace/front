@@ -11,92 +11,55 @@
 
       <AdminHeaderBar class="mb-3"/>
 
-      <!--    Title    -->
-      <v-row class=" px-5 pt-5 mb-5">
-        <BackButton/>
-
-        <v-label class="text-h6 text-black mx-3">مدیریت واحد‌ها</v-label>
-      </v-row>
-
       <!--   Content     -->
-      <v-row class="bg-white mr-2 ml-3 rounded-lg">
+      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-        <!--    Add Unit   -->
+        <!--    Title And Action    -->
         <v-col cols="12">
+          <v-row>
+            <!--      Title      -->
+            <v-col class="mt-2" cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-scale
+              </v-icon>
 
-          <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">افزودن واحد</v-label>
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+                mdi-scale
+              </v-icon>
 
-          <v-form class="mx-5" @submit.prevent="submit" ref="addUnitForm">
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+                mdi-scale
+              </v-icon>
 
-            <v-row class="mt-2">
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">واحد‌ها</span>
+                <span v-if="action === 'add'">افزودن واحد</span>
+                <span v-if="action === 'edit'">ویرایش واحد</span>
+              </v-label>
+            </v-col>
 
-              <!--      Title      -->
-              <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
-                              v-model="form.title"
-                              label="عنوان"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Title EN      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
-                              v-model="form.titleEn"
-                              label="Title"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--     Actions       -->
-              <v-col cols="12">
-
-                <!--       Submit       -->
-                <v-btn class="border rounded-lg"
-                       :loading="form.loading"
-                       prepend-icon="mdi-check-circle-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       type="submit"
-                       density="compact">
-                  ثبت
-                </v-btn>
-
-                <!--       Reset       -->
-                <v-btn class="border mx-2 rounded-lg"
-                       color="pink"
-                       prepend-icon="mdi-delete-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       @click="reset"
-                       density="compact">
-                  بازنگری
-                </v-btn>
-
-              </v-col>
-
-            </v-row>
-          </v-form>
-
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-plus</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-scale</v-icon>
+                <v-icon v-if="action === 'add'">mdi-scale</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-divider class="mt-3"></v-divider>
         </v-col>
 
-        <v-divider class="my-5"></v-divider>
+        <!--    Add Unit   -->
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+          <units-add-unit ref="addUnit" @exit="toggleAction" @refresh="getUnits"/>
+        </v-col>
 
         <!--    Units List   -->
-        <v-col cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-scale</v-icon>
-          <v-label class="text-h6 text-black mx-3">واحد‌ها</v-label>
+        <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -157,85 +120,17 @@ export default {
   data() {
     return {
       user   : {},
-      loading: true,
-      form   : {
-        title  : '',
-        titleEn: '',
-        action : 'insert',
-        loading: false
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-      },
       list   : [],
+      loading: true,
+      action : 'list'
     }
   },
   methods: {
-    reset() {
-      this.$refs.addUnitForm.reset();
-      this.form.loading = false;
-      this.form.action  = 'insert';
-    },
-    async insert() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.getUnits();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'units/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.getUnits();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = this.$refs.addUnit.action;
     },
     async delete(_id) {
       await fetch(
@@ -258,19 +153,6 @@ export default {
         }
       });
     },
-    async submit() {
-      if (this.$refs.addUnitForm.isValid) {
-        this.form.loading = true;
-
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
-          await this.edit();
-        }
-
-        this.form.loading = false;
-      }
-    },
     getUnits() {
       this.loading = true;
       fetch(this.runtimeConfig.public.apiUrl + 'units', {method: 'get',}).then(async response => {
@@ -280,12 +162,8 @@ export default {
       });
     },
     setEdit(data) {
-      this.form = {
-        title  : data.title,
-        titleEn: data.titleEn,
-        action : 'edit',
-        _id    : data._id
-      };
+      this.$refs.addUnit.setEdit(data);
+      this.action = 'edit';
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
