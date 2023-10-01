@@ -11,102 +11,55 @@
 
       <AdminHeaderBar class="mb-3"/>
 
-      <!--    Title    -->
-      <v-row class=" px-5 pt-5 mb-5">
-        <BackButton/>
-
-        <v-label class="text-h6 text-black mx-3">مدیریت انبار‌ها</v-label>
-      </v-row>
-
       <!--   Content     -->
-      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
+      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-        <!--    Add Warehouse   -->
+        <!--    Title And Action    -->
         <v-col cols="12">
+          <v-row>
+            <!--      Title      -->
+            <v-col class="mt-2" cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-warehouse
+              </v-icon>
 
-          <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">افزودن انبار</v-label>
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+                mdi-warehouse
+              </v-icon>
 
-          <v-form class="mx-5" @submit.prevent="submit" ref="addWarehouseForm">
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+                mdi-warehouse
+              </v-icon>
 
-            <v-row class="mt-2">
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">انبار‌ها</span>
+                <span v-if="action === 'add'">افزودن انبار</span>
+                <span v-if="action === 'edit'">ویرایش انبار</span>
+              </v-label>
+            </v-col>
 
-              <!--      Title      -->
-              <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
-                              v-model="form.title"
-                              label="عنوان"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Title EN      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3 ltrDirection"
-                              v-model="form.titleEn"
-                              label="Title"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Sell Online      -->
-              <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="4">
-                <v-checkbox class="mt-2"
-                            v-model="form.sellOnline"
-                            :readonly="loading"
-                            label="فروش آنلاین"
-                            hide-details
-                ></v-checkbox>
-              </v-col>
-
-              <!--     Actions       -->
-              <v-col cols="12">
-
-                <!--       Submit       -->
-                <v-btn class="border rounded-lg"
-                       :loading="form.loading"
-                       prepend-icon="mdi-check-circle-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       type="submit"
-                       density="compact">
-                  ثبت
-                </v-btn>
-
-                <!--       Reset       -->
-                <v-btn class="border mx-2 rounded-lg"
-                       color="pink"
-                       prepend-icon="mdi-delete-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       @click="reset"
-                       density="compact">
-                  بازنگری
-                </v-btn>
-
-              </v-col>
-
-            </v-row>
-          </v-form>
-
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-plus</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-warehouse</v-icon>
+                <v-icon v-if="action === 'add'">mdi-warehouse</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-divider class="mt-3"></v-divider>
         </v-col>
 
-        <v-divider class="my-5"></v-divider>
+        <!--    Add Warehouse   -->
+        <v-col v-show="(action === 'add' || action === 'edit')" class="pb-10" cols="12">
+          <warehouses-add-warehouse ref="addWarehouse" @exit="toggleAction" @refresh="getWarehouses"/>
+        </v-col>
 
         <!--    Warehouses List   -->
-        <v-col cols="12" class="pb-16">
-          <v-icon class="mt-n1 mr-2" color="grey">mdi-warehouse</v-icon>
-          <v-label class="text-h6 text-black mx-3">انبار‌ها</v-label>
+        <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -176,89 +129,17 @@ export default {
   data() {
     return {
       user   : {},
-      loading: true,
-      form   : {
-        title     : '',
-        titleEn   : '',
-        sellOnline: false,
-        action    : 'insert',
-        loading   : false
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-      },
       list   : [],
+      loading: true,
+      action : 'list'
     }
   },
   methods: {
-    reset() {
-      this.$refs.addWarehouseForm.reset();
-      this.form.action     = 'insert';
-      this.form.sellOnline = false;
-      this.form.loading    = false;
-    },
-    async insert() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'warehouses', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title     : this.form.title,
-              titleEn   : this.form.titleEn,
-              sellOnline: this.form.sellOnline
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.getWarehouses();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'warehouses/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title     : this.form.title,
-              titleEn   : this.form.titleEn,
-              sellOnline: this.form.sellOnline
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.getWarehouses();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = this.$refs.addWarehouse.action;
     },
     async delete(_id) {
       await fetch(
@@ -281,19 +162,6 @@ export default {
         }
       });
     },
-    async submit() {
-      if (this.$refs.addWarehouseForm.isValid) {
-        this.form.loading = true;
-
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
-          await this.edit();
-        }
-
-        this.form.loading = false;
-      }
-    },
     getWarehouses() {
       this.loading = true;
       fetch(this.runtimeConfig.public.apiUrl + 'warehouses', {method: 'get',}).then(async response => {
@@ -303,13 +171,8 @@ export default {
       });
     },
     setEdit(data) {
-      this.form = {
-        title     : data.title,
-        titleEn   : data.titleEn,
-        sellOnline: data.sellOnline,
-        action    : 'edit',
-        _id       : data._id
-      };
+      this.$refs.addWarehouse.setEdit(data);
+      this.action = 'edit';
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
