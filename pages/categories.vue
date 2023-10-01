@@ -11,141 +11,64 @@
 
       <AdminHeaderBar class="mb-3"/>
 
-      <!--    Title    -->
-      <v-row class=" px-5 pt-5 mb-5">
-        <BackButton/>
-
-        <v-label class="text-h6 text-black mx-3">مدیریت دسته بندی</v-label>
-      </v-row>
-
       <!--   Content     -->
-      <v-row class="bg-white mr-2 ml-3 rounded-lg">
+      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16v">
 
-        <!--    Add Category   -->
+        <!--    Title And Action    -->
         <v-col cols="12">
+          <v-row>
+            <!--      Title      -->
+            <v-col class="mt-2" cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-file-tree-outline
+              </v-icon>
 
-          <v-icon class="" color="grey">mdi-plus-circle-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">افزودن دسته بندی</v-label>
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+                mdi-file-tree-outline
+              </v-icon>
 
-          <v-form @submit.prevent="submit" ref="addCategoryForm">
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+                mdi-file-tree-outline
+              </v-icon>
 
-            <!--    Parent      -->
-            <v-chip v-if="form._parent"
-                    @click:append-inner="openIconsList"
-                    class="mt-5 mr-7"
-                    size="small"
-                    color="secondary"
-                    variant="elevated">
-              {{ form._parentTitle }}
-            </v-chip>
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">دسته‌بندی‌ها</span>
+                <span v-if="action === 'add'">افزودن دسته‌بندی</span>
+                <span v-if="action === 'edit'">ویرایش دسته‌بندی</span>
+              </v-label>
+            </v-col>
 
-            <v-row class="mt-2 mx-5">
-
-              <!--      Title      -->
-              <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3"
-                              v-model="form.title"
-                              label="عنوان"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Title EN      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3"
-                              v-model="form.titleEn"
-                              label="Title"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              :rules="rules.notEmpty"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Icon      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-text-field class="mt-3"
-                              v-model="form.icon"
-                              append-inner-icon="mdi-link"
-                              @click:append-inner="openIconsList"
-                              label="Icon"
-                              placeholder="وارد کنید"
-                              :readonly="loading"
-                              density="compact"
-                              variant="outlined">
-                </v-text-field>
-              </v-col>
-
-              <!--      Properties      -->
-              <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-                <v-autocomplete class="mt-3"
-                                v-model="form._properties"
-                                label="ویژگی‌ها"
-                                :readonly="loading"
-                                :items="properties"
-                                item-title=".title"
-                                item-value="_id"
-                                density="compact"
-                                variant="outlined"
-                                multiple>
-                </v-autocomplete>
-              </v-col>
-
-              <!--     Actions       -->
-              <v-col cols="12">
-
-                <!--       Submit       -->
-                <v-btn class="border rounded-lg"
-                       :loading="form.loading"
-                       prepend-icon="mdi-check-circle-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       type="submit"
-                       density="compact">
-                  ثبت
-                </v-btn>
-
-                <!--       Reset       -->
-                <v-btn class="border mx-2 rounded-lg"
-                       color="pink"
-                       prepend-icon="mdi-delete-outline"
-                       height="40"
-                       width="100"
-                       variant="text"
-                       @click="reset"
-                       density="compact">
-                  بازنگری
-                </v-btn>
-
-              </v-col>
-
-            </v-row>
-
-          </v-form>
-
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-plus</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-file-tree-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-file-tree-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-divider class="mt-3"></v-divider>
         </v-col>
 
-        <v-divider class="my-5"></v-divider>
+        <!--    Add Category   -->
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12" class="pb-10">
+          <categories-add-category ref="addCategory" @exit="toggleAction" @refresh="getCategories"/>
+        </v-col>
 
         <!--    Category List   -->
-        <v-col cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-file-tree</v-icon>
-          <v-label class="text-h6 text-black mx-3">دسته بندی‌ها</v-label>
+        <v-col v-show="action === 'list'" cols="12" class="pb-16 py-14">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
 
-          <CategoryView class="mt-5"
-                        :list="list"
-                        @setParent="setParent"
-                        @setDelete="setDelete"
-                        @setEdit="setEdit"/>
+          <categories-category-view class="mt-5"
+                                    :list="list"
+                                    @setParent="setParent"
+                                    @setDelete="setDelete"
+                                    @setEdit="setEdit"/>
 
           <!--    Empty List Alert      -->
           <EmptyList :list="list" :loading="loading"/>
@@ -169,107 +92,27 @@ definePageMeta({
 export default {
   data() {
     return {
-      user      : {},
-      loading   : true,
-      form      : {
-        title       : '',
-        titleEn     : '',
-        icon        : '',
-        _parent     : '',
-        _parentTitle: '',
-        _properties : [],
-        action      : 'insert',
-        loading     : false,
-      },
-      rules     : {
-        notEmpty                  : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectableMultiple: [
-          value => {
-            if (value.length) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-      },
-      list      : [],
-      properties: []
+      user   : {},
+      loading: true,
+      action : 'list',
+      list   : []
     }
   },
   methods: {
-    openIconsList() {
-      window.open('https://materialdesignicons.com/', '_blank');
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = this.$refs.addCategory.action;
     },
-    reset() {
-      this.$refs.addCategoryForm.reset();
-      this.form._parent      = '';
-      this.form._parentTitle = '';
-      this.form.action       = 'insert';
-      this.form.loading      = false;
-    },
-    async insert() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              titleEn    : this.form.titleEn,
-              icon       : this.form.icon,
-              _properties: this.form._properties,
-              _parent    : this.form._parent,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          await this.getCategories();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              titleEn    : this.form.titleEn,
-              icon       : this.form.icon,
-              _properties: this.form._properties
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          await this.getCategories();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+    getCategories() {
+      this.loading = true;
+      fetch(this.runtimeConfig.public.apiUrl + 'categories', {method: 'get'})
+          .then(async response => {
+            response     = await response.json();
+            this.list    = response;
+            this.loading = false;
+          });
     },
     async delete(_id) {
       await fetch(
@@ -292,44 +135,9 @@ export default {
         }
       });
     },
-    async submit() {
-      if (this.$refs.addCategoryForm.isValid) {
-        this.form.loading = true;
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
-          await this.edit();
-        }
-        this.form.loading = false;
-      }
-    },
-    getCategories() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.apiUrl + 'categories', {method: 'get'})
-          .then(async response => {
-            response     = await response.json();
-            this.list    = response;
-            this.loading = false;
-          });
-    },
-    getProperties() {
-      fetch(this.runtimeConfig.public.apiUrl + 'properties', {method: 'get'})
-          .then(async response => {
-            response        = await response.json();
-            this.properties = response;
-          });
-    },
     setEdit(data) {
-      this.form = {
-        title       : data.title,
-        titleEn     : data.titleEn,
-        icon        : data.icon ?? '',
-        _parent     : '',
-        _parentTitle: '',
-        _properties : data._properties,
-        action      : 'edit',
-        _id         : data._id
-      };
+      this.$refs.addCategory.setEdit(data);
+      this.action = 'edit';
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
@@ -337,15 +145,13 @@ export default {
       }
     },
     setParent(data) {
-      this.form._parent      = data._id;
-      this.form._parentTitle = data.title;
-      this.form._properties  = data._properties;
+      this.$refs.addCategory.setParent(data);
+      this.action = 'add';
     },
   },
   mounted() {
     this.user = useUserStore();
     this.getCategories();
-    this.getProperties();
   },
   computed: {
     runtimeConfig() {

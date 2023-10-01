@@ -1,6 +1,6 @@
 <template>
   <v-list class="w-100">
-    <CategoryViewItem v-for="item in list"
+    <categories-category-view-item v-for="item in list"
                       @setEdit="setEdit"
                       @setParent="setParent"
                       @setDelete="setDelete"

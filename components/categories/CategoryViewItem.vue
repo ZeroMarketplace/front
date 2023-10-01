@@ -8,7 +8,7 @@
              @click="activeChildren = !activeChildren"
              variant="text"
              icon>
-        <v-icon size="20">mdi-{{ item.icon ?? (activeChildren ? 'menu-down' : 'menu-right') }}</v-icon>
+        <v-icon size="20">mdi-{{ (activeChildren ? 'menu-down' : 'menu-right') }}</v-icon>
       </v-btn>
 
       <!--  Title    -->
@@ -51,12 +51,12 @@
     </template>
 
     <!--  Children   -->
-    <CategoryView v-if="activeChildren"
-                  :list="item.children"
-                  @setParent="setParent"
-                  @setEdit="setEdit"
-                  @setDelete="setDelete"
-                  class="mt-2 pb-2"/>
+    <categories-category-view v-if="activeChildren"
+                              :list="item.children"
+                              @setParent="setParent"
+                              @setEdit="setEdit"
+                              @setDelete="setDelete"
+                              class="mt-2 pb-2"/>
 
   </v-list-item>
 </template>
