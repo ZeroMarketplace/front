@@ -28,7 +28,7 @@
                         label="دسته بندی"
                         :readonly="loading"
                         :rules="rules.notEmptySelectableMultiple"
-                        :items="list.categories"
+                        :items="categories"
                         item-title="title"
                         item-value="_id"
                         density="compact"
@@ -45,7 +45,7 @@
                         label="برند"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
-                        :items="list.brands"
+                        :items="brands"
                         item-title=".title"
                         item-value="_id"
                         density="compact"
@@ -60,7 +60,7 @@
                         label="واحد"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
-                        :items="list.units"
+                        :items="units"
                         item-title="title"
                         item-value="_id"
                         density="compact"
@@ -243,7 +243,7 @@
                     column
                     multiple>
 
-        <v-row v-for="property in list.categoryProperties.filter(p => p.variant === true)"
+        <v-row v-for="property in categoryProperties.filter(p => p.variant === true)"
                class="mt-2">
           <!--    Title    -->
           <v-col class="" cols="12" md="2">
@@ -354,13 +354,14 @@
     </v-btn>
 
     <!--  Add Dynamic Properties  -->
-    <v-row class="mt-5 mx-4 pb-12 d-flex justify-center">
+    <v-row class="mt-5 pb-5 mx-4 d-flex justify-center"
+           v-if="categoryProperties.filter(p => !p.variant).length">
       <v-chip-group v-model="form.dynamicProperties"
                     class="overflow-hidden"
                     column
                     multiple>
 
-        <v-chip v-for="value in list.categoryProperties.filter(p => !p.variant)"
+        <v-chip v-for="value in categoryProperties.filter(p => !p.variant)"
                 :key="value._id"
                 :value="value._id"
                 class="mx-2"
@@ -376,13 +377,15 @@
     </v-row>
 
     <!--  Properties List  -->
-    <v-row class="mt-5 mx-8 pb-12 d-flex justify-center">
+    <v-row class="mt-1 mx-10 pb-12 d-flex justify-center">
       <v-table class="w-100" v-if="form.properties.length">
         <thead>
         <tr>
           <th class="text-center">عنوان</th>
           <th class="text-center">مقدار</th>
-          <th class="text-center"><v-icon>mdi-cog</v-icon></th>
+          <th class="text-center">
+            <v-icon>mdi-cog</v-icon>
+          </th>
         </tr>
         </thead>
         <tbody>
@@ -494,7 +497,7 @@
 
         <!--       Submit       -->
         <v-btn class="border rounded-lg"
-               :loading="form.loading"
+               :loading="loading"
                prepend-icon="mdi-check-circle-outline"
                height="40"
                width="100"
@@ -528,9 +531,8 @@ import {useUserStore} from "~/store/user";
 export default {
   data() {
     return {
-      user   : {},
-      loading: false,
-      form   : {
+      user              : {},
+      form              : {
         name             : '',
         categories       : [],
         brand            : null,
@@ -552,11 +554,9 @@ export default {
         properties       : [],
         dynamicProperties: [],
         title            : '',
-        content          : '',
-        action           : 'insert',
-        loading          : false
+        content          : ''
       },
-      rules  : {
+      rules             : {
         notEmpty                  : [
           value => {
             if (value) return true;
@@ -613,12 +613,12 @@ export default {
           }
         ]
       },
-      list   : {
-        categories        : [],
-        units             : [],
-        brands            : [],
-        categoryProperties: []
-      },
+      categories        : [],
+      units             : [],
+      brands            : [],
+      categoryProperties: [],
+      action            : 'add',
+      loading           : false,
     }
   },
   methods: {
@@ -632,10 +632,11 @@ export default {
       this.form.filesError        = false;
       this.form.properties        = [];
       this.form.dynamicProperties = [];
-      this.form.action            = 'insert';
-      this.form.loading           = false;
+      this.categoryProperties     = [];
+      this.action                 = 'add';
+      this.loading                = false;
     },
-    async insert() {
+    async add() {
 
       // exception remove dynamic properties titles
       this.form.properties.forEach((property) => {
@@ -673,8 +674,8 @@ export default {
             await this.uploadFiles(response._id)
           } else {
             this.reset();
-            this.$emit('exit', true);
-            this.$emit('refresh', true);
+            this.$emit('exit');
+            this.$emit('refresh');
             $showMessage('عملیات با موفقت انجام شد', 'success');
           }
         } else {
@@ -701,8 +702,8 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           this.reset();
-          this.$emit('exit', true);
-          this.$emit('refresh', true);
+          this.$emit('exit');
+          this.$emit('refresh');
           $showMessage('عملیات با موفقت انجام شد', 'success');
         } else {
           // show error
@@ -768,7 +769,8 @@ export default {
             await this.uploadFiles(this.form._id);
           } else {
             this.reset();
-            this.$emit('exit', true);
+            this.$emit('exit');
+            this.$emit('refresh');
             $showMessage('عملیات با موفقت انجام شد', 'success');
           }
 
@@ -780,15 +782,15 @@ export default {
     },
     async submit() {
       if (this.$refs.addProductForm.isValid) {
-        this.form.loading = true;
+        this.loading = true;
 
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
+        if (this.action === 'add') {
+          await this.add();
+        } else if (this.action === 'edit') {
           await this.edit();
         }
 
-        this.form.loading = false;
+        this.loading = false;
       }
     },
     getUnits() {
@@ -799,8 +801,8 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(async response => {
-        response        = await response.json();
-        this.list.units = response;
+        response   = await response.json();
+        this.units = response;
       });
     },
     getBrands() {
@@ -811,8 +813,8 @@ export default {
               'Content-Type': 'application/json'
             }
           }).then(async response => {
-        response         = await response.json();
-        this.list.brands = response;
+        response    = await response.json();
+        this.brands = response;
       });
     },
     getCategories() {
@@ -820,8 +822,8 @@ export default {
           this.runtimeConfig.public.apiUrl + 'categories', {
             method: 'get',
           }).then(async response => {
-        response             = await response.json();
-        this.list.categories = this.reFormatCategories(response);
+        response        = await response.json();
+        this.categories = this.reFormatCategories(response);
       });
     },
     setEdit(data) {
@@ -844,7 +846,7 @@ export default {
       this.form.content      = data.content;
       this.form._id          = data._id;
       this.form.categories   = data._categories;
-      this.form.action       = 'edit';
+      this.action            = 'edit';
 
       // set files
       if (data.files) {
@@ -890,7 +892,8 @@ export default {
 
       // wait for load data
       setTimeout(() => {
-        this.form.action       = 'insert';
+        this.action            = 'add';
+        this.form._id          = '';
         this.form.files        = [];
         this.form.filesPreview = [];
         this.form.filesError   = false;
@@ -925,14 +928,14 @@ export default {
       if (this.form.categories.length) {
         await fetch(this.runtimeConfig.public.apiUrl + 'categories/' + val[0] + '/properties', {method: 'get'})
             .then(async response => {
-              response                     = await response.json();
-              this.list.categoryProperties = response;
+              response                = await response.json();
+              this.categoryProperties = response;
 
               this.$forceUpdate();
 
               // set dynamic properties in edit mode
               response.filter(property => property.variant === false).forEach((property) => {
-                if (this.form.action === 'edit') {
+                if (this.action === 'edit') {
                   let propertyFind = this.form.properties.find(prop => prop._id === property._id);
                   if (propertyFind) propertyFind.title = property.title;
                 }
@@ -1047,7 +1050,7 @@ export default {
       }
 
       // set last variants code's
-      if (this.form.action === 'edit') {
+      if (this.action === 'edit') {
         this.form.variants.forEach((variant) => {
           this.form.lastVariants.forEach((lVariant) => {
             if (JSON.stringify(variant.properties) === JSON.stringify(lVariant.properties)) {
@@ -1063,7 +1066,7 @@ export default {
         this.form.variants.splice(index, 1);
     },
     getPropertyValue(propertyId, valueCode) {
-      let property = this.list.categoryProperties.find(prop => prop._id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property) {
         return property.values.find(value => value.code === valueCode);
       } else {
@@ -1071,7 +1074,7 @@ export default {
       }
     },
     getPropertyValues(propertyId) {
-      let property = this.list.categoryProperties.find(prop => prop._id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property && property.values) {
         return property.values;
       } else {
@@ -1079,7 +1082,7 @@ export default {
       }
     },
     getVariantProps(propertyId) {
-      let property = this.list.categoryProperties.find(prop => prop._id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property) {
         return property;
       } else {
@@ -1136,15 +1139,7 @@ export default {
         this.form.dynamicProperties.splice(this.form.dynamicProperties.indexOf(this.form.properties[index]._id), 1);
 
       this.form.properties.splice(index, 1);
-    },
-    cloneObject(obj) {
-      if (null == obj || "object" != typeof obj) return obj;
-      let copy = obj.constructor();
-      for (let attr in obj) {
-        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
-      }
-      return copy;
-    },
+    }
   },
   watch  : {
     categories(val, oldVal) {
@@ -1161,9 +1156,9 @@ export default {
   },
   mounted() {
     this.user = useUserStore();
-    if (!this.list.units.length) this.getUnits();
-    if (!this.list.categories.length) this.getCategories();
-    if (!this.list.brands.length) this.getBrands();
+    if (!this.units.length) this.getUnits();
+    if (!this.categories.length) this.getCategories();
+    if (!this.brands.length) this.getBrands();
   },
   computed: {
     runtimeConfig() {

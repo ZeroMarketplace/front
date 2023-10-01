@@ -465,13 +465,6 @@ export default {
     getProducts() {
 
     },
-    searchProduct() {
-      clearTimeout(timer);
-
-      timer = setTimeout(() => {
-        doneTyping(event.target.value);
-      }, waitTime);
-    }
   },
   mounted() {
     this.user = useUserStore();

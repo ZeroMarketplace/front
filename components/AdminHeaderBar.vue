@@ -1,7 +1,7 @@
 <template>
   <v-row class="border-b bg-white px-2 py-0 bg-grey-darken-3 border-dotted">
 
-    <v-col class="d-flex flex-grow-1 mr-n4 mr-md-0">
+    <v-col class="d-flex flex-grow-1 mr-n2 mr-md-0">
 
       <!--   Menu Button   -->
       <v-btn class="mt-2 mx-2 d-inline-block d-md-none"

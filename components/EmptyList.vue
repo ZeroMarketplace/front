@@ -6,14 +6,14 @@
     </v-icon>
 
     <v-label class="text-black">
-      داده‌ای یافت نشد
+      داده‌ای یافت نشد!
     </v-label>
   </v-row>
 </template>
 
 <script>
 export default {
-  props: ['list','loading'],
+  props: ['list', 'loading'],
   data() {
     return {}
   }

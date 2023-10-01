@@ -3,13 +3,14 @@
           @submit.prevent="submit"
           ref="addAccountForm">
     <v-row class="mt-2">
+
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class=""
                       v-model="form.title"
                       label="عنوان"
                       placeholder="وارد کنید"
-                      :readonly="form.loading"
+                      :readonly="loading"
                       :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
@@ -22,7 +23,7 @@
                       v-model="form.titleEn"
                       label="Title"
                       placeholder="وارد کنید"
-                      :readonly="form.loading"
+                      :readonly="loading"
                       :rules="rules.notEmpty"
                       density="compact"
                       variant="outlined">
@@ -32,13 +33,14 @@
       <!--     type      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-select class="ltrDirection"
-                      v-model="form.titleEn"
-                      label="نوع حساب"
-                      placeholder="انتخاب کنید"
-                      :readonly="form.loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
+                  v-model="form.type"
+                  label="نوع حساب"
+                  placeholder="انتخاب کنید"
+                  :items="types"
+                  :readonly="loading"
+                  :rules="rules.notEmpty"
+                  density="compact"
+                  variant="outlined">
         </v-select>
       </v-col>
 
@@ -48,7 +50,7 @@
                       v-model="form.balance"
                       label="مانده حساب"
                       placeholder="وارد کنید"
-                      :readonly="form.loading"
+                      :readonly="loading"
                       :rules="rules.notEmpty"
                       type="number"
                       density="compact"
@@ -65,8 +67,7 @@
                       v-model="form.description"
                       label="توضیحات"
                       placeholder="وارد کنید"
-                      :readonly="form.loading"
-                      :rules="rules.notEmpty"
+                      :readonly="loading"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -77,7 +78,7 @@
 
         <!--       Submit       -->
         <v-btn class="border rounded-lg"
-               :loading="form.loading"
+               :loading="loading"
                prepend-icon="mdi-check-circle-outline"
                height="40"
                width="100"
@@ -111,14 +112,15 @@ import {useUserStore} from "~/store/user";
 export default {
   data() {
     return {
-      user : {},
-      form : {
-        title  : '',
-        titleEn: '',
-        action : 'insert',
-        loading: false
+      user   : {},
+      form   : {
+        title      : '',
+        titleEn    : '',
+        type       : 'cash',
+        balance    : '',
+        description: ''
       },
-      rules: {
+      rules  : {
         notEmpty: [
           value => {
             if (value) return true;
@@ -126,15 +128,23 @@ export default {
           }
         ]
       },
+      types  : [
+        {title: 'صندوق', value: 'cash'},
+        {title: 'بانک', value: 'bank'},
+        {title: 'هزینه', value: 'expense'},
+        {title: 'درآمد', value: 'income'},
+      ],
+      action : 'add',
+      loading: false
     }
   },
   methods: {
     reset() {
       this.$refs.addAccountForm.reset();
-      this.form.action  = 'insert';
-      this.form.loading = false;
+      this.action  = 'add';
+      this.loading = false;
     },
-    async insert() {
+    async add() {
       await fetch(
           this.runtimeConfig.public.apiUrl + 'accounts', {
             method : 'post',
@@ -143,8 +153,11 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
+              title      : this.form.title,
+              titleEn    : this.form.titleEn,
+              type       : this.form.type,
+              balance    : this.form.balance,
+              description: this.form.description
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -155,7 +168,8 @@ export default {
           this.reset();
 
           // refresh list
-          await this.getAccounts();
+          this.$emit('exit');
+          this.$emit('refresh');
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -171,8 +185,11 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
+              title      : this.form.title,
+              titleEn    : this.form.titleEn,
+              type       : this.form.type,
+              balance    : this.form.balance,
+              description: this.form.description
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -183,7 +200,8 @@ export default {
           this.reset();
 
           // refresh list
-          await this.getAccounts();
+          this.$emit('exit');
+          this.$emit('refresh');
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -192,17 +210,26 @@ export default {
     },
     async submit() {
       if (this.$refs.addAccountForm.isValid) {
-        this.form.loading = true;
+        this.loading = true;
 
-        if (this.form.action === 'insert') {
-          await this.insert();
-        } else if (this.form.action === 'edit') {
+        if (this.action === 'add') {
+          await this.add();
+        } else if (this.action === 'edit') {
           await this.edit();
         }
 
-        this.form.loading = false;
+        this.loading = false;
       }
     },
+    setEdit(data) {
+      this.form.title       = data.title;
+      this.form.titleEn     = data.titleEn;
+      this.form.type        = data.type;
+      this.form.balance     = data.balance;
+      this.form.description = data.description;
+      this.form._id         = data._id;
+      this.action           = 'edit';
+    }
   },
   mounted() {
     this.user = useUserStore();

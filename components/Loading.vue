@@ -1,6 +1,6 @@
 <template>
-  <v-row class="d-flex justify-center pa-16" v-if="loading">
-    <v-progress-circular indeterminate>
+  <v-row class="d-flex justify-center py-16 my-16" v-if="loading">
+    <v-progress-circular class="my-16 py-2" indeterminate>
     </v-progress-circular>
   </v-row>
 </template>

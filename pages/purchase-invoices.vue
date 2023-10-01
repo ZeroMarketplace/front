@@ -11,54 +11,55 @@
 
       <AdminHeaderBar class="mb-3"/>
 
-      <!--    Title    -->
-      <v-row class=" px-5 pt-5 mb-5">
-
-        <v-col>
-          <BackButton />
-
-          <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت فاکتور‌های خرید</v-label>
-          <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن فاکتور</v-label>
-          <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش فاکتور</v-label>
-        </v-col>
-
-        <v-col class="text-end">
-
-          <!--    Add Purchase Invoice     -->
-          <v-btn class="bg-grey-darken-3 rounded-lg d-none d-sm-inline-flex"
-                 :prepend-icon="action === 'add' || action === 'edit' ? 'mdi-view-list' : 'mdi-plus-outline'"
-                 height="50"
-                 @click="togglePage"
-                 variant="text">
-            <span v-if="action === 'add' || action === 'edit'">لیست فاکتور‌ها</span>
-            <span v-if="action === 'list'">افزودن فاکتور</span>
-          </v-btn>
-
-          <v-btn class="bg-grey-darken-3 d-inline-flex d-sm-none"
-                 prepend-icon="mdi-image-plus-outline"
-                 size="small"
-                 @click="togglePage"
-                 icon>
-            <v-icon v-if="action === 'add' || action === 'edit'">mdi-view-list</v-icon>
-            <v-icon v-if="action === 'list'">mdi-plus-outline</v-icon>
-          </v-btn>
-
-        </v-col>
-      </v-row>
-
       <!--   Content     -->
-      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
+      <v-row class="bg-white mr-1 ml-4 rounded-lg">
+
+        <!--    Title And Action    -->
+        <v-col cols="12">
+          <v-row>
+            <!--      Title      -->
+            <v-col class="mt-2" cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-archive-outline
+              </v-icon>
+
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+                mdi-archive-plus-outline
+              </v-icon>
+
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+                mdi-archive-outline
+              </v-icon>
+
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">محصولات</span>
+                <span v-if="action === 'add'">افزودن محصول</span>
+                <span v-if="action === 'edit'">ویرایش محصول</span>
+              </v-label>
+            </v-col>
+
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-archive-plus-outline</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-archive-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-archive-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-divider class="mt-3"></v-divider>
+        </v-col>
 
         <!--    Add Purchase Invoice   -->
-        <v-col :class="action === 'add' ? '' : 'd-none'" cols="12">
-          <add-purchase-invoice/>
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+          <purchase-invoices-add-purchase-invoice ref="addPurchaseInvoices"/>
         </v-col>
 
-
         <!--    purchase-invoices List   -->
-        <v-col v-if="action === 'list'" class="pb-16" cols="12" >
-          <v-icon class="mt-1 mr-2" color="grey">mdi-receipt-text-edit-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">فاکتور‌ها</v-label>
+        <v-col v-show="action === 'list'" class="pb-16" cols="12">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
@@ -134,9 +135,11 @@ export default {
         action : 'insert'
       };
     },
-    togglePage() {
-      if (this.action === 'add') this.action = 'list';
-      else this.action = 'add';
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = this.$refs.addPurchaseInvoices.form.action;
     },
     async delete(_id) {
       await fetch(

@@ -11,57 +11,59 @@
 
       <AdminHeaderBar class="mb-3"/>
 
-      <!--    Title    -->
-      <v-row class=" px-5 pt-5 mb-5">
-
-        <v-col>
-          <BackButton/>
-
-          <v-label v-if="action === 'list'" class="text-h6 text-black mx-3">مدیریت محصولات</v-label>
-          <v-label v-if="action === 'add'" class="text-h6 text-black mx-3">افزودن محصول</v-label>
-          <v-label v-if="action === 'edit'" class="text-h6 text-black mx-3">ویرایش محصول</v-label>
-        </v-col>
-
-        <v-col class="text-end">
-
-          <!--    Add Product     -->
-          <v-btn class="bg-grey-darken-3 rounded-lg d-none d-sm-inline-flex"
-                 :prepend-icon="action === 'add' || action === 'edit' ? 'mdi-view-list' : 'mdi-image-plus-outline'"
-                 height="50"
-                 @click="togglePage"
-                 variant="text">
-            <span v-if="action === 'add' || action === 'edit'">لیست محصولات</span>
-            <span v-if="action === 'list'">افزودن محصول</span>
-          </v-btn>
-
-          <v-btn class="bg-grey-darken-3 d-inline-flex d-sm-none"
-                 prepend-icon="mdi-image-plus-outline"
-                 size="small"
-                 @click="togglePage"
-                 icon>
-            <v-icon v-if="action === 'add' || action === 'edit'">mdi-view-list</v-icon>
-            <v-icon v-if="action === 'list'">mdi-image-plus-outline</v-icon>
-          </v-btn>
-
-        </v-col>
-
-      </v-row>
-
       <!--   Content     -->
-      <v-row class="bg-white mr-1 ml-4 mt-n2 rounded-lg">
+      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+
+        <!--    Title And Action    -->
+        <v-col cols="12">
+          <v-row>
+            <!--      Title      -->
+            <v-col class="mt-2" cols="9">
+              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+                mdi-archive-outline
+              </v-icon>
+
+              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+                mdi-archive-plus-outline
+              </v-icon>
+
+              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+                mdi-archive-outline
+              </v-icon>
+
+              <v-label class="font-weight-bold mr-2">
+                <span v-if="action === 'list'">محصولات</span>
+                <span v-if="action === 'add'">افزودن محصول</span>
+                <span v-if="action === 'edit'">ویرایش محصول</span>
+              </v-label>
+            </v-col>
+
+            <!--     Action       -->
+            <v-col class="text-end" cols="3">
+              <v-btn class="bg-secondary"
+                     size="small"
+                     @click="toggleAction"
+                     icon>
+                <v-icon v-if="action === 'list'">mdi-archive-plus-outline</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-archive-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-archive-outline</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-divider class="mt-3"></v-divider>
+        </v-col>
 
         <!--    Products List   -->
-        <v-col v-if="action === 'list'" cols="12" class="pb-16">
-          <v-icon class="mt-1 mr-2" color="grey">mdi-archive-outline</v-icon>
-          <v-label class="text-h6 text-black mx-3">محصولات</v-label>
+        <v-col v-show="action === 'list'" cols="12" class="">
 
           <!--    loading      -->
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="mx-5">
+          <v-list class="mx-5" v-show="list.length">
             <v-list-item v-for="item in list"
-                         class="rounded border-b pa-2" link>
+                         class="rounded border-b pa-2"
+                         link>
 
               <!--      Image        -->
               <template v-slot:prepend>
@@ -84,7 +86,6 @@
                 <v-icon v-if="!item.files" class="mx-0" size="100">mdi-image-outline</v-icon>
               </template>
 
-
               <!--      Name        -->
               <v-list-item-title class="mr-2">
                 {{ item.name }}
@@ -95,7 +96,7 @@
               <template v-slot:append>
 
                 <!--  Delete   -->
-                <v-btn class="mx-2"
+                <v-btn class="mx-1"
                        color="red"
                        size="30"
                        @click="setDelete({_id: item._id})"
@@ -104,7 +105,7 @@
                 </v-btn>
 
                 <!--  Copy   -->
-                <v-btn class="mx-2"
+                <v-btn class="mx-1"
                        color="secondary"
                        size="30"
                        @click="setCopy(item)"
@@ -113,7 +114,7 @@
                 </v-btn>
 
                 <!--  Edit   -->
-                <v-btn class="mx-2"
+                <v-btn class="mx-1"
                        color="secondary"
                        size="30"
                        @click="setEdit(item)"
@@ -131,9 +132,9 @@
 
         </v-col>
 
-        <!--    Add|Edit Product    -->
-        <v-col :class="action === 'add' ? '' : 'd-none'" cols="12" class="pb-16">
-          <products-add-product ref="addProductPage" @exit="togglePage" @refresh="getProducts"/>
+        <!--    Add Product    -->
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+          <products-add-product ref="addProduct" @exit="toggleAction" @refresh="getProducts"/>
         </v-col>
 
       </v-row>
@@ -176,9 +177,11 @@ export default {
         this.loading = false;
       });
     },
-    togglePage() {
-      if (this.action === 'add') this.action = 'list';
-      else this.action = 'add';
+    toggleAction() {
+      if (this.action === 'add' || this.action === 'edit')
+        this.action = 'list';
+      else
+        this.action = this.$refs.addProduct.action;
     },
     async delete(_id) {
       await fetch(
@@ -211,8 +214,8 @@ export default {
             }
           }).then(async response => {
         response = await response.json();
-        this.$refs.addProductPage.setEdit(response);
-        this.togglePage();
+        this.$refs.addProduct.setEdit(response);
+        this.toggleAction();
       });
     },
     async setCopy(data) {
@@ -225,8 +228,8 @@ export default {
             }
           }).then(async response => {
         response = await response.json();
-        this.$refs.addProductPage.setCopy(response);
-        this.togglePage();
+        this.$refs.addProduct.setCopy(response);
+        this.toggleAction();
       });
     },
     setDelete(data) {
