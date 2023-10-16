@@ -151,6 +151,10 @@
 
 import VOPTInput      from "vue3-otp-input"
 import {useUserStore} from "~/store/user";
+import {storeToRefs}  from "pinia";
+import {useCookie}    from "#app";
+
+const {authenticated} = storeToRefs(useUserStore());
 
 export default {
   components: {
@@ -299,11 +303,24 @@ export default {
           response        = await response.json();
           userStore.$patch({
             authenticated: true,
+            token        : response.token,
             role         : response.role,
             firstName    : response.firstName,
-            lastName     : response.lastName,
-            token        : response.token
+            lastName     : response.lastName
           });
+
+          // expires in 30 days
+          const user = useCookie('user', {
+            maxAge: (86400 * 30)
+          });
+
+          user.value = {
+            authenticated: true,
+            token        : response.token,
+            role         : response.role,
+            firstName    : response.firstName,
+            lastName     : response.lastName
+          };
 
           // redirect to dashboard
           $showMessage('خوش آمدید', 'success');

@@ -5,10 +5,8 @@ export const useUserStore = defineStore('user', {
         return {
             firstName    : '',
             lastName     : '',
-            authenticated: false,
-            role         : 0,
-            token        : ''
+            role         : 'user',
         }
     },
-    persist: true
+    // persist: true
 });
