@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
     let urlSections = getRequestURL(event).pathname.split('/');
     let page = urlSections[urlSections.length - 1];
 
+
     // requested a page
     if (pages.includes(page)) {
 
@@ -70,8 +71,6 @@ export default defineEventHandler(async (event) => {
                             statusCode: 403,
                             message: 'Permission Denied'
                         });
-                    } else {
-                        console.log(page, 'get accessed!');
                     }
                 });
             } else {

@@ -140,7 +140,6 @@ export default {
   },
   methods : {
     async openProfile() {
-      console.log(this.user.value);
       if (this.user.value && this.user.value.authenticated) {
         await navigateTo(this.user.value.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } else {
