@@ -104,7 +104,7 @@ export default {
     },
     async add() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'warehouses', {
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -134,7 +134,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'warehouses/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',

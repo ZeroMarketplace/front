@@ -107,7 +107,7 @@ export default {
     },
     getCategories() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.apiUrl + 'categories', {method: 'get'})
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'categories', {method: 'get'})
           .then(async response => {
             response     = await response.json();
             this.list    = response;
@@ -116,7 +116,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'categories/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',

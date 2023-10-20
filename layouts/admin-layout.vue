@@ -6,7 +6,7 @@
   <v-app>
 
     <!-- Page   -->
-    <v-container class="ma-0 pa-0 body" fluid>
+    <v-container class="pa-0 body" fluid>
       <slot/>
     </v-container>
 

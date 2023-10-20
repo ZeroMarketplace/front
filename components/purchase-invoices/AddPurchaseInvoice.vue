@@ -433,7 +433,7 @@ export default {
     getUsers() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.apiUrl + 'users', {
+          this.runtimeConfig.public.API_BASE_URL + 'users', {
             method : 'get',
             headers: {'authorization': 'Bearer ' + this.user.token}
           }).then(async response => {
@@ -451,7 +451,7 @@ export default {
     getWarehouses() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.apiUrl + 'warehouses', {
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
             method : 'get',
             headers: {'authorization': 'Bearer ' + this.user.token}
           }).then(async response => {

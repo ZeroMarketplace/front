@@ -149,12 +149,7 @@
 
 // action is 1-Sign up 2-Sign in
 
-import VOPTInput      from "vue3-otp-input"
-import {useUserStore} from "~/store/user";
-import {storeToRefs}  from "pinia";
-import {useCookie}    from "#app";
-
-const {authenticated} = storeToRefs(useUserStore());
+import VOPTInput from "vue3-otp-input"
 
 export default {
   components: {
@@ -237,7 +232,7 @@ export default {
     },
     async sendOTP() {
       let response = await fetch(
-          this.runtimeConfig.public.apiUrl + 'auth/sendOTP', {
+          this.runtimeConfig.public.API_BASE_URL + 'auth/sendOTP', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
             body   : JSON.stringify({phone: this.form.phoneNumber})
@@ -255,7 +250,7 @@ export default {
     },
     async verifyOTP() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'auth/verifyOTP', {
+          this.runtimeConfig.public.API_BASE_URL + 'auth/verifyOTP', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
             body   : JSON.stringify({
@@ -285,7 +280,7 @@ export default {
     },
     async login() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'auth/login', {
+          this.runtimeConfig.public.API_BASE_URL + 'auth/login', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
             body   : JSON.stringify({
@@ -299,33 +294,24 @@ export default {
           // Login was successful
 
           // set auth token
-          const userStore = useUserStore();
-          response        = await response.json();
-          userStore.$patch({
-            authenticated: true,
-            token        : response.token,
-            role         : response.role,
-            firstName    : response.firstName,
-            lastName     : response.lastName
-          });
+          response = await response.json();
 
           // expires in 30 days
           const user = useCookie('user', {
+            secure: true,
             maxAge: (86400 * 30)
           });
 
           user.value = {
             authenticated: true,
             token        : response.token,
-            role         : response.role,
-            firstName    : response.firstName,
-            lastName     : response.lastName
+            role         : response.role
           };
 
           // redirect to dashboard
           $showMessage('خوش آمدید', 'success');
           this.closeModal();
-          await navigateTo(response.role === 1 ? '/admin-dashboard' : '/dashboard');
+          await navigateTo(response.role === 'admin' ? '/admin-dashboard' : '/dashboard');
 
         } else if (response.status === 401) {
           // Password is wrong

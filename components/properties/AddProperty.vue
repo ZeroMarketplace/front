@@ -171,7 +171,7 @@ export default {
     },
     async add() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'properties', {
+          this.runtimeConfig.public.API_BASE_URL + 'properties', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -202,7 +202,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'properties/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',

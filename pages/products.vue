@@ -164,7 +164,7 @@ export default {
     getProducts() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.apiUrl + 'products', {
+          this.runtimeConfig.public.API_BASE_URL + 'products', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -184,7 +184,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -205,7 +205,7 @@ export default {
     },
     async setEdit(data) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -219,7 +219,7 @@ export default {
     },
     async setCopy(data) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -242,7 +242,7 @@ export default {
     this.getProducts();
   },
   created() {
-    this.staticsUrl = this.runtimeConfig.public.staticsUrl;
+    this.staticsUrl = this.runtimeConfig.public.STATICS_URL;
   },
   computed: {
     runtimeConfig() {

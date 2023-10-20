@@ -128,7 +128,7 @@ export default {
   methods: {
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'brands/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'brands/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -149,7 +149,7 @@ export default {
     },
     getBrands() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.apiUrl + 'brands', {method: 'get',}).then(async response => {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'brands', {method: 'get',}).then(async response => {
         response     = await response.json();
         this.list    = response;
         this.loading = false;

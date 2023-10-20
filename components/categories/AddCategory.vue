@@ -129,7 +129,7 @@ export default {
     },
     async add() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories', {
+          this.runtimeConfig.public.API_BASE_URL + 'categories', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -160,7 +160,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'categories/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'categories/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -200,7 +200,7 @@ export default {
       }
     },
     getProperties() {
-      fetch(this.runtimeConfig.public.apiUrl + 'properties', {method: 'get'})
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'properties', {method: 'get'})
           .then(async response => {
             response        = await response.json();
             this.properties = response;

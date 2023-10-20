@@ -645,7 +645,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products', {
+          this.runtimeConfig.public.API_BASE_URL + 'products', {
             method : 'post',
             headers: {
               'Content-Type' : 'application/json',
@@ -692,7 +692,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + _id + '/files', {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id + '/files', {
             method : 'post',
             headers: {
               'authorization': 'Bearer ' + this.user.token
@@ -714,7 +714,7 @@ export default {
     async deleteFile(fileName, index) {
       if (confirm('آیا مطمئن هستید؟')) {
         await fetch(
-            this.runtimeConfig.public.apiUrl + 'products/' + this.form._id + '/files/' + fileName, {
+            this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id + '/files/' + fileName, {
               method : 'delete',
               headers: {
                 'authorization': 'Bearer ' + this.user.token
@@ -741,7 +741,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'products/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -795,7 +795,7 @@ export default {
     },
     getUnits() {
       fetch(
-          this.runtimeConfig.public.apiUrl + 'units', {
+          this.runtimeConfig.public.API_BASE_URL + 'units', {
             method : 'get',
             headers: {
               'Content-Type': 'application/json'
@@ -807,7 +807,7 @@ export default {
     },
     getBrands() {
       fetch(
-          this.runtimeConfig.public.apiUrl + 'brands', {
+          this.runtimeConfig.public.API_BASE_URL + 'brands', {
             method : 'get',
             headers: {
               'Content-Type': 'application/json'
@@ -819,7 +819,7 @@ export default {
     },
     getCategories() {
       fetch(
-          this.runtimeConfig.public.apiUrl + 'categories', {
+          this.runtimeConfig.public.API_BASE_URL + 'categories', {
             method: 'get',
           }).then(async response => {
         response        = await response.json();
@@ -854,7 +854,7 @@ export default {
           this.form.filesPreview.push({
             uploaded: true,
             name    : filePreview,
-            src     : this.runtimeConfig.public.staticsUrl + 'products/files/' + filePreview
+            src     : this.runtimeConfig.public.STATICS_URL + 'products/files/' + filePreview
           });
         });
       }
@@ -926,7 +926,7 @@ export default {
     },
     async getCategoryProperties(val) {
       if (this.form.categories.length) {
-        await fetch(this.runtimeConfig.public.apiUrl + 'categories/' + val[0] + '/properties', {method: 'get'})
+        await fetch(this.runtimeConfig.public.API_BASE_URL + 'categories/' + val[0] + '/properties', {method: 'get'})
             .then(async response => {
               response                = await response.json();
               this.categoryProperties = response;

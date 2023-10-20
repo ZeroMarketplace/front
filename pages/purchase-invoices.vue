@@ -136,7 +136,7 @@ export default {
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'purchase-invoices/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -158,7 +158,7 @@ export default {
     getPurchaseInvoices() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.apiUrl + 'purchase-invoices', {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices', {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',

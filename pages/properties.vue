@@ -126,7 +126,7 @@ export default {
   methods: {
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.apiUrl + 'properties/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'properties/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -147,7 +147,7 @@ export default {
     },
     getProperties() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.apiUrl + 'properties', {method: 'get',}).then(async response => {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'properties', {method: 'get',}).then(async response => {
         response     = await response.json();
         this.list    = response;
         this.loading = false;

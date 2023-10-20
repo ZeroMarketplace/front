@@ -9,7 +9,9 @@
     <Header />
 
     <!-- Page   -->
-    <slot/>
+    <v-container class="pa-0 body" fluid>
+      <slot/>
+    </v-container>
 
 
     <!-- Footer -->
