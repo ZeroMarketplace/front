@@ -140,8 +140,9 @@ export default {
   },
   methods : {
     async openProfile() {
-      if (this.user.authenticated) {
-        await navigateTo(this.user.role === 'admin' ? '/admin-dashboard' : '/dashboard');
+      console.log(this.user.value);
+      if (this.user.value && this.user.value.authenticated) {
+        await navigateTo(this.user.value.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } else {
         this.$refs.login.openModal();
       }
@@ -149,7 +150,7 @@ export default {
   },
   computed: {
     user() {
-      return useUserStore();
+      return useCookie('user')
     }
   },
   mounted() {

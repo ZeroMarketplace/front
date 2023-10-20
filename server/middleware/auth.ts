@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken'
 
 const pages = [
-    '',
     'accounts',
     'admin-dashboard',
     'brands',
@@ -16,7 +15,7 @@ const pages = [
 
 const pagesPermissions = {
     admin: [
-        'index',
+        '',
         'accounts',
         'admin-dashboard',
         'brands',
@@ -29,12 +28,12 @@ const pagesPermissions = {
     ],
 
     user: [
-        'index',
+        '',
         'dashboard',
     ],
 
     guest: [
-        'index'
+        ''
     ]
 };
 
@@ -58,16 +57,18 @@ export default defineEventHandler(async (event) => {
             if (user.token) {
                 jwt.verify(user.token, process.env.TOKEN_SECRET, (err, userJWT) => {
                     // validate token
-                    if (err) throw createError({
-                        statusCode: 403,
-                        message: 'Permission Denied. You have to login first'
-                    });
+                    if (err) {
+                        throw createError({
+                            statusCode: 401
+                        });
+                    }
 
                     // verified
+                    // @ts-ignore
                     if (!pagesPermissions[userJWT.data.role].includes(page)) {
-                        if (err) throw createError({
+                        throw createError({
                             statusCode: 403,
-                            message: 'Permission Denied. You have to login first'
+                            message: 'Permission Denied'
                         });
                     } else {
                         console.log(page, 'get accessed!');
@@ -78,7 +79,7 @@ export default defineEventHandler(async (event) => {
                 if (!pagesPermissions.guest.includes(page)) {
                     throw createError({
                         statusCode: 403,
-                        message: 'Permission Denied. You have to login first'
+                        message: 'Permission Denied'
                     });
                 }
             }
@@ -87,7 +88,7 @@ export default defineEventHandler(async (event) => {
             if (!pagesPermissions.guest.includes(page)) {
                 throw createError({
                     statusCode: 403,
-                    message: 'Permission Denied. You have to login first'
+                    message: 'Permission Denied'
                 });
             }
         }
