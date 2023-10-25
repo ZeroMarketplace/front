@@ -142,8 +142,9 @@ export default {
   methods: {
     reset() {
       this.$refs.addAccountForm.reset();
-      this.action  = 'add';
-      this.loading = false;
+      this.action    = 'add';
+      this.form.type = 'cash';
+      this.loading   = false;
     },
     async add() {
       await fetch(
@@ -233,7 +234,7 @@ export default {
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
   },
   computed: {}
