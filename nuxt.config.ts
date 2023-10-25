@@ -68,6 +68,8 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
 
+        TOKEN_SECRET: process.env.TOKEN_SECRET,
+
         // Keys within public, will be also exposed to the client-side
         public: {
             API_BASE_URL: process.env.API_BASE_URL,

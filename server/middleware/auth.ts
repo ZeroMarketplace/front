@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+const runTimeConfiguration = useRuntimeConfig();
 
 const pages = [
     'accounts',
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event) => {
             let user = JSON.parse(cookies.user);
 
             if (user.token) {
-                jwt.verify(user.token, process.env.TOKEN_SECRET, (err, userJWT) => {
+                jwt.verify(user.token, runTimeConfiguration.TOKEN_SECRET, (err, userJWT) => {
                     // validate token
                     if (err) {
                         throw createError({
