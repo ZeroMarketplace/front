@@ -154,7 +154,6 @@ definePageMeta({
 export default {
   data() {
     return {
-      user   : {},
       loading: true,
       action : 'list',
       list   : [],
@@ -238,17 +237,14 @@ export default {
     }
   },
   mounted() {
-    this.user = useUserStore();
+    this.user = useCookie('user').value;
     this.getProducts();
   },
   created() {
+    this.runtimeConfig = useRuntimeConfig();
     this.staticsUrl = this.runtimeConfig.public.STATICS_URL;
   },
-  computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
-  }
+  computed: {}
 }
 </script>
 

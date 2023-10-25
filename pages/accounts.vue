@@ -155,6 +155,7 @@
 
 <script>
 import {useUserStore} from "~/store/user";
+import {useCookie}    from "#app";
 
 definePageMeta({
   layout: "admin-layout"
@@ -194,7 +195,15 @@ export default {
     getAccounts() {
       this.loading = true;
       this.list    = [];
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts', {method: 'get',}).then(async response => {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts',
+          {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }
+      ).then(async response => {
         response     = await response.json();
         this.list    = response;
         this.loading = false;
@@ -217,14 +226,11 @@ export default {
     }
   },
   mounted() {
-    this.user = useUserStore();
+    this.user          = useCookie('user').value;
+    this.runtimeConfig = useRuntimeConfig();
     this.getAccounts();
   },
-  computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
-  }
+  computed: {}
 }
 </script>
 

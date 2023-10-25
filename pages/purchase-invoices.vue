@@ -112,6 +112,7 @@
 <script>
 import {useUserStore}     from "~/store/user";
 import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
+import {useCookie}        from "#app";
 
 definePageMeta({
   layout: "admin-layout"
@@ -180,14 +181,11 @@ export default {
     }
   },
   mounted() {
-    this.user = useUserStore();
+    this.user = useCookie('user').value;
+    this.runtimeConfig = useRuntimeConfig();
     this.getPurchaseInvoices();
   },
-  computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
-  }
+  computed: {}
 }
 </script>
 

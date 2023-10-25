@@ -527,6 +527,7 @@
 
 <script>
 import {useUserStore} from "~/store/user";
+import {useCookie}    from "#app";
 
 export default {
   data() {
@@ -1155,15 +1156,13 @@ export default {
     }
   },
   mounted() {
-    this.user = useUserStore();
+    this.user = useCookie('user').value;
+    this.runtimeConfig = useRuntimeConfig();
     if (!this.units.length) this.getUnits();
     if (!this.categories.length) this.getCategories();
     if (!this.brands.length) this.getBrands();
   },
   computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
     selectedCategories() {
       return this.form.categories;
     }

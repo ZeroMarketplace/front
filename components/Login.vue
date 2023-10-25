@@ -178,9 +178,6 @@ export default {
     }
   },
   computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
     validToSubmit() {
       if (this.step === 1 && this.form.phoneNumber.length === 11) {
         return true;
@@ -344,6 +341,7 @@ export default {
     }
   },
   mounted() {
+    this.runtimeConfig = useRuntimeConfig();
     // const {signIn} = useAuth();
   }
 }

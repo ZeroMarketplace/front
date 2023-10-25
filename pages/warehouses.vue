@@ -120,6 +120,7 @@
 
 <script>
 import {useUserStore} from "~/store/user";
+import {useCookie}    from "#app";
 
 definePageMeta({
   layout: "admin-layout"
@@ -181,14 +182,11 @@ export default {
     }
   },
   mounted() {
-    this.user = useUserStore();
+    this.user = useCookie('user').value;
+    this.runtimeConfig = useRuntimeConfig();
     this.getWarehouses();
   },
-  computed: {
-    runtimeConfig() {
-      return useRuntimeConfig();
-    },
-  }
+  computed: {}
 }
 </script>
 
