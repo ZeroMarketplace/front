@@ -229,10 +229,10 @@ export default {
     },
     async sendOTP() {
       let response = await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'auth/sendOTP', {
+          this.runtimeConfig.public.API_BASE_URL + 'auth/login', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
-            body   : JSON.stringify({phone: this.form.phoneNumber})
+            body   : JSON.stringify({phone: this.form.phoneNumber, method: 'phone'})
           });
 
       // OTP code sent
