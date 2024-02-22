@@ -208,7 +208,7 @@ export default {
       this.step = val;
     },
     startTimer() {
-      this.timer.minutes = 1;
+      this.timer.minutes = 4;
       this.timer.second  = 60;
       this.timer.active  = true;
       this.timer.counter = setInterval(() => {
@@ -217,9 +217,9 @@ export default {
             this.timer.minutes--;
             this.timer.second = 60;
           } else {
-            this.timer.active  = false;
-            this.timer.minutes = 1;
-            this.timer.second  = 60;
+            this.timer.active = false;
+            this.timer.minutes -= 1;
+            this.timer.second = 60;
             clearInterval(this.timer.counter);
           }
         } else {
@@ -247,12 +247,13 @@ export default {
     },
     async verifyOTP() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'auth/verifyOTP', {
+          this.runtimeConfig.public.API_BASE_URL + 'auth/login', {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
             body   : JSON.stringify({
-              phone: this.form.phoneNumber,
-              code : this.form.otp
+              phone : this.form.phoneNumber,
+              code  : this.form.otp,
+              method: 'phone'
             })
           }).then(async response => {
         // OTP code verified
@@ -266,10 +267,8 @@ export default {
           const {$showMessage} = useNuxtApp();
           response             = await response.json();
           if (response.message) {
-            if (response.message === 'otpIsWrong') {
+            if (response.message === 'The OTP code is wrong') {
               $showMessage('کد وارد شده صحیح نیست', 'error');
-            } else if (response.message === 'otpIsExpired') {
-              $showMessage('کد منقضی شده است. لطفا دوباره تلاش کنید', 'error');
             }
           }
         }
@@ -281,6 +280,7 @@ export default {
             method : 'post',
             headers: {'Content-Type': 'application/json'},
             body   : JSON.stringify({
+              method    : 'phone',
               phone     : this.form.phoneNumber,
               password  : this.form.password,
               validation: this.validation
@@ -317,7 +317,7 @@ export default {
         } else {
           // other errors
           response = await response.json();
-          if (response.message === 'validationExpired') {
+          if (response.message === 'Validation has expired') {
             $showMessage('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
           }
 

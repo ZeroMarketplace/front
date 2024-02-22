@@ -154,7 +154,7 @@
 </template>
 
 <script>
-import {useUserStore} from "~/store/user";
+
 import {useCookie}    from "#app";
 
 definePageMeta({
