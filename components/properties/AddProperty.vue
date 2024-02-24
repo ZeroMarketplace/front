@@ -5,7 +5,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -18,7 +18,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -140,8 +140,10 @@ export default {
   data() {
     return {
       form   : {
-        title  : '',
-        titleEn: '',
+        title  : {
+          en: '',
+          fa: ''
+        },
         variant: false,
         values : [
           {
@@ -180,7 +182,6 @@ export default {
             },
             body   : JSON.stringify({
               title  : this.form.title,
-              titleEn: this.form.titleEn,
               variant: this.form.variant,
               values : this.form.values
             })
@@ -203,7 +204,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form.id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -211,7 +212,6 @@ export default {
             },
             body   : JSON.stringify({
               title  : this.form.title,
-              titleEn: this.form.titleEn,
               variant: this.form.variant,
               values : this.form.values
             })
@@ -248,10 +248,9 @@ export default {
     setEdit(data) {
       this.form   = {
         title  : data.title,
-        titleEn: data.titleEn,
         variant: data.variant,
         values : data.values,
-        _id    : data._id
+        id     : data.id
       };
       this.action = 'edit';
     },
@@ -266,7 +265,7 @@ export default {
     },
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
   },
   computed: {}

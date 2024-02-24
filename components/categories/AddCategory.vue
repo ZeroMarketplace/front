@@ -15,7 +15,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -28,7 +28,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
