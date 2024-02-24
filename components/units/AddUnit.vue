@@ -114,7 +114,9 @@ export default {
 
           // refresh list
           this.$emit('exit');
-          this.$emit('refresh');
+          setTimeout(() => {
+            this.$emit('refresh');
+          },500)
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -142,7 +144,9 @@ export default {
 
           // refresh list
           this.$emit('exit');
-          this.$emit('refresh');
+          setTimeout(() => {
+            this.$emit('refresh');
+          },500)
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
