@@ -99,7 +99,7 @@
                 <v-btn class="mx-1"
                        color="red"
                        size="30"
-                       @click="setDelete({_id: item._id})"
+                       @click="setDelete({id: item.id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -171,7 +171,7 @@ export default {
             }
           }).then(async response => {
         response     = await response.json();
-        this.list    = response;
+        this.list    = response.list;
         this.loading = false;
       });
     },
@@ -181,9 +181,9 @@ export default {
       else
         this.action = this.$refs.addProduct.action;
     },
-    async delete(_id) {
+    async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -204,7 +204,7 @@ export default {
     },
     async setEdit(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -218,7 +218,7 @@ export default {
     },
     async setCopy(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -232,7 +232,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     }
   },
@@ -242,7 +242,7 @@ export default {
   },
   created() {
     this.runtimeConfig = useRuntimeConfig();
-    this.staticsUrl = this.runtimeConfig.public.STATICS_URL;
+    this.staticsUrl    = this.runtimeConfig.public.STATICS_URL;
   },
   computed: {}
 }
