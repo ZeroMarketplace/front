@@ -287,7 +287,7 @@
         <thead>
         <tr>
           <th v-for="props in form.variantsProps" class="text-center font-weight-bold">
-            {{ getVariantProps(props.id).title.fa ?? '' }}
+            {{ categoryProperties.length ? (getVariantProps(props.id).title.fa ?? '') : '' }}
           </th>
           <th class="text-center">
             <v-icon>mdi-cog</v-icon>
@@ -832,61 +832,65 @@ export default {
       this.reset();
 
       // set data
-      this.form.name         = data.name;
-      this.form.properties   = data.properties;
-      this.form.brand        = data._brand;
-      this.form.unit         = data._unit;
-      this.form.barcode      = data.barcode;
-      this.form.iranCode     = data.iranCode;
-      this.form.variants     = data.variants;
-      this.form.lastVariants = data.variants;
-      this.form.weight       = data.weight;
-      this.form.dimensions   = data.dimensions;
-      this.form.tags         = data.tags;
-      this.form.title        = data.title;
-      this.form.content      = data.content;
-      this.form.id          = data.id;
-      this.form.categories   = data._categories;
-      this.action            = 'edit';
+      this.getCategoryProperties(data._categories).then(
+          () => {
+            this.form.categories   = data._categories;
+            this.form.name         = data.name;
+            this.form.properties   = data.properties;
+            this.form.brand        = data._brand;
+            this.form.unit         = data._unit;
+            this.form.barcode      = data.barcode;
+            this.form.iranCode     = data.iranCode;
+            this.form.variants     = data.variants;
+            this.form.lastVariants = data.variants;
+            this.form.weight       = data.weight;
+            this.form.dimensions   = data.dimensions;
+            this.form.tags         = data.tags;
+            this.form.title        = data.title;
+            this.form.content      = data.content;
+            this.form.id           = data.id;
+            this.action            = 'edit';
 
-      // set files
-      if (data.files) {
-        data.files.forEach((filePreview) => {
-          this.form.filesPreview.push({
-            uploaded: true,
-            name    : filePreview,
-            src     : this.runtimeConfig.public.STATICS_URL + 'products/files/' + filePreview
-          });
-        });
-      }
+            // set files
+            if (data.files) {
+              data.files.forEach((filePreview) => {
+                this.form.filesPreview.push({
+                  uploaded: true,
+                  name    : filePreview,
+                  src     : this.runtimeConfig.public.STATICS_URL + 'products/files/' + filePreview
+                });
+              });
+            }
 
-      // set variants props
-      data.variants.forEach((variant) => {
-        variant.properties.forEach((property) => {
-          let variantProp = this.form.variantsProps.find(prop => prop.id === property.propertyId);
-          if (variantProp) {
-            if (!variantProp.values.includes(property.value))
-              variantProp.values.push(property.value);
-          } else {
-            this.form.variantsProps.push({
-              id   : property.propertyId,
-              values: [property.value]
+            // set variants props
+            data.variants.forEach((variant) => {
+              variant.properties.forEach((property) => {
+                let variantProp = this.form.variantsProps.find(prop => prop.id === property.propertyId);
+                if (variantProp) {
+                  if (!variantProp.values.includes(property.value))
+                    variantProp.values.push(property.value);
+                } else {
+                  this.form.variantsProps.push({
+                    id    : property.propertyId,
+                    values: [property.value]
+                  });
+                }
+
+                // add to variants values
+                if (!this.form.variantsValues.includes(property.value))
+                  this.form.variantsValues.push(property.value);
+              });
             });
+
+            // set dynamic properties
+            data.properties.forEach((property) => {
+              if (property.id) {
+                this.form.dynamicProperties.push(property.id);
+              }
+            });
+
           }
-
-          // add to variants values
-          if (!this.form.variantsValues.includes(property.value))
-            this.form.variantsValues.push(property.value);
-        });
-      });
-
-      // set dynamic properties
-      data.properties.forEach((property) => {
-        if (property.id) {
-          this.form.dynamicProperties.push(property.id);
-        }
-      });
-
+      );
     },
     setCopy(data) {
       this.setEdit(data);
@@ -894,7 +898,7 @@ export default {
       // wait for load data
       setTimeout(() => {
         this.action            = 'add';
-        this.form.id          = '';
+        this.form.id           = '';
         this.form.files        = [];
         this.form.filesPreview = [];
         this.form.filesError   = false;
@@ -1124,7 +1128,7 @@ export default {
         this.form.properties.push({
           title: title,
           value: '',
-          id  : id
+          id   : id
         });
       } else {
         // remove property
@@ -1143,7 +1147,7 @@ export default {
     }
   },
   watch  : {
-    selectedCategories(val, oldVal) {
+    async selectedCategories(val, oldVal) {
       // remove all variants
       if (oldVal && oldVal[0]) {
         if (val[0] !== oldVal[0]) {
@@ -1152,11 +1156,11 @@ export default {
         }
       }
 
-      this.getCategoryProperties(val);
+      await this.getCategoryProperties(val);
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     if (!this.units.length) this.getUnits();
     if (!this.categories.length) this.getCategories();

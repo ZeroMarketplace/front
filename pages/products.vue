@@ -68,11 +68,11 @@
               <!--      Image        -->
               <template v-slot:prepend>
 
-                <v-img v-if="item.files"
+                <v-img v-if="item.files && item.files.length"
                        width="100"
                        height="100"
                        max-width="100"
-                       :src="staticsUrl + 'products/files/' + item.files"
+                       :src="staticsUrl + 'products/files/' + item.files[0]"
                        aspect-ratio="1/1"
                        cover>
                   <template v-slot:placeholder>
@@ -83,7 +83,7 @@
                 </v-img>
 
                 <!--        Icon        -->
-                <v-icon v-if="!item.files" class="mx-0" size="100">mdi-image-outline</v-icon>
+                <v-icon v-if="!item.files || !item.files.length" class="mx-0" size="100">mdi-image-outline</v-icon>
               </template>
 
               <!--      Name        -->

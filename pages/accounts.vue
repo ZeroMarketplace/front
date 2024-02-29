@@ -73,7 +73,7 @@
                 <v-card elevation="2">
                   <!--        Title and Icon     -->
                   <v-card-title class="border-b">
-                    {{ item.title }}
+                    {{ item.title.fa }}
 
                     <!--         Icon         -->
                     <v-icon v-if="item.type === 'bank'"
@@ -123,7 +123,7 @@
                     <!--  Delete   -->
                     <v-btn class="mx-2 bg-red"
                            size="30"
-                           @click="setDelete({_id: item._id})"
+                           @click="setDelete({id: item.id})"
                            icon>
                       <v-icon size="15">mdi-delete-outline</v-icon>
                     </v-btn>
@@ -155,7 +155,7 @@
 
 <script>
 
-import {useCookie}    from "#app";
+import {useCookie} from "#app";
 
 definePageMeta({
   layout: "admin-layout"
@@ -171,9 +171,9 @@ export default {
     }
   },
   methods: {
-    async delete(_id) {
+    async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -205,7 +205,7 @@ export default {
           }
       ).then(async response => {
         response     = await response.json();
-        this.list    = response;
+        this.list    = response.list;
         this.loading = false;
       });
     },
@@ -215,7 +215,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     },
     toggleAction() {

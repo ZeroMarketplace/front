@@ -70,7 +70,7 @@
                          class="rounded border-b pa-2" link>
 
               <!--      Title        -->
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
@@ -96,7 +96,7 @@
                 <v-btn class="mx-2"
                        color="red"
                        size="30"
-                       @click="setDelete({_id: item._id})"
+                       @click="setDelete({id: item.id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -142,9 +142,9 @@ export default {
       else
         this.action = this.$refs.addWarehouse.action;
     },
-    async delete(_id) {
+    async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -167,7 +167,7 @@ export default {
       this.loading = true;
       fetch(this.runtimeConfig.public.API_BASE_URL + 'warehouses', {method: 'get',}).then(async response => {
         response     = await response.json();
-        this.list    = response;
+        this.list    = response.list;
         this.loading = false;
       });
     },
@@ -177,12 +177,12 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getWarehouses();
   },
