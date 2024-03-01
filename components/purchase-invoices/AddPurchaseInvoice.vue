@@ -53,8 +53,8 @@
                   :readonly="loading"
                   :rules="rules.notEmptySelectable"
                   :items="warehouses"
-                  item-title="title"
-                  item-value="_id"
+                  item-title="title.fa"
+                  item-value="id"
                   density="compact"
                   variant="outlined">
         </v-select>
@@ -76,7 +76,7 @@
     <v-divider class="my-5"></v-divider>
 
     <!--    Products     -->
-    <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
+    <v-icon class="mt-1 mr-2" color="grey">mdi-archive-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">اقلام فاکتور</v-label>
 
     <!--  Add Product   -->
@@ -99,18 +99,17 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <v-autocomplete class="w-100"
-                        v-model="product.code"
-                        label="نام یا کد کالا"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectable"
-                        :items="[]"
-                        item-title="title"
-                        item-value="code"
-                        density="compact"
-                        variant="outlined"
-                        hide-details>
-        </v-autocomplete>
+        <v-text-field class="w-100"
+                      v-model="product.title"
+                      label="نام یا کد کالا"
+                      :readonly="product.loading"
+                      :loading="product.loading"
+                      :rules="rules.notEmpty"
+                      density="compact"
+                      variant="outlined"
+                      @input="searchProduct(index)"
+                      clearable>
+        </v-text-field>
       </v-col>
 
       <!--   Count    -->
@@ -195,7 +194,7 @@
     <v-divider class="mt-8 mb-4"></v-divider>
 
     <!--    Additions and subtractions     -->
-    <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
+    <v-icon class="mt-1 mr-2" color="grey">mdi-plus-minus-variant</v-icon>
     <v-label class="text-black font-weight-bold mx-3">اضافات و کسورات</v-label>
 
     <!--  Add Operation   -->
@@ -208,44 +207,58 @@
       <v-icon>mdi-plus</v-icon>
     </v-btn>
 
-    <!--  Total   -->
+    <!--  Add-And-Subtract & Total   -->
     <v-row class="mt-2 mx-4">
 
+      <!--   Add-And-Subtract    -->
       <v-col class="" cols="12" md="6">
-        <v-row>
-          <!--      Complications     -->
-          <v-col cols="6">
-            <v-text-field class=""
-                          v-model="form.complications"
-                          type="number"
-                          label="عوارض"
-                          placeholder="وارد کنید"
-                          :readonly="loading"
-                          :rules="rules.notEmpty"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
-            </v-text-field>
-          </v-col>
+        <!--   Chips     -->
+        <v-chip-group v-model="selectedAddAndSubtract"
+                      class="overflow-hidden my-5 my-md-0"
+                      column
+                      multiple>
+          <v-chip v-for="(value) in addAndSubtract"
+                  :key="value.id"
+                  :value="value.id"
+                  class="mx-2"
+                  variant="outlined"
+                  @click="toggleAddAndSubtract(value.id)"
+                  filter>
 
-          <!--      Taxes     -->
-          <v-col cols="6">
+            {{ value.title.fa }}
+
+          </v-chip>
+        </v-chip-group>
+
+        <!--   Inputs for Add and Subtract    -->
+        <v-row class="my-5 my-md-2">
+          <!--      Add And Subtract     -->
+          <v-col v-for="item in form.addAndSubtract" cols="12" md="8">
             <v-text-field class=""
-                          v-model="form.taxes"
+                          v-model="item.value"
                           type="number"
-                          label="مالیات"
+                          :label="getAddAndSubtractDetail(item.reason).title.fa"
                           placeholder="وارد کنید"
                           :readonly="loading"
                           :rules="rules.notEmpty"
                           density="compact"
                           variant="outlined"
                           hide-details>
+              <template v-slot:append-inner>
+                <v-icon v-if="getAddAndSubtractDetail(item.reason).type === 'percent'">
+                  mdi-percent
+                </v-icon>
+                <v-label v-if="getAddAndSubtractDetail(item.reason).type === 'number'">
+                  تومان
+                </v-label>
+              </template>
             </v-text-field>
           </v-col>
 
         </v-row>
       </v-col>
 
+      <!--   Total   -->
       <v-col cols="12" md="6">
         <v-row class="border rounded-lg bg-grey-lighten-3 mx-0 px-5 py-2">
 
@@ -344,12 +357,13 @@ import {useCookie}    from "#app";
 export default {
   data() {
     return {
-      form      : {
-        user     : null,
-        dateTime : undefined,
-        warehouse: null,
-        products : [
+      form                  : {
+        user          : null,
+        dateTime      : undefined,
+        warehouse     : null,
+        products      : [
           {
+            title   : '',
             code    : '',
             count   : 0,
             price   : {
@@ -360,11 +374,15 @@ export default {
             sum     : 0,
             discount: 0,
             total   : 0,
+            items   : [],
+            loading : false,
+            search  : false
           }
         ],
-        total    : 0
+        addAndSubtract: [],
+        total         : 0
       },
-      rules     : {
+      rules                 : {
         notEmpty          : [
           value => {
             if (value) return true;
@@ -378,10 +396,14 @@ export default {
           }
         ],
       },
-      users     : [],
-      warehouses: [],
-      loading   : false,
-      action    : 'add'
+      users                 : [],
+      warehouses            : [],
+      addAndSubtract        : [],
+      selectedAddAndSubtract: [],
+      productSearchTimer    : undefined,
+      productSearchInput    : '',
+      loading               : false,
+      action                : 'add'
     }
   },
   methods: {
@@ -400,18 +422,20 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        code         : '',
-        count        : 0,
-        price        : {
+        title   : '',
+        code    : '',
+        count   : 0,
+        price   : {
           purchase: 0,
           consumer: 0,
           store   : 0,
         },
-        sum          : 0,
-        discount     : 0,
-        complications: 0,
-        taxes        : 0,
-        total        : 0,
+        sum     : 0,
+        discount: 0,
+        total   : 0,
+        items   : [],
+        loading : false,
+        search  : false
       });
     },
     deleteProduct(index) {
@@ -431,6 +455,27 @@ export default {
       //     - (product.discount * product.sum / 100) // minus discount
       this.calculateInvoiceTotal();
     },
+    toggleAddAndSubtract(id) {
+      if (this.form.addAndSubtract.find(p => p.reason === id)) {
+        this.form.addAndSubtract.splice(
+            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p.reason === id)),
+            1
+        );
+      } else {
+        this.form.addAndSubtract.push({
+          reason: id,
+          value : ''
+        });
+      }
+    },
+    getAddAndSubtractDetail(id) {
+      let findItem = this.addAndSubtract.find(p => p.id === id);
+      if (findItem) {
+        return findItem;
+      } else {
+        return '';
+      }
+    },
     getUsers() {
       this.loading = true;
       fetch(
@@ -441,11 +486,11 @@ export default {
         response = await response.json();
 
         // set title of users
-        response.forEach((user) => {
+        response.list.forEach((user) => {
           user.title = (user.firstName && user.lastName) ? (user.firstName + ' ' + user.lastName) : user.phone;
         });
 
-        this.users   = response;
+        this.users   = response.list;
         this.loading = false;
       });
     },
@@ -457,24 +502,79 @@ export default {
             headers: {'authorization': 'Bearer ' + this.user.token}
           }).then(async response => {
         response        = await response.json();
-        this.warehouses = response;
+        this.warehouses = response.list;
         this.loading    = false;
       });
     },
-    getProducts() {
+    getAddAndSubtract() {
+      this.loading = true;
+      fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract', {
+            method : 'get',
+            headers: {'authorization': 'Bearer ' + this.user.token}
+          }).then(async response => {
+        response            = await response.json();
+        this.addAndSubtract = response.list;
+        this.loading        = false;
+      });
+    },
+    updateProductSearchInput(newSearch) {
+      this.productSearchInput = newSearch;
+    },
+    searchProduct(index) {
+      clearInterval(this.timer);
 
+      this.timer = setTimeout(() => {
+
+        // turn on search
+        this.form.products[index].search = true;
+
+        let search = new URLSearchParams();
+
+        // code or title
+        if (typeof this.form.products[index].title === 'number') {
+          search.set('code', this.form.products[index].title);
+        } else {
+          search.set('title', this.form.products[index].title);
+        }
+
+        // search request
+        this.form.products[index].loading = true;
+        fetch(
+            this.runtimeConfig.public.API_BASE_URL + 'products?' + search, {
+              method: 'get',
+            }).then(
+            async (response) => {
+              response                          = await response.json();
+              this.form.products[index].items   = response.list;
+              this.form.products[index].loading = false;
+            });
+
+      }, 800);
     },
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getUsers();
     this.getWarehouses();
+    this.getAddAndSubtract();
   },
-  computed: {}
+  computed: {},
+  watch   : {
+    productSearchInput(val) {
+      console.log(val);
+    }
+  }
 }
 </script>
 
 <style scoped>
-
+.productSearchItems {
+  position: absolute;
+  margin-bottom: -170px;
+  z-index: 1;
+  width: 17%;
+  margin-right: -1%;
+}
 </style>
