@@ -134,6 +134,11 @@ export default {
               text: 'واحد‌ها',
               link: '/units',
               icon: 'mdi-scale'
+            },
+            {
+              text: 'اضافات و کسورات',
+              link: '/add-and-subtract',
+              icon: 'mdi-plus-minus-variant'
             }
           ]
         }
