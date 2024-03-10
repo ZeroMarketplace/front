@@ -67,23 +67,7 @@
 
               <!--      Image        -->
               <template v-slot:prepend>
-
-                <v-img v-if="item.files"
-                       width="100"
-                       height="100"
-                       max-width="100"
-                       :src="staticsUrl + 'products/files/' + item.files"
-                       aspect-ratio="1/1"
-                       cover>
-                  <template v-slot:placeholder>
-                    <div class="d-flex align-center justify-center fill-height">
-                      <v-progress-circular indeterminate></v-progress-circular>
-                    </div>
-                  </template>
-                </v-img>
-
-                <!--        Icon        -->
-                <v-icon v-if="!item.files" class="mx-0" size="100">mdi-image-outline</v-icon>
+                <ProductImage :files="item.files" :size="100"/>
               </template>
 
               <!--      Name        -->
@@ -99,7 +83,7 @@
                 <v-btn class="mx-1"
                        color="red"
                        size="30"
-                       @click="setDelete({_id: item._id})"
+                       @click="setDelete({id: item.id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -146,12 +130,14 @@
 
 <script>
 import {useUserStore} from "~/store/user";
+import ProductImage   from "~/components/products/ProductImage.vue";
 
 definePageMeta({
   layout: "admin-layout"
 });
 
 export default {
+  components: {ProductImage},
   data() {
     return {
       loading: true,
@@ -171,7 +157,7 @@ export default {
             }
           }).then(async response => {
         response     = await response.json();
-        this.list    = response;
+        this.list    = response.list;
         this.loading = false;
       });
     },
@@ -181,9 +167,9 @@ export default {
       else
         this.action = this.$refs.addProduct.action;
     },
-    async delete(_id) {
+    async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -204,7 +190,7 @@ export default {
     },
     async setEdit(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -218,7 +204,7 @@ export default {
     },
     async setCopy(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -232,7 +218,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     }
   },
@@ -242,7 +228,7 @@ export default {
   },
   created() {
     this.runtimeConfig = useRuntimeConfig();
-    this.staticsUrl = this.runtimeConfig.public.STATICS_URL;
+    this.staticsUrl    = this.runtimeConfig.public.STATICS_URL;
   },
   computed: {}
 }

@@ -8,7 +8,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -21,7 +21,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -73,8 +73,10 @@ export default {
     return {
       user   : {},
       form   : {
-        title  : '',
-        titleEn: ''
+        title: {
+          fa: '',
+          en: ''
+        }
       },
       rules  : {
         notEmpty: [
@@ -103,8 +105,7 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
+              title: this.form.title
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -125,15 +126,14 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'brands/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'brands/' + this.form.id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title  : this.form.title,
-              titleEn: this.form.titleEn
+              title: this.form.title
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -167,15 +167,14 @@ export default {
     },
     setEdit(data) {
       this.form   = {
-        title  : data.title,
-        titleEn: data.titleEn,
-        _id    : data._id
+        title: data.title,
+        id   : data.id
       };
       this.action = 'edit';
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
   },
   computed: {}

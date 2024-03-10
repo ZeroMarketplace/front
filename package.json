@@ -17,12 +17,12 @@
     "vee-validate": "^4.10.3",
     "vue3-otp-input": "^0.4.1",
     "vue3-persian-datetime-picker": "^1.2.2",
-    "vuetify": "^3.3.7"
+    "vuetify": "^3.5.6"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@types/node": "^18",
-    "nuxt": "^3.6.1",
+    "nuxt": "^3.10.2",
     "nuxt-security": "^0.14.4"
   }
 }

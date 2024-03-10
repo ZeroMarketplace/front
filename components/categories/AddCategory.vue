@@ -15,7 +15,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -28,7 +28,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -45,8 +45,8 @@
                         label="ویژگی‌ها"
                         :readonly="loading"
                         :items="properties"
-                        item-title=".title"
-                        item-value="_id"
+                        item-title=".title.fa"
+                        item-value="id"
                         density="compact"
                         variant="outlined"
                         multiple>
@@ -95,8 +95,10 @@ export default {
   data() {
     return {
       form      : {
-        title       : '',
-        titleEn     : '',
+        title       : {
+          en: '',
+          fa: ''
+        },
         _parent     : '',
         _parentTitle: '',
         _properties : []
@@ -138,7 +140,6 @@ export default {
             },
             body   : JSON.stringify({
               title      : this.form.title,
-              titleEn    : this.form.titleEn,
               _properties: this.form._properties,
               _parent    : this.form._parent,
             })
@@ -161,7 +162,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'categories/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'categories/' + this.form.id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -169,7 +170,6 @@ export default {
             },
             body   : JSON.stringify({
               title      : this.form.title,
-              titleEn    : this.form.titleEn,
               _properties: this.form._properties
             })
           }).then(async response => {
@@ -204,33 +204,32 @@ export default {
       fetch(this.runtimeConfig.public.API_BASE_URL + 'properties', {method: 'get'})
           .then(async response => {
             response        = await response.json();
-            this.properties = response;
+            this.properties = response.list;
           });
     },
     setEdit(data) {
       this.form   = {
         title       : data.title,
-        titleEn     : data.titleEn,
         _parent     : '',
         _parentTitle: '',
         _properties : data._properties,
-        _id         : data._id
+        id          : data.id
       };
       this.action = 'edit';
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     },
     setParent(data) {
-      this.form._parent      = data._id;
+      this.form._parent      = data.id;
       this.form._parentTitle = data.title;
       this.form._properties  = data._properties;
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getProperties();
   },

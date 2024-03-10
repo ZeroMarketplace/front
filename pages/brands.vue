@@ -70,7 +70,7 @@
                          class="rounded border-b pa-2" link>
 
               <!--      Title        -->
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
@@ -78,7 +78,7 @@
                 <v-btn class="mx-2"
                        color="red"
                        size="30"
-                       @click="setDelete({_id: item._id})"
+                       @click="setDelete({id: item.id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -152,7 +152,7 @@ export default {
       this.loading = true;
       fetch(this.runtimeConfig.public.API_BASE_URL + 'brands', {method: 'get',}).then(async response => {
         response     = await response.json();
-        this.list    = response;
+        this.list    = response.list;
         this.loading = false;
       });
     },
@@ -162,7 +162,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     },
     toggleAction() {

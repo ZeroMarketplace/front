@@ -6,7 +6,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -19,7 +19,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -80,8 +80,10 @@ export default {
   data() {
     return {
       form   : {
-        title     : '',
-        titleEn   : '',
+        title     : {
+          en: '',
+          fa: ''
+        },
         sellOnline: false
       },
       rules  : {
@@ -113,7 +115,6 @@ export default {
             },
             body   : JSON.stringify({
               title     : this.form.title,
-              titleEn   : this.form.titleEn,
               sellOnline: this.form.sellOnline
             })
           }).then(async response => {
@@ -135,7 +136,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + this.form.id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -143,7 +144,6 @@ export default {
             },
             body   : JSON.stringify({
               title     : this.form.title,
-              titleEn   : this.form.titleEn,
               sellOnline: this.form.sellOnline
             })
           }).then(async response => {
@@ -179,15 +179,14 @@ export default {
     setEdit(data) {
       this.form   = {
         title     : data.title,
-        titleEn   : data.titleEn,
         sellOnline: data.sellOnline,
-        _id       : data._id
+        id       : data.id
       };
       this.action = 'edit';
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
   },
   computed: {}

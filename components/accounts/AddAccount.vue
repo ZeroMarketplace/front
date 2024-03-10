@@ -7,7 +7,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class=""
-                      v-model="form.title"
+                      v-model="form.title.fa"
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -20,7 +20,7 @@
       <!--      Title EN      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="ltrDirection"
-                      v-model="form.titleEn"
+                      v-model="form.title.en"
                       label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
@@ -115,8 +115,10 @@ export default {
     return {
       user   : {},
       form   : {
-        title      : '',
-        titleEn    : '',
+        title      : {
+          en: '',
+          fa: ''
+        },
         type       : 'cash',
         balance    : '',
         description: ''
@@ -156,7 +158,6 @@ export default {
             },
             body   : JSON.stringify({
               title      : this.form.title,
-              titleEn    : this.form.titleEn,
               type       : this.form.type,
               balance    : this.form.balance,
               description: this.form.description
@@ -180,7 +181,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.form.id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -188,7 +189,6 @@ export default {
             },
             body   : JSON.stringify({
               title      : this.form.title,
-              titleEn    : this.form.titleEn,
               type       : this.form.type,
               balance    : this.form.balance,
               description: this.form.description
@@ -225,11 +225,10 @@ export default {
     },
     setEdit(data) {
       this.form.title       = data.title;
-      this.form.titleEn     = data.titleEn;
       this.form.type        = data.type;
       this.form.balance     = data.balance;
       this.form.description = data.description;
-      this.form._id         = data._id;
+      this.form.id         = data.id;
       this.action           = 'edit';
     }
   },

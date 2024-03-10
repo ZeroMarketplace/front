@@ -20,21 +20,21 @@
             <!--      Title      -->
             <v-col class="mt-2" cols="9">
               <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-warehouse
+                mdi-plus-minus-variant
               </v-icon>
 
               <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-warehouse
+                mdi-plus-minus-variant
               </v-icon>
 
               <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-warehouse
+                mdi-plus-minus-variant
               </v-icon>
 
               <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">انبار‌ها</span>
-                <span v-if="action === 'add'">افزودن انبار</span>
-                <span v-if="action === 'edit'">ویرایش انبار</span>
+                <span v-if="action === 'list'">اضافات و کسورات</span>
+                <span v-if="action === 'add'">افزودن</span>
+                <span v-if="action === 'edit'">ویرایش</span>
               </v-label>
             </v-col>
 
@@ -45,20 +45,20 @@
                      @click="toggleAction"
                      icon>
                 <v-icon v-if="action === 'list'">mdi-plus</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-warehouse</v-icon>
-                <v-icon v-if="action === 'add'">mdi-warehouse</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-scale</v-icon>
+                <v-icon v-if="action === 'add'">mdi-scale</v-icon>
               </v-btn>
             </v-col>
           </v-row>
           <v-divider class="mt-3"></v-divider>
         </v-col>
 
-        <!--    Add Warehouse   -->
-        <v-col v-show="(action === 'add' || action === 'edit')" class="pb-10" cols="12">
-          <warehouses-add-warehouse ref="addWarehouse" @exit="toggleAction" @refresh="getWarehouses"/>
+        <!--    Add Add-And-Subtract   -->
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+          <add-and-subtract-add ref="addAndSubtract" @exit="toggleAction" @refresh="getAddAndSubtract"/>
         </v-col>
 
-        <!--    Warehouses List   -->
+        <!--    Add-And-Subtract List   -->
         <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
@@ -74,13 +74,13 @@
 
               <!--      Actions        -->
               <template v-slot:append>
-
-                <!--  inventory of products   -->
+                <!--  Delete   -->
                 <v-btn class="mx-2"
-                       color="secondary"
+                       color="red"
                        size="30"
+                       @click="setDelete({id: item.id})"
                        icon>
-                  <v-icon size="15">mdi-format-list-bulleted-square</v-icon>
+                  <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
 
                 <!--  Edit   -->
@@ -90,15 +90,6 @@
                        @click="setEdit(item)"
                        icon>
                   <v-icon size="15">mdi-pencil</v-icon>
-                </v-btn>
-
-                <!--  Delete   -->
-                <v-btn class="mx-2"
-                       color="red"
-                       size="30"
-                       @click="setDelete({id: item.id})"
-                       icon>
-                  <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
 
               </template>
@@ -140,11 +131,11 @@ export default {
       if (this.action === 'add' || this.action === 'edit')
         this.action = 'list';
       else
-        this.action = this.$refs.addWarehouse.action;
+        this.action = this.$refs.addAndSubtract.action;
     },
     async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -156,23 +147,23 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          this.getWarehouses();
+          this.getAddAndSubtract();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
         }
       });
     },
-    getWarehouses() {
+    getAddAndSubtract() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'warehouses', {method: 'get',}).then(async response => {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract', {method: 'get',}).then(async response => {
         response     = await response.json();
         this.list    = response.list;
         this.loading = false;
       });
     },
     setEdit(data) {
-      this.$refs.addWarehouse.setEdit(data);
+      this.$refs.addAndSubtract.setEdit(data);
       this.action = 'edit';
     },
     setDelete(data) {
@@ -184,7 +175,7 @@ export default {
   mounted() {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
-    this.getWarehouses();
+    this.getAddAndSubtract();
   },
   computed: {}
 }

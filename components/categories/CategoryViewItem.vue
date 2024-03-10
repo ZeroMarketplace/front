@@ -12,7 +12,7 @@
       </v-btn>
 
       <!--  Title    -->
-      {{ item.title }}
+      {{ item.title.fa }}
 
       <!--      <a class="text-yellow">{{ ' #' + item.code }}</a>-->
 
@@ -25,7 +25,7 @@
       <v-btn class="mx-2"
              color="secondary"
              size="30"
-             @click="setParent({_id: item._id, title: item.title, _properties: item._properties})"
+             @click="setParent({id: item.id, title: item.title.fa, _properties: item._properties})"
              icon>
         <v-icon size="15">mdi-plus</v-icon>
       </v-btn>
@@ -43,7 +43,7 @@
       <v-btn class="mx-2"
              color="red"
              size="30"
-             @click="setDelete({_id: item._id})"
+             @click="setDelete({id: item.id})"
              icon>
         <v-icon size="15">mdi-delete-outline</v-icon>
       </v-btn>
@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     setParent(data) {
-      this.$emit('setParent', {_id: data._id, title: data.title, _properties: data._properties});
+      this.$emit('setParent', data);
     },
     setEdit(data) {
       this.$emit('setEdit', data);
