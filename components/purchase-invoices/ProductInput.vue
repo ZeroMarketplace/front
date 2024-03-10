@@ -6,30 +6,29 @@
               :loading="loading"
               :items="items"
               item-title="title"
-              item-value="code"
+              item-value="id"
               density="compact"
               variant="outlined"
               @input="searchProduct"
-              return-object
               clearable>
-    <template #item="{ item, index }">
-      <v-list-item link @click="selectProduct(index)">
+<!--    <template #item="{ item, index }">-->
+<!--      <v-list-item link @click="selectProduct(index)">-->
 
-        <template v-slot:prepend>
-          <ProductImage class="ml-2" :files="item.files" :size="35"/>
-        </template>
+<!--        <template v-slot:prepend>-->
+<!--          <ProductImage class="ml-2" :files="item.files" :size="35"/>-->
+<!--        </template>-->
 
-        <v-list-item-title>
-          {{ item.title }}
-        </v-list-item-title>
+<!--        <v-list-item-title>-->
+<!--          {{ item.title }}-->
+<!--        </v-list-item-title>-->
 
-      </v-list-item>
-    </template>
+<!--      </v-list-item>-->
+<!--    </template>-->
 
-    <template #selection="{item,index}">
-      <ProductImage v-if="item.files" class="ml-2" :files="item.files" :size="25"/>
-      {{ item.title }}
-    </template>
+<!--    <template #selection="{item,index}">-->
+<!--      <ProductImage v-if="item.files" class="ml-2" :files="item.files" :size="25"/>-->
+<!--      {{ item.title }}-->
+<!--    </template>-->
   </v-combobox>
 </template>
 

@@ -99,7 +99,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput v-model="product.code"/>
+        <ProductInput v-model="product.id"/>
       </v-col>
 
       <!--   Count    -->
@@ -227,10 +227,11 @@
             <v-text-field class=""
                           v-model="item.value"
                           type="number"
-                          :label="getAddAndSubtractDetail(item.reason).title.fa"
                           placeholder="وارد کنید"
+                          :label="getAddAndSubtractDetail(item.reason).title.fa"
                           :readonly="loading"
                           :rules="rules.notEmpty"
+                          @input="calculateInvoiceTotal"
                           density="compact"
                           variant="outlined"
                           hide-details>
@@ -251,39 +252,26 @@
       <!--   Total   -->
       <v-col cols="12" md="6">
         <v-row class="border rounded-lg bg-grey-lighten-3 mx-0 px-5 py-2">
-
           <!--    Total      -->
           <v-col cols="12">
-            <v-row>
-              <v-col>
-                جمع کل:
+            <v-row class="">
+              <v-col cols="5" class="">
+                کل:
               </v-col>
-              <v-col class="text-end">
+              <v-col cols="7" class="text-end">
                 {{ form.total }} تومان
               </v-col>
             </v-row>
           </v-col>
 
-          <!--    Total      -->
-          <v-col cols="12">
-            <v-row>
-              <v-col>
-                جمع کل:
+          <!--    add and subtract      -->
+          <v-col v-for="addAndSubtract in form.addAndSubtract" cols="12">
+            <v-row class="">
+              <v-col cols="5" class="text-caption">
+                {{ getAddAndSubtractDetail(addAndSubtract.reason).title.fa }}:
               </v-col>
-              <v-col class="text-end">
-                {{ form.total }} تومان
-              </v-col>
-            </v-row>
-          </v-col>
-
-          <!--    Total      -->
-          <v-col cols="12">
-            <v-row>
-              <v-col>
-                جمع کل:
-              </v-col>
-              <v-col class="text-end">
-                {{ form.total }} تومان
+              <v-col cols="7" class="text-end">
+                {{ addAndSubtract.sum }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -291,11 +279,11 @@
           <!--    Total      -->
           <v-col cols="12">
             <v-row class="">
-              <v-col cols="5" class="text-caption">
+              <v-col cols="5" class="font-weight-bold">
                 جمع کل:
               </v-col>
-              <v-col cols="7" class="text-end">
-                {{ form.total }} تومان
+              <v-col cols="7" class="text-end font-weight-bold">
+                {{ form.sum }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -355,8 +343,7 @@ export default {
         warehouse     : null,
         products      : [
           {
-            title   : '',
-            code    : '',
+            id      : '',
             count   : 0,
             price   : {
               purchase: 0,
@@ -365,13 +352,11 @@ export default {
             },
             sum     : 0,
             discount: 0,
-            total   : 0,
-            items   : [],
-            loading : false,
-            search  : false
+            total   : 0
           }
         ],
         addAndSubtract: [],
+        sum           : 0,
         total         : 0
       },
       rules                 : {
@@ -399,6 +384,75 @@ export default {
     }
   },
   methods: {
+    reset() {
+      this.$refs.addPurchaseInvoiceForm.reset();
+      this.loading = false;
+      this.action  = 'add';
+    },
+    async add() {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices', {
+            method : 'post',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              customer      : this.form.user,
+              dateTime      : this.form.dateTime,
+              warehouse     : this.form.warehouse,
+              products      : this.form.products,
+              addAndSubtract: this.form.addAndSubtract,
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
+
+          // refresh list
+          this.$emit('exit');
+          setTimeout(() => {
+            this.$emit('refresh');
+          }, 500)
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
+    async edit() {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form.id, {
+            method : 'put',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              title: this.form.title
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+
+          // reset form
+          this.reset();
+
+          // refresh list
+          this.$emit('exit');
+          setTimeout(() => {
+            this.$emit('refresh');
+          }, 500)
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
     async submit() {
       if (this.$refs.addPurchaseInvoiceForm.isValid) {
         this.form.loading = true;
@@ -414,8 +468,7 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        title   : '',
-        code    : '',
+        id      : '',
         count   : 0,
         price   : {
           purchase: 0,
@@ -424,10 +477,7 @@ export default {
         },
         sum     : 0,
         discount: 0,
-        total   : 0,
-        items   : [],
-        loading : false,
-        search  : false
+        total   : 0
       });
     },
     deleteProduct(index) {
@@ -435,8 +485,39 @@ export default {
     },
     calculateInvoiceTotal() {
       this.form.total = 0;
+
+      // calc products price
       this.form.products.forEach((product) => {
         this.form.total += product.total;
+      });
+
+      this.form.sum = this.form.total;
+
+      // add and subtract
+      this.form.addAndSubtract.forEach((addAndSubtract) => {
+        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract.reason);
+        if (detailAddAndSubtract) {
+          let operationSum = 0;
+          if (detailAddAndSubtract.operation === 'add') {
+            if (detailAddAndSubtract.type === 'percent') {
+              operationSum = (this.form.total * addAndSubtract.value / 100)
+              this.form.sum += operationSum;
+            } else {
+              operationSum = Number(addAndSubtract.value);
+              this.form.sum += addAndSubtract.value;
+            }
+          } else {
+            if (detailAddAndSubtract.type === 'percent') {
+              operationSum = (this.form.total * addAndSubtract.value / 100)
+              this.form.sum -= operationSum;
+            } else {
+              operationSum = Number(addAndSubtract.value);
+              this.form.sum -= addAndSubtract.value;
+            }
+          }
+
+          addAndSubtract.sum = operationSum;
+        }
       });
     },
     calculateProductPrices(index) {
@@ -456,9 +537,12 @@ export default {
       } else {
         this.form.addAndSubtract.push({
           reason: id,
-          value : ''
+          value : '',
+          sum   : 0
         });
       }
+
+      this.calculateInvoiceTotal();
     },
     getAddAndSubtractDetail(id) {
       let findItem = this.addAndSubtract.find(p => p.id === id);
@@ -528,11 +612,5 @@ export default {
 </script>
 
 <style scoped>
-.productSearchItems {
-  position: absolute;
-  margin-bottom: -170px;
-  z-index: 1;
-  width: 17%;
-  margin-right: -1%;
-}
+
 </style>
