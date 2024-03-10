@@ -99,17 +99,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <v-text-field class="w-100"
-                      v-model="product.title"
-                      label="نام یا کد کالا"
-                      :readonly="product.loading"
-                      :loading="product.loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined"
-                      @input="searchProduct(index)"
-                      clearable>
-        </v-text-field>
+        <ProductInput v-model="product.code"/>
       </v-col>
 
       <!--   Count    -->
@@ -353,8 +343,10 @@
 <script>
 import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
+import ProductInput   from "~/components/purchase-invoices/ProductInput.vue";
 
 export default {
+  components: {ProductInput},
   data() {
     return {
       form                  : {
@@ -517,41 +509,7 @@ export default {
         this.addAndSubtract = response.list;
         this.loading        = false;
       });
-    },
-    updateProductSearchInput(newSearch) {
-      this.productSearchInput = newSearch;
-    },
-    searchProduct(index) {
-      clearInterval(this.timer);
-
-      this.timer = setTimeout(() => {
-
-        // turn on search
-        this.form.products[index].search = true;
-
-        let search = new URLSearchParams();
-
-        // code or title
-        if (typeof this.form.products[index].title === 'number') {
-          search.set('code', this.form.products[index].title);
-        } else {
-          search.set('title', this.form.products[index].title);
-        }
-
-        // search request
-        this.form.products[index].loading = true;
-        fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'products?' + search, {
-              method: 'get',
-            }).then(
-            async (response) => {
-              response                          = await response.json();
-              this.form.products[index].items   = response.list;
-              this.form.products[index].loading = false;
-            });
-
-      }, 800);
-    },
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;
