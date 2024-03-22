@@ -10,13 +10,13 @@
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
         <v-autocomplete class="mt-3"
-                        v-model="form.user"
+                        v-model="form.customer"
                         label="کاربر"
                         :readonly="loading"
                         :rules="rules.notEmptySelectable"
                         :items="users"
                         item-title="title"
-                        item-value="_id"
+                        item-value="id"
                         density="compact"
                         variant="outlined">
         </v-autocomplete>
@@ -99,7 +99,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput v-model="product.id"/>
+        <ProductInput @selected="val => product.id = val"/>
       </v-col>
 
       <!--   Count    -->
@@ -338,9 +338,10 @@ export default {
   data() {
     return {
       form                  : {
-        user          : null,
+        customer      : null,
         dateTime      : undefined,
         warehouse     : null,
+        description   : '',
         products      : [
           {
             id      : '',
@@ -351,7 +352,6 @@ export default {
               store   : 0,
             },
             sum     : 0,
-            discount: 0,
             total   : 0
           }
         ],
@@ -390,6 +390,15 @@ export default {
       this.action  = 'add';
     },
     async add() {
+
+      // convert numbers
+      this.form.products.forEach((product) => {
+        product.price.purchase = Number(product.price.purchase);
+        product.price.consumer = Number(product.price.consumer);
+        product.price.store    = Number(product.price.store);
+        product.count          = Number(product.count);
+      });
+
       await fetch(
           this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices', {
             method : 'post',
@@ -398,11 +407,12 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              customer      : this.form.user,
-              dateTime      : this.form.dateTime,
-              warehouse     : this.form.warehouse,
-              products      : this.form.products,
-              addAndSubtract: this.form.addAndSubtract,
+              customer   : this.form.customer,
+              dateTime   : this.form.dateTime,
+              warehouse  : this.form.warehouse,
+              description: this.form.description,
+              products   : this.form.products,
+              AddAndSub  : this.form.addAndSubtract,
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -476,7 +486,6 @@ export default {
           store   : 0,
         },
         sum     : 0,
-        discount: 0,
         total   : 0
       });
     },
