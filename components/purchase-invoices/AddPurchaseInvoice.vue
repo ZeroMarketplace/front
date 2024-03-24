@@ -99,7 +99,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput @selected="val => product.id = val"/>
+        <ProductInput :inputId="product.id" @selected="val => product.id = val"/>
       </v-col>
 
       <!--   Count    -->
@@ -265,9 +265,9 @@
           </v-col>
 
           <!--    add and subtract      -->
-          <v-col v-for="addAndSubtract in form.addAndSubtract" cols="12">
+          <v-col class="my-md-2" v-for="addAndSubtract in form.addAndSubtract" cols="12">
             <v-row class="">
-              <v-col cols="5" class="text-caption">
+              <v-col cols="5" class="">
                 {{ getAddAndSubtractDetail(addAndSubtract.reason).title.fa }}:
               </v-col>
               <v-col cols="7" class="text-end">
@@ -299,7 +299,7 @@
 
         <!--       Submit       -->
         <v-btn class="border rounded-lg"
-               :loading="form.loading"
+               :loading="loading"
                prepend-icon="mdi-check-circle-outline"
                height="40"
                width="100"
@@ -338,21 +338,22 @@ export default {
   data() {
     return {
       form                  : {
+        id            : '',
         customer      : null,
         dateTime      : undefined,
         warehouse     : null,
         description   : '',
         products      : [
           {
-            id      : '',
-            count   : 0,
-            price   : {
+            id   : '',
+            count: 0,
+            price: {
               purchase: 0,
               consumer: 0,
               store   : 0,
             },
-            sum     : 0,
-            total   : 0
+            sum  : 0,
+            total: 0
           }
         ],
         addAndSubtract: [],
@@ -386,8 +387,14 @@ export default {
   methods: {
     reset() {
       this.$refs.addPurchaseInvoiceForm.reset();
-      this.loading = false;
-      this.action  = 'add';
+      this.form.id                = '';
+      this.form.sum               = 0;
+      this.form.total             = 0;
+      this.form.products          = [];
+      this.form.addAndSubtract    = [];
+      this.selectedAddAndSubtract = [];
+      this.loading                = false;
+      this.action                 = 'add';
     },
     async add() {
 
@@ -434,6 +441,15 @@ export default {
       });
     },
     async edit() {
+
+      // convert numbers
+      this.form.products.forEach((product) => {
+        product.price.purchase = Number(product.price.purchase);
+        product.price.consumer = Number(product.price.consumer);
+        product.price.store    = Number(product.price.store);
+        product.count          = Number(product.count);
+      });
+
       await fetch(
           this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form.id, {
             method : 'put',
@@ -442,7 +458,12 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title: this.form.title
+              customer   : this.form.customer,
+              dateTime   : this.form.dateTime,
+              warehouse  : this.form.warehouse,
+              description: this.form.description,
+              products   : this.form.products,
+              AddAndSub  : this.form.addAndSubtract,
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -465,7 +486,7 @@ export default {
     },
     async submit() {
       if (this.$refs.addPurchaseInvoiceForm.isValid) {
-        this.form.loading = true;
+        this.loading = true;
 
         if (this.action === 'add') {
           await this.add();
@@ -473,20 +494,20 @@ export default {
           await this.edit();
         }
 
-        this.form.loading = false;
+        this.loading = false;
       }
     },
     addProduct() {
       this.form.products.push({
-        id      : '',
-        count   : 0,
-        price   : {
+        id   : '',
+        count: 0,
+        price: {
           purchase: 0,
           consumer: 0,
           store   : 0,
         },
-        sum     : 0,
-        total   : 0
+        sum  : 0,
+        total: 0
       });
     },
     deleteProduct(index) {
@@ -602,7 +623,28 @@ export default {
         this.addAndSubtract = response.list;
         this.loading        = false;
       });
-    }
+    },
+    setEdit(data) {
+      this.reset();
+
+      this.form.customer       = data.customer;
+      this.form.dateTime       = data.dateTime;
+      this.form.warehouse      = data.warehouse;
+      this.form.description    = data.description;
+      this.form.products       = data.products;
+      this.form.addAndSubtract = data.AddAndSub;
+
+      // add and subtract
+      data.AddAndSub.forEach((addAndSub) => {
+        this.selectedAddAndSubtract.push(addAndSub.reason);
+      });
+
+      // id and action
+      this.form.id = data.id;
+      this.action  = 'edit';
+
+      this.calculateInvoiceTotal();
+    },
   },
   mounted() {
     this.user          = useCookie('user').value;

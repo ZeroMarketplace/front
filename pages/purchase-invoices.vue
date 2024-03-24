@@ -55,7 +55,10 @@
 
         <!--    Add Purchase Invoice   -->
         <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-          <purchase-invoices-add-purchase-invoice ref="addPurchaseInvoices"/>
+          <purchase-invoices-add-purchase-invoice
+              ref="addPurchaseInvoices"
+              @exit="toggleAction"
+              @refresh="getPurchaseInvoices"/>
         </v-col>
 
         <!--    purchase-invoices List   -->
@@ -70,7 +73,7 @@
                          class="rounded border-b pa-2" link>
 
               <!--      Title        -->
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
+              <v-list-item-title>{{ item.dateTime }}</v-list-item-title>
 
               <!--      Actions        -->
               <template v-slot:append>
@@ -78,7 +81,7 @@
                 <v-btn class="mx-2"
                        color="red"
                        size="25"
-                       @click="setDelete({_id: item._id})"
+                       @click="setDelete({id: item.id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -135,9 +138,9 @@ export default {
       else
         this.action = this.$refs.addPurchaseInvoices.action;
     },
-    async delete(_id) {
+    async delete(id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -167,21 +170,32 @@ export default {
             }
           }).then(async response => {
         response  = await response.json();
-        this.list = response;
+        this.list = response.list;
       });
       this.loading = false;
     },
-    setEdit(data) {
-
+    async setEdit(data) {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + data.id, {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        response = await response.json();
+        this.$refs.addPurchaseInvoices.setEdit(response);
+        this.toggleAction();
+      });
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+        this.delete(data.id);
       }
     }
   },
   mounted() {
-    this.user = useCookie('user').value;
+    this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getPurchaseInvoices();
   },

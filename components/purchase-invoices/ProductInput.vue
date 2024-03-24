@@ -40,10 +40,10 @@ import ProductImage from "~/components/products/ProductImage.vue";
 
 export default {
   components: {ProductImage},
+  props     : ['inputId'],
   data() {
     return {
       title  : '',
-      code   : '',
       items  : [],
       loading: false,
       rules  : {
@@ -57,10 +57,6 @@ export default {
     }
   },
   methods : {
-    selectProduct(index) {
-      this.title = this.items[index].title;
-      this.title = this.items[index];
-    },
     searchProduct() {
       clearInterval(this.timer);
 
@@ -89,6 +85,21 @@ export default {
 
       }, 800);
     },
+    getProduct() {
+      this.loading = true;
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'products/' + this.id, {
+        method : 'get',
+        headers: {
+          'Content-Type' : 'application/json',
+          'authorization': 'Bearer ' + this.user.token
+        }
+      }).then(async (response) => {
+        response = await response.json();
+        this.items.push(response);
+        this.title   = response;
+        this.loading = false;
+      });
+    }
   },
   computed: {},
   watch   : {
@@ -96,11 +107,21 @@ export default {
       if (val && typeof val === 'object') {
         this.$emit('selected', val.id);
       }
+    },
+    inputId(val, oldVal) {
+      if (val) {
+        this.id = val;
+        this.getProduct();
+      }
     }
   },
   mounted() {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
+    if (this.inputId) {
+      this.id = this.inputId;
+      this.getProduct();
+    }
   }
 }
 </script>
