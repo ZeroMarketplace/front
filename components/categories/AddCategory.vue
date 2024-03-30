@@ -53,6 +53,19 @@
         </v-autocomplete>
       </v-col>
 
+      <!--      Profit Percentage      -->
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+        <v-text-field class="mt-3"
+                      v-model="form.profitPercent"
+                      label="درصد سود"
+                      placeholder="وارد کنید"
+                      :readonly="loading"
+                      type="number"
+                      density="compact"
+                      variant="outlined">
+        </v-text-field>
+      </v-col>
+
       <!--     Actions       -->
       <v-col cols="12">
 
@@ -95,13 +108,14 @@ export default {
   data() {
     return {
       form      : {
-        title       : {
+        title        : {
           en: '',
           fa: ''
         },
-        _parent     : '',
-        _parentTitle: '',
-        _properties : []
+        profitPercent: 0,
+        _parent      : '',
+        _parentTitle : '',
+        _properties  : []
       },
       rules     : {
         notEmpty                  : [
@@ -139,9 +153,10 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title      : this.form.title,
-              _properties: this.form._properties,
-              _parent    : this.form._parent,
+              title        : this.form.title,
+              profitPercent: Number(this.form.profitPercent),
+              _properties  : this.form._properties,
+              _parent      : this.form._parent,
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -169,8 +184,9 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title      : this.form.title,
-              _properties: this.form._properties
+              title        : this.form.title,
+              profitPercent: Number(this.form.profitPercent),
+              _properties  : this.form._properties
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -209,11 +225,12 @@ export default {
     },
     setEdit(data) {
       this.form   = {
-        title       : data.title,
-        _parent     : '',
-        _parentTitle: '',
-        _properties : data._properties,
-        id          : data.id
+        title        : data.title,
+        profitPercent: data.profitPercent,
+        _parent      : '',
+        _parentTitle : '',
+        _properties  : data._properties,
+        id           : data.id
       };
       this.action = 'edit';
     },
