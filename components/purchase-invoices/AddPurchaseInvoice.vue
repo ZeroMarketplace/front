@@ -237,10 +237,10 @@
                           variant="outlined"
                           hide-details>
               <template v-slot:append-inner>
-                <v-icon v-if="getAddAndSubtractDetail(item.reason).type === 'percent'">
+                <v-icon v-if="Number(item.value) <= 100">
                   mdi-percent
                 </v-icon>
-                <v-label v-if="getAddAndSubtractDetail(item.reason).type === 'number'">
+                <v-label v-else>
                   تومان
                 </v-label>
               </template>
@@ -526,7 +526,7 @@ export default {
         if (detailAddAndSubtract) {
           let operationSum = 0;
           if (detailAddAndSubtract.operation === 'add') {
-            if (detailAddAndSubtract.type === 'percent') {
+            if (Number(addAndSubtract.value) <= 100) {
               operationSum = (this.form.total * addAndSubtract.value / 100)
               this.form.sum += operationSum;
             } else {
@@ -534,7 +534,7 @@ export default {
               this.form.sum += addAndSubtract.value;
             }
           } else {
-            if (detailAddAndSubtract.type === 'percent') {
+            if (Number(addAndSubtract.value) <= 100) {
               operationSum = (this.form.total * addAndSubtract.value / 100)
               this.form.sum -= operationSum;
             } else {
@@ -580,9 +580,10 @@ export default {
             1
         );
       } else {
+        let addAndSubtract = this.getAddAndSubtractDetail(id);
         this.form.addAndSubtract.push({
           reason: id,
-          value : '',
+          value : addAndSubtract.default,
           sum   : 0
         });
       }

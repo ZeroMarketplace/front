@@ -29,7 +29,7 @@
         </v-text-field>
       </v-col>
 
-      <!--      Title EN      -->
+      <!--      Default      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
                       v-model="form.default"
@@ -40,21 +40,15 @@
                       type="number"
                       density="compact"
                       variant="outlined">
+          <template v-slot:append-inner>
+            <v-icon v-if="Number(form.default) <= 100">
+              mdi-percent
+            </v-icon>
+            <v-label v-else>
+              تومان
+            </v-label>
+          </template>
         </v-text-field>
-      </v-col>
-
-      <!--      Type      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-select class="ltrDirection"
-                  v-model="form.type"
-                  label="نوع ورودی"
-                  placeholder="انتخاب کنید"
-                  :items="types"
-                  :readonly="loading"
-                  :rules="rules.notEmpty"
-                  density="compact"
-                  variant="outlined">
-        </v-select>
       </v-col>
 
       <!--      Operation      -->
@@ -117,8 +111,7 @@ export default {
           fa: ''
         },
         default  : '',
-        type     : 'percent',
-        operation: 'add',
+        operation: 'add'
       },
       rules     : {
         notEmpty: [
@@ -128,10 +121,6 @@ export default {
           }
         ],
       },
-      types     : [
-        {title: 'درصد', value: 'percent'},
-        {title: 'مقدار عددی', value: 'number'},
-      ],
       operations: [
         {title: 'اضافه کردن', value: 'add'},
         {title: 'کم کردن', value: 'subtract'},
@@ -157,8 +146,7 @@ export default {
             body   : JSON.stringify({
               title    : this.form.title,
               default  : this.form.default,
-              type     : this.form.type,
-              operation: this.form.operation,
+              operation: this.form.operation
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -190,8 +178,7 @@ export default {
             body   : JSON.stringify({
               title    : this.form.title,
               default  : this.form.default,
-              type     : this.form.type,
-              operation: this.form.operation,
+              operation: this.form.operation
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -229,7 +216,6 @@ export default {
       this.form   = {
         title    : data.title,
         default  : data.default,
-        type     : data.type,
         operation: data.operation,
         id       : data.id
       };
