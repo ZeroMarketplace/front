@@ -99,7 +99,8 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput :inputId="product.id" @selected="val => product.id = val"/>
+        <ProductInput :inputId="product.id"
+                      @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
       <!--   Count    -->
@@ -137,7 +138,7 @@
         <v-text-field class=""
                       v-model="product.price.consumer"
                       type="number"
-                      label="فی مصرف"
+                      :label="'فی مصرف' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
                       :readonly="loading"
                       :rules="rules.notEmpty"
                       density="compact"
@@ -150,7 +151,7 @@
       <v-col class="pa-1 mt-2" cols="12" md="2">
         <v-text-field class=""
                       v-model="product.price.store"
-                      label="فی فروشگاه"
+                      :label="'فی فروشگاه' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
                       type="number"
                       :readonly="loading"
                       :rules="rules.notEmpty"
@@ -343,19 +344,7 @@ export default {
         dateTime      : undefined,
         warehouse     : null,
         description   : '',
-        products      : [
-          {
-            id   : '',
-            count: 0,
-            price: {
-              purchase: 0,
-              consumer: 0,
-              store   : 0,
-            },
-            sum  : 0,
-            total: 0
-          }
-        ],
+        products      : [],
         addAndSubtract: [],
         sum           : 0,
         total         : 0
@@ -395,6 +384,7 @@ export default {
       this.selectedAddAndSubtract = [];
       this.loading                = false;
       this.action                 = 'add';
+      this.$forceUpdate();
     },
     async add() {
 
@@ -510,6 +500,13 @@ export default {
         total: 0
       });
     },
+    async onProductSelected(val, index) {
+      this.form.products[index]['id'] = val.id;
+      this.getCategory(val._categories[0]).then(category => {
+        if (category.profitPercent)
+          this.form.products[index].profitPercent = category.profitPercent;
+      });
+    },
     deleteProduct(index) {
       this.form.products.splice(index, 1);
     },
@@ -554,6 +551,24 @@ export default {
       let product                     = this.form.products[index];
       this.form.products[index].sum   = product.count * product.price.purchase;
       this.form.products[index].total = this.form.products[index].sum;
+
+      // calc profit percentage
+      if (this.form.products[index].profitPercent) {
+        // consumer price
+        this.form.products[index].price.consumer = Number(this.form.products[index].price.purchase) +
+            (Number(this.form.products[index].price.purchase) * Number(this.form.products[index].profitPercent) / 100);
+
+        // store price
+        this.form.products[index].price.store = Number(this.form.products[index].price.purchase) +
+            (Number(this.form.products[index].price.purchase) * Number(this.form.products[index].profitPercent) / 100);
+      } else {
+        // consumer price
+        this.form.products[index].price.consumer = this.form.products[index].price.purchase;
+
+        // store price
+        this.form.products[index].price.store = this.form.products[index].price.purchase;
+      }
+
       // this.form.products[index].total = product.sum
       //     - (product.discount * product.sum / 100) // minus discount
       this.calculateInvoiceTotal();
@@ -624,6 +639,17 @@ export default {
         this.loading        = false;
       });
     },
+    getCategory(id) {
+      return new Promise((resolve, reject) => {
+        fetch(
+            this.runtimeConfig.public.API_BASE_URL + 'categories/' + id, {
+              method: 'get'
+            }).then(async response => {
+          response = await response.json();
+          return resolve(response);
+        });
+      });
+    },
     setEdit(data) {
       this.reset();
 
@@ -642,6 +668,9 @@ export default {
       // id and action
       this.form.id = data.id;
       this.action  = 'edit';
+      setTimeout(() => {
+        this.$forceUpdate();
+      }, 2500);
 
       this.calculateInvoiceTotal();
     },
@@ -654,11 +683,7 @@ export default {
     this.getAddAndSubtract();
   },
   computed: {},
-  watch   : {
-    productSearchInput(val) {
-      console.log(val);
-    }
-  }
+  watch   : {}
 }
 </script>
 

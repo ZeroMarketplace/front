@@ -43,10 +43,10 @@ export default {
   props     : ['inputId'],
   data() {
     return {
-      title  : '',
-      items  : [],
-      loading: false,
-      rules  : {
+      title   : '',
+      items   : [],
+      loading : false,
+      rules   : {
         notEmptySelectable: [
           value => {
             if (value) return true;
@@ -87,7 +87,7 @@ export default {
     },
     getProduct() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'products/' + this.id, {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'products/' + this.inputId, {
         method : 'get',
         headers: {
           'Content-Type' : 'application/json',
@@ -105,21 +105,14 @@ export default {
   watch   : {
     title(val, oldVal) {
       if (val && typeof val === 'object') {
-        this.$emit('selected', val.id);
+        this.$emit('selected', val);
       }
     },
-    inputId(val, oldVal) {
-      if (val) {
-        this.id = val;
-        this.getProduct();
-      }
-    }
   },
   mounted() {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     if (this.inputId) {
-      this.id = this.inputId;
       this.getProduct();
     }
   }
