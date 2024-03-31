@@ -68,37 +68,9 @@
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-list class="mx-5">
-            <v-list-item v-for="item in list"
-                         class="rounded border-b pa-2" link>
+          <v-data-table :headers="listHeaders" :items="list">
+          </v-data-table>
 
-              <!--      Title        -->
-              <v-list-item-title>{{ item.dateTime }}</v-list-item-title>
-
-              <!--      Actions        -->
-              <template v-slot:append>
-                <!--  Delete   -->
-                <v-btn class="mx-2"
-                       color="red"
-                       size="25"
-                       @click="setDelete({id: item.id})"
-                       icon>
-                  <v-icon size="15">mdi-delete-outline</v-icon>
-                </v-btn>
-
-                <!--  Edit   -->
-                <v-btn class="mx-2"
-                       color="secondary"
-                       size="25"
-                       @click="setEdit(item)"
-                       icon>
-                  <v-icon size="15">mdi-pencil</v-icon>
-                </v-btn>
-
-              </template>
-
-            </v-list-item>
-          </v-list>
 
           <!--    Empty List Alert      -->
           <EmptyList :list="list" :loading="loading"/>
@@ -129,6 +101,37 @@ export default {
       action : 'list',
       loading: true,
       list   : [],
+      listHeaders: [
+        {
+          title: 'فروشنده',
+          align: 'start',
+          key: 'customer',
+          sortable: false
+        },
+        {
+          title: 'تاریخ',
+          align: 'start',
+          key: 'dateTime',
+          sortable: false
+        },
+        {
+          title: 'مبلغ فاکتور',
+          align: 'start',
+          key: 'total',
+          sortable: false
+        },
+        {
+          title: 'انبار',
+          align: 'start',
+          key: 'warehouse.title',
+          sortable: false
+        },
+        {
+          title: 'عملیات',
+          align: 'start',
+          sortable: false
+        }
+      ],
     }
   },
   methods: {

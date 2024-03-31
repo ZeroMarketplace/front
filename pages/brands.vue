@@ -78,7 +78,7 @@
                 <v-btn class="mx-2"
                        color="red"
                        size="30"
-                       @click="setDelete({id: item.id})"
+                       @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -162,7 +162,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     },
     toggleAction() {

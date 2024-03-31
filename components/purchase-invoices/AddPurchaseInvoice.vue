@@ -229,7 +229,7 @@
                           v-model="item.value"
                           type="number"
                           placeholder="وارد کنید"
-                          :label="getAddAndSubtractDetail(item.reason).title.fa"
+                          :label="getAddAndSubtractDetail(item._reason).title.fa"
                           :readonly="loading"
                           :rules="rules.notEmpty"
                           @input="calculateInvoiceTotal"
@@ -269,7 +269,7 @@
           <v-col class="my-md-2" v-for="addAndSubtract in form.addAndSubtract" cols="12">
             <v-row class="">
               <v-col cols="5" class="">
-                {{ getAddAndSubtractDetail(addAndSubtract.reason).title.fa }}:
+                {{ getAddAndSubtractDetail(addAndSubtract._reason).title.fa }}:
               </v-col>
               <v-col cols="7" class="text-end">
                 {{ addAndSubtract.sum }} تومان
@@ -522,7 +522,7 @@ export default {
 
       // add and subtract
       this.form.addAndSubtract.forEach((addAndSubtract) => {
-        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract.reason);
+        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
         if (detailAddAndSubtract) {
           let operationSum = 0;
           if (detailAddAndSubtract.operation === 'add') {
@@ -574,15 +574,15 @@ export default {
       this.calculateInvoiceTotal();
     },
     toggleAddAndSubtract(id) {
-      if (this.form.addAndSubtract.find(p => p.reason === id)) {
+      if (this.form.addAndSubtract.find(p => p._reason === id)) {
         this.form.addAndSubtract.splice(
-            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p.reason === id)),
+            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p._reason === id)),
             1
         );
       } else {
         let addAndSubtract = this.getAddAndSubtractDetail(id);
         this.form.addAndSubtract.push({
-          reason: id,
+          _reason: id,
           value : addAndSubtract.default,
           sum   : 0
         });
@@ -663,7 +663,7 @@ export default {
 
       // add and subtract
       data.AddAndSub.forEach((addAndSub) => {
-        this.selectedAddAndSubtract.push(addAndSub.reason);
+        this.selectedAddAndSubtract.push(addAndSub._reason);
       });
 
       // id and action
