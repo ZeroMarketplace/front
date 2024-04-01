@@ -30,7 +30,7 @@
                         :rules="rules.notEmptySelectableMultiple"
                         :items="categories"
                         item-title="title.fa"
-                        item-value="id"
+                        item-value="_id"
                         density="compact"
                         variant="outlined"
                         chips
@@ -47,7 +47,7 @@
                         :rules="rules.notEmptySelectable"
                         :items="brands"
                         item-title="title.fa"
-                        item-value="id"
+                        item-value="_id"
                         density="compact"
                         variant="outlined">
         </v-autocomplete>
@@ -62,7 +62,7 @@
                         :rules="rules.notEmptySelectable"
                         :items="units"
                         item-title="title.fa"
-                        item-value="id"
+                        item-value="_id"
                         density="compact"
                         variant="outlined">
         </v-autocomplete>
@@ -259,7 +259,7 @@
                     :value="value.code"
                     class="mx-2"
                     variant="outlined"
-                    @click="togglePropertyVariant(property.id,value.code)"
+                    @click="togglePropertyVariant(property._id,value.code)"
                     filter>
 
               <template v-slot:prepend>
@@ -287,7 +287,7 @@
         <thead>
         <tr>
           <th v-for="props in form.variantsProps" class="text-center font-weight-bold">
-            {{ categoryProperties.length ? (getVariantProps(props.id).title.fa ?? '') : '' }}
+            {{ categoryProperties.length ? (getVariantProps(props._id).title.fa ?? '') : '' }}
           </th>
           <th class="text-center">
             <v-icon>mdi-cog</v-icon>
@@ -303,7 +303,7 @@
           <!--     Properties     -->
           <td v-for="props in  form.variantsProps" class="flex-grow-1">
             <v-label v-for="property in variant.properties">
-              <span v-if="props.id === property.propertyId">
+              <span v-if="props._id === property.propertyId">
                 {{ getPropertyValue(property.propertyId, property.value).title }}
               </span>
             </v-label>
@@ -362,11 +362,11 @@
                     multiple>
 
         <v-chip v-for="value in categoryProperties.filter(p => !p.variant)"
-                :key="value.id"
-                :value="value.id"
+                :key="value._id"
+                :value="value._id"
                 class="mx-2"
                 variant="outlined"
-                @click="toggleDynamicProperty(value.id,value.title.fa)"
+                @click="toggleDynamicProperty(value._id,value.title.fa)"
                 filter>
 
           {{ value.title.fa }}
@@ -397,7 +397,7 @@
                           v-model="property.title"
                           label="عنوان"
                           placeholder="وارد کنید"
-                          :readonly="loading || property.id"
+                          :readonly="loading || property._id"
                           :rules="rules.notEmpty"
                           density="compact"
                           variant="outlined"
@@ -408,7 +408,7 @@
           <!--      Value      -->
           <td>
             <v-text-field
-                v-if="!property.id || (property.id && !getPropertyValues(property.id).length)"
+                v-if="!property._id || (property._id && !getPropertyValues(property._id).length)"
                 class=""
                 v-model="property.value"
                 label="مقدار"
@@ -420,13 +420,13 @@
                 hide-details>
             </v-text-field>
 
-            <v-autocomplete v-if="property.id && getPropertyValues(property.id).length"
+            <v-autocomplete v-if="property._id && getPropertyValues(property._id).length"
                             class="mt-3"
                             v-model="property.value"
                             label="مقدار"
                             :readonly="loading"
                             :rules="rules.notEmptySelectable"
-                            :items="getPropertyValues(property.id)"
+                            :items="getPropertyValues(property._id)"
                             item-title="title"
                             item-value="code"
                             density="compact"
@@ -641,7 +641,7 @@ export default {
 
       // exception remove dynamic properties titles
       // this.form.properties.forEach((property) => {
-      //   if (property.id)
+      //   if (property._id)
       //     delete property['title'];
       // });
 
@@ -672,7 +672,7 @@ export default {
         if (response.status === 200) {
           if (this.form.files.length) {
             response = await response.json();
-            await this.uploadFiles(response.id)
+            await this.uploadFiles(response._id)
           } else {
             this.reset();
             this.$emit('exit');
@@ -685,7 +685,7 @@ export default {
         }
       });
     },
-    async uploadFiles(id) {
+    async uploadFiles(_id) {
       // add files to form data
       let filesForm = new FormData();
       this.form.files.forEach((file) => {
@@ -693,7 +693,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + id + '/files', {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id + '/files', {
             method : 'post',
             headers: {
               'authorization': 'Bearer ' + this.user.token
@@ -715,7 +715,7 @@ export default {
     async deleteFile(fileName, index) {
       if (confirm('آیا مطمئن هستید؟')) {
         await fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form.id + '/files/' + fileName, {
+            this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id + '/files/' + fileName, {
               method : 'delete',
               headers: {
                 'authorization': 'Bearer ' + this.user.token
@@ -737,12 +737,12 @@ export default {
     async edit() {
       // exception remove dynamic properties titles
       // this.form.properties.forEach((property) => {
-      //   if (property.id)
+      //   if (property._id)
       //     delete property['title'];
       // });
 
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -767,7 +767,7 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           if (this.form.files.length) {
-            await this.uploadFiles(this.form.id);
+            await this.uploadFiles(this.form._id);
           } else {
             this.reset();
             this.$emit('exit');
@@ -848,7 +848,7 @@ export default {
             this.form.tags         = data.tags;
             this.form.title        = data.title;
             this.form.content      = data.content;
-            this.form.id           = data.id;
+            this.form._id           = data._id;
             this.action            = 'edit';
 
             // set files
@@ -865,13 +865,13 @@ export default {
             // set variants props
             data.variants.forEach((variant) => {
               variant.properties.forEach((property) => {
-                let variantProp = this.form.variantsProps.find(prop => prop.id === property.propertyId);
+                let variantProp = this.form.variantsProps.find(prop => prop._id === property.propertyId);
                 if (variantProp) {
                   if (!variantProp.values.includes(property.value))
                     variantProp.values.push(property.value);
                 } else {
                   this.form.variantsProps.push({
-                    id    : property.propertyId,
+                    _id    : property.propertyId,
                     values: [property.value]
                   });
                 }
@@ -884,8 +884,8 @@ export default {
 
             // set dynamic properties
             data.properties.forEach((property) => {
-              if (property.id) {
-                this.form.dynamicProperties.push(property.id);
+              if (property._id) {
+                this.form.dynamicProperties.push(property._id);
               }
             });
 
@@ -898,7 +898,7 @@ export default {
       // wait for load data
       setTimeout(() => {
         this.action            = 'add';
-        this.form.id           = '';
+        this.form._id           = '';
         this.form.files        = [];
         this.form.filesPreview = [];
         this.form.filesError   = false;
@@ -941,7 +941,7 @@ export default {
               // set dynamic properties in edit mode
               response.list.filter(property => property.variant === false).forEach((property) => {
                 if (this.action === 'edit') {
-                  let propertyFind = this.form.properties.find(prop => prop.id === property.id);
+                  let propertyFind = this.form.properties.find(prop => prop._id === property._id);
                   if (propertyFind) propertyFind.title = property.title.fa;
                 }
               });
@@ -962,15 +962,15 @@ export default {
 
       // every other properties
       this.form.variantsProps.forEach((variantProp) => {
-        if (!propsChecked.includes(variantProp.id)) {
+        if (!propsChecked.includes(variantProp._id)) {
           // add to checked
-          propsChecked.push(variantProp.id);
+          propsChecked.push(variantProp._id);
 
           // every value of other properties
           variantProp.values.forEach((propValue) => {
 
             // create the value sample
-            let propertyObject = {propertyId: variantProp.id, value: propValue};
+            let propertyObject = {propertyId: variantProp._id, value: propValue};
 
             // add the value sample
             variant.properties.push(propertyObject);
@@ -995,10 +995,10 @@ export default {
     togglePropertyVariant(propertyId, valueCode) {
 
       // create property array
-      let variantProp = this.form.variantsProps.find(prop => prop.id === propertyId);
+      let variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
       if (!variantProp) {
-        this.form.variantsProps.push({id: propertyId, values: []});
-        variantProp = this.form.variantsProps.find(prop => prop.id === propertyId);
+        this.form.variantsProps.push({_id: propertyId, values: []});
+        variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
       }
 
       // toggle value
@@ -1037,11 +1037,11 @@ export default {
           let variant = {properties: []};
 
           // add base prop value
-          variant.properties.push({propertyId: variantProp.id, value: propValue});
+          variant.properties.push({propertyId: variantProp._id, value: propValue});
 
           // check exists other properties
           if (this.form.variantsProps.length > 1) {
-            this.createPropertyVariants(structuredClone(variant), [variantProp.id]);
+            this.createPropertyVariants(structuredClone(variant), [variantProp._id]);
           } else {
             if (!this.checkVariantExists(variant)) {
               this.form.variants.push(variant);
@@ -1071,7 +1071,7 @@ export default {
         this.form.variants.splice(index, 1);
     },
     getPropertyValue(propertyId, valueCode) {
-      let property = this.categoryProperties.find(prop => prop.id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property) {
         return property.values.find(value => value.code === valueCode);
       } else {
@@ -1079,7 +1079,7 @@ export default {
       }
     },
     getPropertyValues(propertyId) {
-      let property = this.categoryProperties.find(prop => prop.id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property && property.values) {
         return property.values;
       } else {
@@ -1087,7 +1087,7 @@ export default {
       }
     },
     getVariantProps(propertyId) {
-      let property = this.categoryProperties.find(prop => prop.id === propertyId);
+      let property = this.categoryProperties.find(prop => prop._id === propertyId);
       if (property) {
         return property;
       } else {
@@ -1122,26 +1122,26 @@ export default {
         value: ''
       });
     },
-    toggleDynamicProperty(id, title) {
+    toggleDynamicProperty(_id, title) {
       // add property
-      if (!this.form.properties.find(p => p.id === id)) {
+      if (!this.form.properties.find(p => p._id === _id)) {
         this.form.properties.push({
           title: title,
           value: '',
-          id   : id
+          _id   : _id
         });
       } else {
         // remove property
         this.form.properties.splice(
-            this.form.properties.indexOf(this.form.properties.find(p => p.id === id)),
+            this.form.properties.indexOf(this.form.properties.find(p => p._id === _id)),
             1
         );
       }
     },
     deleteProperty(index) {
       // remove from dynamic properties chip input
-      if (this.form.properties[index].id)
-        this.form.dynamicProperties.splice(this.form.dynamicProperties.indexOf(this.form.properties[index].id), 1);
+      if (this.form.properties[index]._id)
+        this.form.dynamicProperties.splice(this.form.dynamicProperties.indexOf(this.form.properties[index]._id), 1);
 
       this.form.properties.splice(index, 1);
     }

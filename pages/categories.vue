@@ -115,9 +115,9 @@ export default {
             this.loading = false;
           });
     },
-    async delete(id) {
+    async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'categories/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'categories/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -142,7 +142,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     },
     setParent(data) {

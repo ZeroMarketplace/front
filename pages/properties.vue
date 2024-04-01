@@ -76,7 +76,7 @@
                 <v-btn class="mx-2"
                        color="red"
                        size="30"
-                       @click="setDelete({id: item.id})"
+                       @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -125,9 +125,9 @@ export default {
     }
   },
   methods: {
-    async delete(id) {
+    async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'properties/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -160,7 +160,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     },
     toggleAction() {

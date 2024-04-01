@@ -141,9 +141,9 @@ export default {
       else
         this.action = this.$refs.addPurchaseInvoices.action;
     },
-    async delete(id) {
+    async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -179,7 +179,7 @@ export default {
     },
     async setEdit(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + data.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + data._id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -193,7 +193,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     }
   },

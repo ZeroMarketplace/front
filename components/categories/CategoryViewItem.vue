@@ -25,7 +25,7 @@
       <v-btn class="mx-2"
              color="secondary"
              size="30"
-             @click="setParent({id: item.id, title: item.title.fa, _properties: item._properties})"
+             @click="setParent({_id: item._id, title: item.title.fa, _properties: item._properties})"
              icon>
         <v-icon size="15">mdi-plus</v-icon>
       </v-btn>
@@ -43,7 +43,7 @@
       <v-btn class="mx-2"
              color="red"
              size="30"
-             @click="setDelete({id: item.id})"
+             @click="setDelete({_id: item._id})"
              icon>
         <v-icon size="15">mdi-delete-outline</v-icon>
       </v-btn>

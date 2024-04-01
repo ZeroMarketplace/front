@@ -83,7 +83,7 @@
                 <v-btn class="mx-1"
                        color="red"
                        size="30"
-                       @click="setDelete({id: item.id})"
+                       @click="setDelete({_id: item._id})"
                        icon>
                   <v-icon size="15">mdi-delete-outline</v-icon>
                 </v-btn>
@@ -167,9 +167,9 @@ export default {
       else
         this.action = this.$refs.addProduct.action;
     },
-    async delete(id) {
+    async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -190,7 +190,7 @@ export default {
     },
     async setEdit(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -204,7 +204,7 @@ export default {
     },
     async setCopy(data) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -218,7 +218,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     }
   },

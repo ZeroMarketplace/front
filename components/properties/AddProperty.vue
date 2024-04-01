@@ -204,7 +204,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -250,7 +250,7 @@ export default {
         title  : data.title,
         variant: data.variant,
         values : data.values,
-        id     : data.id
+        _id     : data._id
       };
       this.action = 'edit';
     },

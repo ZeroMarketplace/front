@@ -46,7 +46,7 @@
                         :readonly="loading"
                         :items="properties"
                         item-title=".title.fa"
-                        item-value="id"
+                        item-value="_id"
                         density="compact"
                         variant="outlined"
                         multiple>
@@ -177,7 +177,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'categories/' + this.form.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'categories/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -230,17 +230,17 @@ export default {
         _parent      : '',
         _parentTitle : '',
         _properties  : data._properties,
-        id           : data.id
+        _id           : data._id
       };
       this.action = 'edit';
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     },
     setParent(data) {
-      this.form._parent      = data.id;
+      this.form._parent      = data._id;
       this.form._parentTitle = data.title;
       this.form._properties  = data._properties;
     }
