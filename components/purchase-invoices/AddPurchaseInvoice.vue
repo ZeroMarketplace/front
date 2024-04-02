@@ -654,9 +654,9 @@ export default {
     setEdit(data) {
       this.reset();
 
-      this.form.customer       = data.customer;
+      this.form.customer       = data._customer;
       this.form.dateTime       = data.dateTime;
-      this.form.warehouse      = data.warehouse;
+      this.form.warehouse      = data._warehouse;
       this.form.description    = data.description;
       this.form.products       = data.products;
       this.form.addAndSubtract = data.AddAndSub;

@@ -68,7 +68,50 @@
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-data-table :headers="listHeaders" :items="list">
+          <v-data-table class="mt-n5"
+                        :loading="loading"
+                        :headers="listHeaders"
+                        :items="list"
+                        :items-per-page="perPage"
+                        :pageCount="listTotal"
+                        @update:options="setListOptions"
+                        sticky
+                        show-current-page>
+            <template v-slot:item._customer="{ item }">
+              {{ item._customer.phone }}
+            </template>
+            <template v-slot:item._warehouse="{ item }">
+              {{ item._warehouse.title.fa }}
+            </template>
+            <template v-slot:item.operation="{ item }">
+              <!--  Delete   -->
+              <v-btn class="mx-2"
+                     color="red"
+                     size="25"
+                     @click="setDelete({id: item.id})"
+                     icon>
+                <v-icon size="15">mdi-delete-outline</v-icon>
+              </v-btn>
+
+              <!--  Edit   -->
+              <v-btn class="mx-2"
+                     color="secondary"
+                     size="25"
+                     @click="setEdit(item)"
+                     icon>
+                <v-icon size="15">mdi-pencil</v-icon>
+              </v-btn>
+            </template>
+
+            <!--      Pagination      -->
+            <template v-slot:bottom>
+              <v-pagination class="mt-5"
+                            active-color="secondary"
+                            v-model="page"
+                            :length="pageCount"
+                            rounded="circle">
+              </v-pagination>
+            </template>
           </v-data-table>
 
 
@@ -97,41 +140,48 @@ export default {
   components: {AddPurchaseInvoice},
   data() {
     return {
-      user   : {},
-      action : 'list',
-      loading: true,
-      list   : [],
-      listHeaders: [
+      user         : {},
+      action       : 'list',
+      loading      : true,
+      list         : [],
+      listHeaders  : [
         {
-          title: 'فروشنده',
-          align: 'start',
-          key: 'customer',
+          title   : 'فروشنده',
+          align   : 'center',
+          key     : '_customer',
           sortable: false
         },
         {
-          title: 'تاریخ',
-          align: 'start',
-          key: 'dateTime',
-          sortable: false
+          title   : 'تاریخ',
+          key     : 'dateTimeJalali',
+          align   : 'center',
+          sortable: true
         },
         {
-          title: 'مبلغ فاکتور',
-          align: 'start',
-          key: 'total',
-          sortable: false
+          title   : 'مبلغ',
+          key     : 'total',
+          align   : 'center',
+          sortable: true
         },
         {
-          title: 'انبار',
-          align: 'start',
-          key: 'warehouse.title',
-          sortable: false
+          title   : 'انبار',
+          key     : '_warehouse',
+          align   : 'center',
+          sortable: true
         },
         {
-          title: 'عملیات',
-          align: 'start',
+          title   : 'عملیات',
+          align   : 'center',
+          key     : 'operation',
           sortable: false
         }
       ],
+      listTotal    : 100,
+      page         : 1,
+      perPage      : 10,
+      pageCount    : 1,
+      sortColumn   : '',
+      sortDirection: ''
     }
   },
   methods: {
@@ -162,18 +212,33 @@ export default {
         }
       });
     },
+    filter() {
+      let search = new URLSearchParams();
+
+      // pagination
+      search.set('perPage', this.perPage);
+      search.set('page', this.page);
+
+      // sort
+      search.set('sortColumn', this.sortColumn);
+      search.set('sortDirection', Number(this.sortDirection));
+
+      return search;
+    },
     getPurchaseInvoices() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices', {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices?' + this.filter(), {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-        response  = await response.json();
-        this.list = response.list;
+        response       = await response.json();
+        this.listTotal = response.total;
+        this.pageCount = Math.ceil((this.listTotal / this.perPage));
+        this.list      = response.list;
       });
       this.loading = false;
     },
@@ -195,6 +260,20 @@ export default {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
+    },
+    setListOptions(val) {
+      // handle dateTime
+      if (val && val.sortBy[0]) {
+
+        if (val.sortBy[0].key === 'dateTimeJalali')
+          this.sortColumn = 'dateTime';
+        else
+          this.sortColumn = val.sortBy[0].key;
+
+        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
+
+        this.getPurchaseInvoices();
+      }
     }
   },
   mounted() {
@@ -202,7 +281,12 @@ export default {
     this.runtimeConfig = useRuntimeConfig();
     this.getPurchaseInvoices();
   },
-  computed: {}
+  computed: {},
+  watch   : {
+    page(val, oldVal) {
+      this.getPurchaseInvoices();
+    }
+  }
 }
 </script>
 
