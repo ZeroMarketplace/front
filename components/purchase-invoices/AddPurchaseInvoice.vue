@@ -16,7 +16,7 @@
                         :rules="rules.notEmptySelectable"
                         :items="users"
                         item-title="title"
-                        item-value="id"
+                        item-value="_id"
                         density="compact"
                         variant="outlined">
         </v-autocomplete>
@@ -54,7 +54,7 @@
                   :rules="rules.notEmptySelectable"
                   :items="warehouses"
                   item-title="title.fa"
-                  item-value="id"
+                  item-value="_id"
                   density="compact"
                   variant="outlined">
         </v-select>
@@ -99,7 +99,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput :inputId="product.id"
+        <ProductInput :inputId="product._id"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -209,11 +209,11 @@
                       column
                       multiple>
           <v-chip v-for="(value) in addAndSubtract"
-                  :key="value.id"
-                  :value="value.id"
+                  :key="value._id"
+                  :value="value._id"
                   class="mx-2"
                   variant="outlined"
-                  @click="toggleAddAndSubtract(value.id)"
+                  @click="toggleAddAndSubtract(value._id)"
                   filter>
 
             {{ value.title.fa }}
@@ -339,7 +339,7 @@ export default {
   data() {
     return {
       form                  : {
-        id            : '',
+        _id            : '',
         customer      : null,
         dateTime      : undefined,
         warehouse     : null,
@@ -376,7 +376,7 @@ export default {
   methods: {
     reset() {
       this.$refs.addPurchaseInvoiceForm.reset();
-      this.form.id                = '';
+      this.form._id                = '';
       this.form.sum               = 0;
       this.form.total             = 0;
       this.form.products          = [];
@@ -441,7 +441,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -489,7 +489,7 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        id   : '',
+        _id   : '',
         count: 0,
         price: {
           purchase: 0,
@@ -501,7 +501,7 @@ export default {
       });
     },
     async onProductSelected(val, index) {
-      this.form.products[index]['id'] = val.id;
+      this.form.products[index]['_id'] = val._id;
       this.getCategory(val._categories[0]).then(category => {
         if (category.profitPercent)
           this.form.products[index].profitPercent = category.profitPercent;
@@ -573,16 +573,16 @@ export default {
       //     - (product.discount * product.sum / 100) // minus discount
       this.calculateInvoiceTotal();
     },
-    toggleAddAndSubtract(id) {
-      if (this.form.addAndSubtract.find(p => p._reason === id)) {
+    toggleAddAndSubtract(_id) {
+      if (this.form.addAndSubtract.find(p => p._reason === _id)) {
         this.form.addAndSubtract.splice(
-            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p._reason === id)),
+            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p._reason === _id)),
             1
         );
       } else {
-        let addAndSubtract = this.getAddAndSubtractDetail(id);
+        let addAndSubtract = this.getAddAndSubtractDetail(_id);
         this.form.addAndSubtract.push({
-          _reason: id,
+          _reason: _id,
           value : addAndSubtract.default,
           sum   : 0
         });
@@ -590,8 +590,8 @@ export default {
 
       this.calculateInvoiceTotal();
     },
-    getAddAndSubtractDetail(id) {
-      let findItem = this.addAndSubtract.find(p => p.id === id);
+    getAddAndSubtractDetail(_id) {
+      let findItem = this.addAndSubtract.find(p => p._id === _id);
       if (findItem) {
         return findItem;
       } else {
@@ -640,10 +640,10 @@ export default {
         this.loading        = false;
       });
     },
-    getCategory(id) {
+    getCategory(_id) {
       return new Promise((resolve, reject) => {
         fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'categories/' + id, {
+            this.runtimeConfig.public.API_BASE_URL + 'categories/' + _id, {
               method: 'get'
             }).then(async response => {
           response = await response.json();
@@ -666,8 +666,8 @@ export default {
         this.selectedAddAndSubtract.push(addAndSub._reason);
       });
 
-      // id and action
-      this.form.id = data.id;
+      // _id and action
+      this.form._id = data._id;
       this.action  = 'edit';
       setTimeout(() => {
         this.$forceUpdate();
