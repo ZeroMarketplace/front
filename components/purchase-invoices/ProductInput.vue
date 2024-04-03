@@ -43,10 +43,10 @@ export default {
   props     : ['inputId'],
   data() {
     return {
-      title   : '',
-      items   : [],
-      loading : false,
-      rules   : {
+      title  : '',
+      items  : [],
+      loading: false,
+      rules  : {
         notEmptySelectable: [
           value => {
             if (value) return true;
@@ -79,7 +79,7 @@ export default {
             }).then(
             async (response) => {
               response     = await response.json();
-              this.items   = response.list;
+              this.items   = this.reformatProducts(response.list);
               this.loading = false;
             });
 
@@ -99,6 +99,29 @@ export default {
         this.title   = response;
         this.loading = false;
       });
+    },
+    reformatProducts(list) {
+      list.forEach((product) => {
+        // every variant must add to list
+        product.variants.forEach((variant) => {
+          let additionProduct  = structuredClone(product);
+          additionProduct._id  = variant._id;
+          additionProduct.code = variant.code;
+
+          // create title with properties
+          additionProduct.title = product.title + ' | ';
+          variant.properties.forEach((property, index) => {
+            additionProduct.title += property._property.values.find(value => value.code === property.value).title;
+            if (variant.properties.length !== (index + 1)) {
+              additionProduct.title += ' | ';
+            }
+          });
+
+          // add to list
+          list.push(additionProduct);
+        });
+      });
+      return list;
     }
   },
   computed: {},

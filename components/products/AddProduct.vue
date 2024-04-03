@@ -303,8 +303,8 @@
           <!--     Properties     -->
           <td v-for="props in  form.variantsProps" class="flex-grow-1">
             <v-label v-for="property in variant.properties">
-              <span v-if="props._id === property.propertyId">
-                {{ getPropertyValue(property.propertyId, property.value).title }}
+              <span v-if="props._id === property._property">
+                {{ getPropertyValue(property._property, property.value).title }}
               </span>
             </v-label>
           </td>
@@ -865,13 +865,13 @@ export default {
             // set variants props
             data.variants.forEach((variant) => {
               variant.properties.forEach((property) => {
-                let variantProp = this.form.variantsProps.find(prop => prop._id === property.propertyId);
+                let variantProp = this.form.variantsProps.find(prop => prop._id === property._property);
                 if (variantProp) {
                   if (!variantProp.values.includes(property.value))
                     variantProp.values.push(property.value);
                 } else {
                   this.form.variantsProps.push({
-                    _id    : property.propertyId,
+                    _id    : property._property,
                     values: [property.value]
                   });
                 }
@@ -970,7 +970,7 @@ export default {
           variantProp.values.forEach((propValue) => {
 
             // create the value sample
-            let propertyObject = {propertyId: variantProp._id, value: propValue};
+            let propertyObject = {_property: variantProp._id, value: propValue};
 
             // add the value sample
             variant.properties.push(propertyObject);
@@ -992,13 +992,13 @@ export default {
 
       return true;
     },
-    togglePropertyVariant(propertyId, valueCode) {
+    togglePropertyVariant(_property, valueCode) {
 
       // create property array
-      let variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
+      let variantProp = this.form.variantsProps.find(prop => prop._id === _property);
       if (!variantProp) {
-        this.form.variantsProps.push({_id: propertyId, values: []});
-        variantProp = this.form.variantsProps.find(prop => prop._id === propertyId);
+        this.form.variantsProps.push({_id: _property, values: []});
+        variantProp = this.form.variantsProps.find(prop => prop._id === _property);
       }
 
       // toggle value
@@ -1037,7 +1037,7 @@ export default {
           let variant = {properties: []};
 
           // add base prop value
-          variant.properties.push({propertyId: variantProp._id, value: propValue});
+          variant.properties.push({_property: variantProp._id, value: propValue});
 
           // check exists other properties
           if (this.form.variantsProps.length > 1) {
@@ -1070,24 +1070,24 @@ export default {
       if (confirm('آیا مطمئن هستید؟'))
         this.form.variants.splice(index, 1);
     },
-    getPropertyValue(propertyId, valueCode) {
-      let property = this.categoryProperties.find(prop => prop._id === propertyId);
+    getPropertyValue(_property, valueCode) {
+      let property = this.categoryProperties.find(prop => prop._id === _property);
       if (property) {
         return property.values.find(value => value.code === valueCode);
       } else {
         return {};
       }
     },
-    getPropertyValues(propertyId) {
-      let property = this.categoryProperties.find(prop => prop._id === propertyId);
+    getPropertyValues(_property) {
+      let property = this.categoryProperties.find(prop => prop._id === _property);
       if (property && property.values) {
         return property.values;
       } else {
         return [];
       }
     },
-    getVariantProps(propertyId) {
-      let property = this.categoryProperties.find(prop => prop._id === propertyId);
+    getVariantProps(_property) {
+      let property = this.categoryProperties.find(prop => prop._id === _property);
       if (property) {
         return property;
       } else {
