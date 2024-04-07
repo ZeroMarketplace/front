@@ -181,7 +181,7 @@ export default {
     },
     async edit() {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.form.id, {
+          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -228,7 +228,7 @@ export default {
       this.form.type        = data.type;
       this.form.balance     = data.balance;
       this.form.description = data.description;
-      this.form.id         = data.id;
+      this.form._id         = data._id;
       this.action           = 'edit';
     }
   },

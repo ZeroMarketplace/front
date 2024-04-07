@@ -104,6 +104,13 @@
                       mdi-cash-plus
                     </v-icon>
 
+                    <v-icon v-if="item.type === 'system'"
+                            size="20"
+                            class="float-left mt-1"
+                            color="secondary">
+                      mdi-database-cog-outline
+                    </v-icon>
+
                   </v-card-title>
 
                   <!--        Content        -->
@@ -122,14 +129,16 @@
                   <v-card-actions class="float-left">
                     <!--  Delete   -->
                     <v-btn class="mx-2 bg-red"
+                           v-if="item.type !== 'system'"
                            size="30"
-                           @click="setDelete({id: item.id})"
+                           @click="setDelete({_id: item._id})"
                            icon>
                       <v-icon size="15">mdi-delete-outline</v-icon>
                     </v-btn>
 
                     <!--  Edit   -->
                     <v-btn class="mx-2 bg-secondary"
+                           v-if="item.type !== 'system'"
                            size="30"
                            @click="setEdit(item)"
                            icon>
@@ -171,9 +180,9 @@ export default {
     }
   },
   methods: {
-    async delete(id) {
+    async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + id, {
+          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -215,7 +224,7 @@ export default {
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data.id);
+        this.delete(data._id);
       }
     },
     toggleAction() {
