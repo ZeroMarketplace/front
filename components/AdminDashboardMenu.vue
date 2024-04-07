@@ -95,6 +95,11 @@ export default {
           link: '/accounts'
         },
         {
+          text: 'اسناد حسابداری',
+          icon: 'mdi-file-document-outline',
+          link: '/accounting-documents'
+        },
+        {
           text: 'انبار‌ها',
           icon: 'mdi-warehouse',
           link: "/warehouses"
