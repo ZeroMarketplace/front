@@ -65,70 +65,84 @@
     </div>
 
     <!--  Accounts List   -->
-    <v-row class="border rounded-lg mx-5 mt-3 mb-2 pt-1 pb-2" v-for="(account,index) in form.accountsInvolved">
+    <v-table v-if="form.accountsInvolved.length" class="border my-2" density="compact" fixed-footer hover>
+      <thead>
+      <tr class="text-center">
+        <th class="text-center border">حساب</th>
+        <th class="text-center border">توضیحات</th>
+        <th class="text-center border">بدهکار</th>
+        <th class="text-center border">بستانکار</th>
+        <th class="text-center border">عملیات</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(account,index) in form.accountsInvolved"
+          class="text-center px-0">
 
-      <!--  Accounts CodeOrName    -->
-      <v-col class="pa-1 mt-2" cols="12" md="3">
-        <AccountInput :inputId="account._id"
-                      @selected="val => onAccountSelected(val,index)"/>
-      </v-col>
+        <!--  Accounts CodeOrName    -->
+        <td class="pt-5 px-1 w-25 border">
+          <AccountInput :inputId="account._id"
+                        @selected="val => onAccountSelected(val,index)"/>
+        </td>
 
-      <!--   Description    -->
-      <v-col class="pa-1 mt-2" cols="12" md="4">
-        <v-text-field class=""
-                      v-model="account.description"
-                      label="توضیحات"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
-      </v-col>
+        <!--  Description    -->
+        <td class="px-1 w-25 border">
+          <v-text-field class=""
+                        v-model="account.description"
+                        label="توضیحات"
+                        :readonly="loading"
+                        :rules="rules.notEmpty"
+                        density="compact"
+                        variant="outlined"
+                        hide-details>
+          </v-text-field>
+        </td>
 
-      <!--   Debit   -->
-      <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="account.debit"
-                      label="بدهکار"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      type="number"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
-      </v-col>
+        <!--  Debit    -->
+        <td class="px-1 border">
+          <v-text-field class=""
+                        v-model="account.debit"
+                        label="بدهکار"
+                        :readonly="loading"
+                        :rules="rules.notEmpty"
+                        type="number"
+                        density="compact"
+                        variant="outlined"
+                        hide-details>
+          </v-text-field>
+        </td>
 
-      <!--   Credit   -->
-      <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="account.credit"
-                      label="بستانکار"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      type="number"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
-      </v-col>
+        <!--   Credit   -->
+        <td class="px-1 border">
+          <v-text-field class=""
+                        v-model="account.credit"
+                        label="بستانکار"
+                        :readonly="loading"
+                        :rules="rules.notEmpty"
+                        type="number"
+                        density="compact"
+                        variant="outlined"
+                        hide-details>
+          </v-text-field>
+        </td>
 
+        <!--  Actions  -->
+        <td class="px-1">
+          <!--  Delete Product   -->
+          <v-btn class="bg-white"
+                 @click="deleteAccount(index)"
+                 size="30"
+                 variant="outlined"
+                 color="pink"
+                 icon>
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </td>
 
-      <!--  Actions  -->
-      <v-col class="pt-4" cols="12" md="1">
-        <!--  Delete Product   -->
-        <v-btn class="bg-white float-end"
-               @click="deleteAccount(index)"
-               size="30"
-               variant="outlined"
-               color="pink"
-               icon>
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </v-col>
+      </tr>
+      </tbody>
 
-    </v-row>
+    </v-table>
 
     <v-divider class="mt-8 mb-4"></v-divider>
 

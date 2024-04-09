@@ -2,45 +2,25 @@
   <div>
     <v-combobox class="w-100"
                 v-model="title"
-                label="نام یا کد کالا"
+                label="عنوان یا کد حساب"
                 :readonly="loading"
                 :loading="loading"
                 :items="items"
-                item-title="title"
-                item-value="id"
+                item-title="title.fa"
+                item-value="_id"
                 density="compact"
                 variant="outlined"
-                @input="searchProduct"
+                @input="searchAccount"
                 clearable>
-      <!--    <template #item="{ item, index }">-->
-      <!--      <v-list-item link @click="selectProduct(index)">-->
-
-      <!--        <template v-slot:prepend>-->
-      <!--          <ProductImage class="ml-2" :files="item.files" :size="35"/>-->
-      <!--        </template>-->
-
-      <!--        <v-list-item-title>-->
-      <!--          {{ item.title }}-->
-      <!--        </v-list-item-title>-->
-
-      <!--      </v-list-item>-->
-      <!--    </template>-->
-
-      <!--    <template #selection="{item,index}">-->
-      <!--      <ProductImage v-if="item.files" class="ml-2" :files="item.files" :size="25"/>-->
-      <!--      {{ item.title }}-->
-      <!--    </template>-->
     </v-combobox>
   </div>
 </template>
 
 <script>
-import {useCookie}  from "#app";
-import ProductImage from "~/components/products/ProductImage.vue";
+import {useCookie} from "#app";
 
 export default {
-  components: {ProductImage},
-  props     : ['inputId'],
+  props: ['inputId'],
   data() {
     return {
       title  : '',
@@ -57,7 +37,7 @@ export default {
     }
   },
   methods : {
-    searchProduct() {
+    searchAccount() {
       clearInterval(this.timer);
 
       this.timer = setTimeout(() => {
@@ -74,20 +54,20 @@ export default {
         // search request
         this.loading = true;
         fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'products?' + search, {
+            this.runtimeConfig.public.API_BASE_URL + 'accounts?' + search, {
               method: 'get',
             }).then(
             async (response) => {
               response     = await response.json();
-              this.items   = this.reformatProducts(response.list);
+              this.items   = response.list;
               this.loading = false;
             });
 
       }, 800);
     },
-    getProduct() {
+    getAccount() {
       this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'products/' + this.inputId, {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.inputId, {
         method : 'get',
         headers: {
           'Content-Type' : 'application/json',
@@ -113,7 +93,7 @@ export default {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     if (this.inputId) {
-      this.getProduct();
+      this.getAccount();
     }
   }
 }
