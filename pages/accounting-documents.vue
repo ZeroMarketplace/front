@@ -77,18 +77,12 @@
                         @update:options="setListOptions"
                         sticky
                         show-current-page>
-            <template v-slot:item._customer="{ item }">
-              {{ item._customer.phone }}
-            </template>
-            <template v-slot:item._warehouse="{ item }">
-              {{ item._warehouse.title.fa }}
-            </template>
             <template v-slot:item.operation="{ item }">
               <!--  Delete   -->
               <v-btn class="mx-2"
                      color="red"
                      size="25"
-                     @click="setDelete({id: item.id})"
+                     @click="setDelete({_id: item._id})"
                      icon>
                 <v-icon size="15">mdi-delete-outline</v-icon>
               </v-btn>
@@ -145,26 +139,20 @@ export default {
       list         : [],
       listHeaders  : [
         {
-          title   : 'فروشنده',
-          align   : 'center',
-          key     : '_customer',
-          sortable: false
-        },
-        {
           title   : 'تاریخ',
           key     : 'dateTimeJalali',
           align   : 'center',
           sortable: true
         },
         {
-          title   : 'مبلغ',
-          key     : 'total',
+          title   : 'توضیحات',
+          key     : 'description',
           align   : 'center',
           sortable: true
         },
         {
-          title   : 'انبار',
-          key     : '_warehouse',
+          title   : 'مبلغ',
+          key     : 'amount',
           align   : 'center',
           sortable: true
         },

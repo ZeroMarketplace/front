@@ -11,7 +11,8 @@
                 density="compact"
                 variant="outlined"
                 @input="searchProduct"
-                clearable>
+                clearable
+                hide-details>
       <!--    <template #item="{ item, index }">-->
       <!--      <v-list-item link @click="selectProduct(index)">-->
 

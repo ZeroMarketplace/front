@@ -88,7 +88,7 @@
               <v-btn class="mx-2"
                      color="red"
                      size="25"
-                     @click="setDelete({id: item.id})"
+                     @click="setDelete({_id: item._id})"
                      icon>
                 <v-icon size="15">mdi-delete-outline</v-icon>
               </v-btn>

@@ -1,17 +1,18 @@
 <template>
   <div>
-    <v-combobox class="w-100"
+    <v-combobox class="w-100 pa-0"
                 v-model="title"
                 label="عنوان یا کد حساب"
                 :readonly="loading"
                 :loading="loading"
                 :items="items"
+                :rules="rules.notEmptySelectable"
                 item-title="title.fa"
                 item-value="_id"
                 density="compact"
                 variant="outlined"
                 @input="searchAccount"
-                clearable>
+                clearable hide-details>
     </v-combobox>
   </div>
 </template>
