@@ -178,19 +178,13 @@
       </v-col>
 
       <!--   Previews    -->
-      <v-col v-for="(filePreview, index) in form.filesPreview"
+      <v-col v-if="form.renderFilesPreview" v-for="(filePreview, index) in form.filesPreview"
              class=""
              cols="12"
              md="3">
-        <v-btn v-if="filePreview.uploaded"
-               class="mt-2 mr-2 border border-opacity-100"
-               size="25"
-               variant="elevated"
-               @click="deleteFile(filePreview.name, index)"
-               icon>
-          <v-icon color="red">mdi-delete</v-icon>
-        </v-btn>
-        <AttachmentPreview :src="filePreview.src"></AttachmentPreview>
+        <AttachmentPreview :src="filePreview.src"
+                           :showDelete="filePreview.uploaded"
+                           @deleteFile="deleteFile(filePreview.name, index)"/>
       </v-col>
 
     </v-row>
@@ -231,9 +225,9 @@
 </template>
 
 <script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
-import AccountInput   from "~/components/accounts/AccountInput.vue";
+import {useUserStore}    from "~/store/user";
+import {useCookie}       from "#app";
+import AccountInput      from "~/components/accounts/AccountInput.vue";
 import AttachmentPreview from "~/components/accounting-documents/AttachmentPreview.vue";
 
 export default {
@@ -241,17 +235,18 @@ export default {
   data() {
     return {
       form   : {
-        _id             : '',
-        dateTime        : new Date(),
-        accountsInvolved: [],
-        description     : '',
-        amount          : 0,
-        difference      : 0,
-        sumOfDebit      : 0,
-        sumOfCredit     : 0,
-        files           : [],
-        filesPreview    : [],
-        filesError      : false,
+        _id               : '',
+        dateTime          : new Date(),
+        accountsInvolved  : [],
+        description       : '',
+        amount            : 0,
+        difference        : 0,
+        sumOfDebit        : 0,
+        sumOfCredit       : 0,
+        files             : [],
+        filesPreview      : [],
+        renderFilesPreview: true,
+        filesError        : false,
       },
       rules  : {
         notEmpty          : [
@@ -343,7 +338,7 @@ export default {
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
-          if (this.form.files.length) {
+          if (this.form.files && this.form.files.length) {
             response = await response.json();
             await this.uploadFiles(response._id)
           } else {
@@ -367,7 +362,7 @@ export default {
       });
 
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form._id, {
+          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + this.form._id, {
             method : 'put',
             headers: {
               'Content-Type' : 'application/json',
@@ -382,7 +377,7 @@ export default {
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
-          if (this.form.files.length) {
+          if (this.form.files && this.form.files.length) {
             await this.uploadFiles(this.form._id)
           } else {
             this.reset();
@@ -524,6 +519,13 @@ export default {
           if (response.status === 200) {
             // remove item from files preview
             this.form.filesPreview.splice(index, 1);
+
+            // exception for reRender files preview after delete file
+            // must AttachmentPreview Component reRendered
+            this.form.renderFilesPreview = false;
+            setTimeout(() => {
+              this.form.renderFilesPreview = true;
+            }, 200);
 
             $showMessage('عملیات با موفقت انجام شد', 'success');
           } else {

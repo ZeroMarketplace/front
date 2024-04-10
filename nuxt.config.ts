@@ -55,7 +55,7 @@ export default defineNuxtConfig({
                 'font-src': ["'self'", 'https:', 'data:'],
                 'form-action': ["'self'"],
                 'frame-ancestors': ["'self'"],
-                'img-src': ["'self'", 'data:', 'https:', 'http://localhost:5000/'],
+                'img-src': ["'self'", 'data:', 'blob:', 'https:', 'http://localhost:5000/'],
                 'object-src': ["'none'"],
                 'script-src-attr': ["'none'"],
                 'style-src': ["'self'", 'https:', "'unsafe-inline'"],
