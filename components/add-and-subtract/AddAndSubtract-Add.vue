@@ -65,6 +65,11 @@
         </v-select>
       </v-col>
 
+      <!--      _Account      -->
+      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+        <AccountInput :input-id="form._account" @selected="(val) => form._account= val._id"/>
+      </v-col>
+
       <!--     Actions       -->
       <v-col cols="12">
 
@@ -101,8 +106,10 @@
 <script>
 import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
+import AccountInput   from "~/components/accounts/AccountInput.vue";
 
 export default {
+  components: {AccountInput},
   data() {
     return {
       form      : {
@@ -111,7 +118,8 @@ export default {
           fa: ''
         },
         default  : '',
-        operation: 'add'
+        operation: 'add',
+        _account : ''
       },
       rules     : {
         notEmpty: [
@@ -146,7 +154,8 @@ export default {
             body   : JSON.stringify({
               title    : this.form.title,
               default  : this.form.default,
-              operation: this.form.operation
+              operation: this.form.operation,
+              _account : this.form._account,
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -178,7 +187,8 @@ export default {
             body   : JSON.stringify({
               title    : this.form.title,
               default  : this.form.default,
-              operation: this.form.operation
+              operation: this.form.operation,
+              _account : this.form._account
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -217,7 +227,8 @@ export default {
         title    : data.title,
         default  : data.default,
         operation: data.operation,
-        _id       : data._id
+        _account : data._account,
+        _id      : data._id
       };
       this.action = 'edit';
     }

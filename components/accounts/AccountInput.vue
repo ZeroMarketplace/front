@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-combobox class="w-100 pa-0"
+                v-if="render"
                 v-model="title"
                 label="عنوان یا کد حساب"
                 :readonly="loading"
@@ -27,6 +28,8 @@ export default {
       title  : '',
       items  : [],
       loading: false,
+      preload: true,
+      render : true,
       rules  : {
         notEmptySelectable: [
           value => {
@@ -87,8 +90,22 @@ export default {
     title(val, oldVal) {
       if (val && typeof val === 'object') {
         this.$emit('selected', val);
+
+        // prevent preload after select
+        this.preload = false;
+        setTimeout(() => {
+          this.preload = true;
+        }, 100);
       }
     },
+    inputId(val, oldVal) {
+      if (this.preload) {
+        this.title = '';
+        this.items = [];
+        if (val)
+          this.getAccount();
+      }
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;
