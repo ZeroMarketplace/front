@@ -857,7 +857,7 @@ export default {
                 this.form.filesPreview.push({
                   uploaded: true,
                   name    : filePreview,
-                  src     : this.runtimeConfig.public.STATICS_URL + 'products/files/' + filePreview
+                  src     : this.runtimeConfig.public.STATICS_URL + 'products/' + filePreview
                 });
               });
             }

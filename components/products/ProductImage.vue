@@ -5,7 +5,7 @@
            :width="size"
            :height="size"
            max-width="100"
-           :src="staticsUrl + 'products/files/' + files[0]"
+           :src="staticsUrl + 'products/' + files[0]"
            aspect-ratio="1/1"
            cover>
       <template v-slot:placeholder>

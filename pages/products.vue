@@ -228,7 +228,6 @@ export default {
   },
   created() {
     this.runtimeConfig = useRuntimeConfig();
-    this.staticsUrl    = this.runtimeConfig.public.STATICS_URL;
   },
   computed: {}
 }
