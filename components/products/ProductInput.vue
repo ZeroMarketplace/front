@@ -7,7 +7,7 @@
                 :loading="loading"
                 :items="items"
                 item-title="title"
-                item-value="id"
+                item-value="_id"
                 density="compact"
                 variant="outlined"
                 @input="searchProduct"
@@ -97,7 +97,8 @@ export default {
       }).then(async (response) => {
         response = await response.json();
         this.items.push(response);
-        this.title   = response;
+        this.items   = this.reformatProducts(this.items);
+        this.title   = this.items.find(row => row._id === this.inputId);
         this.loading = false;
       });
     },
@@ -105,14 +106,14 @@ export default {
       list.forEach((product) => {
         // every variant must add to list
         product.variants.forEach((variant) => {
-          let additionProduct  = structuredClone(product);
+          let additionProduct  = structuredClone(toRaw(product));
           additionProduct._id  = variant._id;
           additionProduct.code = variant.code;
 
           // create title with properties
           additionProduct.title = product.title + ' | ';
           variant.properties.forEach((property, index) => {
-            additionProduct.title += property._property.values.find(value => value.code === property.value).title;
+            additionProduct.title += property._property.values[0].title;
             if (variant.properties.length !== (index + 1)) {
               additionProduct.title += ' | ';
             }
@@ -130,8 +131,19 @@ export default {
     title(val, oldVal) {
       if (val && typeof val === 'object') {
         this.$emit('selected', val);
+
+        // prevent preload after select
+        this.preload = false;
+        setTimeout(() => {
+          this.preload = true;
+        }, 100);
       }
     },
+    inputId(val, oldVal) {
+      if (this.preload && val) {
+        this.getProduct();
+      }
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;

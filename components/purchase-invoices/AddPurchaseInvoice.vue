@@ -331,8 +331,8 @@
 
 <script>
 import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
-import ProductInput   from "~/components/purchase-invoices/ProductInput.vue";
+import {useCookie}  from "#app";
+import ProductInput from "~/components/products/ProductInput.vue";
 
 export default {
   components: {ProductInput},
