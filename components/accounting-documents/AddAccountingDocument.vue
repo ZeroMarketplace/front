@@ -434,6 +434,7 @@ export default {
     },
     deleteAccount(index) {
       this.form.accountsInvolved.splice(index, 1);
+      this.calcDocument();
     },
     setEdit(data) {
       this.reset();

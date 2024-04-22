@@ -68,7 +68,7 @@
           <Loading :loading="loading"/>
 
           <!--    List      -->
-          <v-data-table class="mt-n5"
+          <v-data-table v-if="list.length" class="mt-n5"
                         :loading="loading"
                         :headers="listHeaders"
                         :items="list"
