@@ -144,6 +144,16 @@
                            icon>
                       <v-icon size="15">mdi-pencil</v-icon>
                     </v-btn>
+
+                    <!--  Set Default   -->
+                    <v-btn class="mx-2"
+                           :class="item.defaultFor ? 'bg-secondary' : 'bg-white border'"
+                           v-if="item.type !== 'system'"
+                           size="30"
+                           @click="setDefault(item)"
+                           icon>
+                      <v-icon size="15">mdi-star-outline</v-icon>
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-col>
@@ -226,6 +236,25 @@ export default {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
+    },
+    async setDefault(data) {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'accounts/default/' + data._id, {
+            method : 'put',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+          this.getAccounts();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
     },
     toggleAction() {
       if (this.action === 'add' || this.action === 'edit')
