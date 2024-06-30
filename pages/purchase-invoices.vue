@@ -6,6 +6,8 @@
       <AdminDashboardMenu/>
     </v-col>
 
+    <SettlementDialog v-model="settlementDialog" ref="settlementDialog"/>
+
     <!--  Page   -->
     <v-col cols="12" md="9">
 
@@ -130,6 +132,7 @@
 <script>
 import {useUserStore}     from "~/store/user";
 import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
+import SettlementDialog from "~/components/SettlementDialog.vue";
 import {useCookie}        from "#app";
 
 definePageMeta({
@@ -137,14 +140,15 @@ definePageMeta({
 });
 
 export default {
-  components: {AddPurchaseInvoice},
+  components: {AddPurchaseInvoice,SettlementDialog},
   data() {
     return {
-      user         : {},
-      action       : 'list',
-      loading      : true,
-      list         : [],
-      listHeaders  : [
+      user            : {},
+      action          : 'list',
+      loading         : true,
+      settlementDialog: true,
+      list            : [],
+      listHeaders     : [
         {
           title   : 'فروشنده',
           align   : 'center',
@@ -176,12 +180,12 @@ export default {
           sortable: false
         }
       ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: ''
+      listTotal       : 100,
+      page            : 1,
+      perPage         : 10,
+      pageCount       : 1,
+      sortColumn      : '',
+      sortDirection   : ''
     }
   },
   methods: {
