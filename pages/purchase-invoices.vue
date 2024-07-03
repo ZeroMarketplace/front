@@ -6,8 +6,6 @@
       <AdminDashboardMenu/>
     </v-col>
 
-    <SettlementDialog v-model="settlementDialog" ref="settlementDialog"/>
-
     <!--  Page   -->
     <v-col cols="12" md="9">
 
@@ -71,6 +69,7 @@
 
           <!--    List      -->
           <v-data-table class="mt-n5"
+                        v-if="list.length"
                         :loading="loading"
                         :headers="listHeaders"
                         :items="list"
@@ -132,7 +131,7 @@
 <script>
 import {useUserStore}     from "~/store/user";
 import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
-import SettlementDialog from "~/components/SettlementDialog.vue";
+import SettlementDialog   from "~/components/SettlementDialog.vue";
 import {useCookie}        from "#app";
 
 definePageMeta({
@@ -140,13 +139,12 @@ definePageMeta({
 });
 
 export default {
-  components: {AddPurchaseInvoice,SettlementDialog},
+  components: {AddPurchaseInvoice, SettlementDialog},
   data() {
     return {
       user            : {},
       action          : 'list',
       loading         : true,
-      settlementDialog: true,
       list            : [],
       listHeaders     : [
         {

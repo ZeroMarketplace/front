@@ -44,7 +44,7 @@
                 <v-col class="d-flex" cols="12" md="12">
                   <v-label class="d-inline-block mx-2 mt-4">مبلغ:</v-label>
                   <v-text-field class="font-weight-bold text-secondary"
-                                v-model="form.amount"
+                                v-model="info.amount"
                                 variant="solo-filled"
                                 readonly>
                   </v-text-field>
@@ -119,12 +119,12 @@
                   <v-label class="d-inline-block mx-2 mt-4">باقیمانده:</v-label>
                   <v-text-field class="font-weight-bold text-secondary"
                                 v-model="form.payment.remaining"
+                                :rules="rules.remaining"
                                 variant="solo-filled"
                                 readonly>
                   </v-text-field>
                 </v-col>
               </v-row>
-
             </v-col>
           </v-window-item>
 
@@ -208,12 +208,23 @@
 import {useCookie} from "#app";
 
 export default {
+  props: ['_id', 'type'],
   data() {
     return {
       loading : false,
       accounts: [],
+      rules   : {
+        remaining: [
+          value => {
+            if (value === 0) return true;
+            return 'مقدار باقیمانده باید ۰ شود';
+          }
+        ],
+      },
+      info    : {
+        amount: 0
+      },
       form    : {
-        amount : 90000,
         payment: {
           cash           : 0,
           cashAccounts   : [],
@@ -222,15 +233,41 @@ export default {
           bankAccounts   : [],
           distributedBank: false,
           credit         : 0,
-          remaining      : 0
+          remaining      : 0,
         },
         window : 1
       }
     }
   },
   methods: {
-    submit() {
+    async submit() {
+      if (this.$refs.settlementForm.isValid && this.form.payment.remaining === 0) {
+        this.loading = true;
 
+        await fetch(
+            this.runtimeConfig.public.API_BASE_URL + 'settlements', {
+              method : 'post',
+              headers: {
+                'Content-Type' : 'application/json',
+                'authorization': 'Bearer ' + this.user.token
+              },
+              body   : JSON.stringify({
+                type   : this.type,
+                _id    : this._id,
+                payment: this.form.payment
+              })
+            }).then(async response => {
+          const {$showMessage} = useNuxtApp();
+          if (response.status === 200) {
+            $showMessage('عملیات با موفقت انجام شد', 'success');
+          } else {
+            // show error
+            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+          }
+        });
+
+        this.loading = false;
+      }
     },
     getAccounts() {
       this.loading = true;
@@ -269,13 +306,30 @@ export default {
         this.loading = false;
       });
     },
+    getInfo() {
+      this.loading = true;
+      fetch(this.runtimeConfig.public.API_BASE_URL + this.type + '/' + this._id,
+          {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }
+      ).then(async response => {
+        response         = await response.json();
+        this.info.amount = response.total;
+        this.calcRemaining();
+        this.loading     = false;
+      });
+    },
     calcRemaining() {
-      let remaining               = this.form.amount;
+      let remaining               = this.info.amount;
       remaining -= this.form.payment.cash;
       remaining -= this.form.payment.bank;
       remaining -= this.form.payment.credit;
       this.form.payment.remaining = remaining;
-    }
+    },
   },
   mounted() {
     this.user          = useCookie('user').value;
@@ -354,6 +408,9 @@ export default {
         }
       },
       deep: true
+    },
+    _id(val, oldVal) {
+      this.getInfo();
     }
   }
 }

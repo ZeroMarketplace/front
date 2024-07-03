@@ -3,6 +3,12 @@
           @submit.prevent="submit"
           ref="addPurchaseInvoiceForm">
 
+    <!--  Settlement Dialog  -->
+    <SettlementDialog v-model="settlementDialog"
+                      :_id="settlementId"
+                      type="purchase-invoices"
+                      ref="settlementDialog"/>
+
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات فاکتور</v-label>
@@ -272,7 +278,7 @@
                 {{ getAddAndSubtractDetail(addAndSubtract._reason).title.fa }}:
               </v-col>
               <v-col cols="7" class="text-end">
-                {{ addAndSubtract.sum }} تومان
+                {{ addAndSubtract.amount }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -322,6 +328,19 @@
           بازنگری
         </v-btn>
 
+        <!--       Settlement       -->
+        <v-btn class="border mx-2 rounded-lg"
+               v-if="action === 'edit'"
+               color="blue"
+               prepend-icon="mdi-cash-fast"
+               height="40"
+               width="100"
+               variant="text"
+               @click="setSettlement"
+               density="compact">
+          تسویه
+        </v-btn>
+
       </v-col>
     </v-row>
 
@@ -331,15 +350,17 @@
 
 <script>
 import {useUserStore} from "~/store/user";
-import {useCookie}  from "#app";
-import ProductInput from "~/components/products/ProductInput.vue";
+import {useCookie}    from "#app";
+import ProductInput   from "~/components/products/ProductInput.vue";
 
 export default {
   components: {ProductInput},
   data() {
     return {
+      settlementDialog      : false,
+      settlementId          : '',
       form                  : {
-        _id            : '',
+        _id           : '',
         customer      : null,
         dateTime      : undefined,
         warehouse     : null,
@@ -376,7 +397,7 @@ export default {
   methods: {
     reset() {
       this.$refs.addPurchaseInvoiceForm.reset();
-      this.form._id                = '';
+      this.form._id               = '';
       this.form.sum               = 0;
       this.form.total             = 0;
       this.form.products          = [];
@@ -415,15 +436,9 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
+          response = await response.json();
+          this.setEdit(response);
+          this.setSettlement();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -489,7 +504,7 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        _id   : '',
+        _id  : '',
         count: 0,
         price: {
           purchase: 0,
@@ -520,20 +535,12 @@ export default {
 
       this.form.sum = this.form.total;
 
-      // add and subtract
+      // calc subtracts on total
       this.form.addAndSubtract.forEach((addAndSubtract) => {
         let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
         if (detailAddAndSubtract) {
-          let operationSum = 0;
-          if (detailAddAndSubtract.operation === 'add') {
-            if (Number(addAndSubtract.value) <= 100) {
-              operationSum = (this.form.total * addAndSubtract.value / 100)
-              this.form.sum += operationSum;
-            } else {
-              operationSum = Number(addAndSubtract.value);
-              this.form.sum += addAndSubtract.value;
-            }
-          } else {
+          if (detailAddAndSubtract.operation === 'subtract') {
+            let operationSum = 0;
             if (Number(addAndSubtract.value) <= 100) {
               operationSum = (this.form.total * addAndSubtract.value / 100)
               this.form.sum -= operationSum;
@@ -541,9 +548,26 @@ export default {
               operationSum = Number(addAndSubtract.value);
               this.form.sum -= addAndSubtract.value;
             }
+            addAndSubtract.amount = operationSum;
           }
+        }
+      });
 
-          addAndSubtract.sum = operationSum;
+      // add and subtract
+      this.form.addAndSubtract.forEach((addAndSubtract) => {
+        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
+        if (detailAddAndSubtract) {
+          if (detailAddAndSubtract.operation === 'add') {
+            let operationSum = 0;
+            if (Number(addAndSubtract.value) <= 100) {
+              operationSum = (this.form.sum * addAndSubtract.value / 100)
+              this.form.sum += operationSum;
+            } else {
+              operationSum = Number(addAndSubtract.value);
+              this.form.sum += addAndSubtract.value;
+            }
+            addAndSubtract.amount = operationSum;
+          }
         }
       });
     },
@@ -583,8 +607,8 @@ export default {
         let addAndSubtract = this.getAddAndSubtractDetail(_id);
         this.form.addAndSubtract.push({
           _reason: _id,
-          value : addAndSubtract.default,
-          sum   : 0
+          value  : addAndSubtract.default,
+          sum    : 0
         });
       }
 
@@ -668,13 +692,17 @@ export default {
 
       // _id and action
       this.form._id = data._id;
-      this.action  = 'edit';
+      this.action   = 'edit';
       setTimeout(() => {
         this.$forceUpdate();
       }, 2500);
 
       this.calculateInvoiceTotal();
     },
+    setSettlement() {
+      this.settlementId     = this.form._id;
+      this.settlementDialog = true;
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;
