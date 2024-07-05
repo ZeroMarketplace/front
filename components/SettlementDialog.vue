@@ -212,6 +212,7 @@ export default {
   data() {
     return {
       loading : false,
+      action  : 'add',
       accounts: [],
       rules   : {
         remaining: [
@@ -225,6 +226,7 @@ export default {
         amount: 0
       },
       form    : {
+        _id    : '',
         payment: {
           cash           : 0,
           cashAccounts   : [],
@@ -244,30 +246,60 @@ export default {
       if (this.$refs.settlementForm.isValid && this.form.payment.remaining === 0) {
         this.loading = true;
 
-        await fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'settlements', {
-              method : 'post',
-              headers: {
-                'Content-Type' : 'application/json',
-                'authorization': 'Bearer ' + this.user.token
-              },
-              body   : JSON.stringify({
-                type   : this.type,
-                _id    : this._id,
-                payment: this.form.payment
-              })
-            }).then(async response => {
-          const {$showMessage} = useNuxtApp();
-          if (response.status === 200) {
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-          } else {
-            // show error
-            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-          }
-        });
+        if (this.action === 'add') {
+          await this.add();
+        } else if (this.action === 'edit') {
+          await this.edit();
+        }
 
         this.loading = false;
       }
+    },
+    async add() {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'settlements', {
+            method : 'post',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              type   : this.type,
+              _id    : this._id,
+              payment: this.form.payment
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
+    async edit() {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'settlements/' + this.form._id, {
+            method : 'put',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              type   : this.type,
+              _id    : this._id,
+              payment: this.form.payment
+            })
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
     },
     getAccounts() {
       this.loading = true;
@@ -306,6 +338,23 @@ export default {
         this.loading = false;
       });
     },
+    getSettlement(_id) {
+      this.loading = true;
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'settlements/' + _id,
+          {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }
+      ).then(async response => {
+        response          = await response.json();
+        this.form.payment = response.payment;
+        this.calcRemaining();
+        this.loading = false;
+      });
+    },
     getInfo() {
       this.loading = true;
       fetch(this.runtimeConfig.public.API_BASE_URL + this.type + '/' + this._id,
@@ -319,8 +368,16 @@ export default {
       ).then(async response => {
         response         = await response.json();
         this.info.amount = response.total;
+
+        // check has settlement and turn to edit mode
+        if (response._settlement) {
+          this.getSettlement(response._settlement);
+          this.action   = 'edit';
+          this.form._id = response._settlement;
+        }
+
         this.calcRemaining();
-        this.loading     = false;
+        this.loading = false;
       });
     },
     calcRemaining() {
