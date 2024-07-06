@@ -362,7 +362,7 @@ export default {
       form                  : {
         _id           : '',
         customer      : null,
-        dateTime      : undefined,
+        dateTime      : new Date(),
         warehouse     : null,
         description   : '',
         products      : [],

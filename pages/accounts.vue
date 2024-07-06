@@ -73,7 +73,7 @@
                 <v-card elevation="2">
                   <!--        Title and Icon     -->
                   <v-card-title class="border-b">
-                    {{ item.title.fa }}
+                    {{ item.title ? item.title.fa : 'USER' }}
 
                     <!--         Icon         -->
                     <v-icon v-if="item.type === 'bank'"
