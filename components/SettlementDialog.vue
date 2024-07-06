@@ -18,10 +18,22 @@
           </v-col>
 
           <!--     Action       -->
-          <v-col v-if="form.window !== 1" class="text-end" cols="3">
-            <v-btn class="" @click="form.window = 1" icon>
+          <v-col class="text-end" cols="3">
+            <!--      Back      -->
+            <v-btn v-if="form.window !== 1"
+                   @click="form.window = 1"
+                   size="small" icon>
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
+
+            <!--      Close      -->
+            <v-btn class=""
+                   v-if="form.window === 1"
+                   @click="exit"
+                   size="small" icon>
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+
           </v-col>
         </v-row>
         <v-divider class="mt-3"></v-divider>
@@ -272,6 +284,7 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+          this.exit();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -295,11 +308,32 @@ export default {
         const {$showMessage} = useNuxtApp();
         if (response.status === 200) {
           $showMessage('عملیات با موفقت انجام شد', 'success');
+          this.exit();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
         }
       });
+    },
+    reset() {
+      this.form.payment.cash            = 0;
+      this.form.payment.distributedCash = false;
+      this.form.payment.bank            = 0;
+      this.form.payment.distributedBank = false;
+      this.form.payment.credit          = 0;
+
+      // clear bank accounts
+      this.form.payment.bankAccounts.forEach((bankAccount) => {
+        bankAccount.amount = 0;
+      });
+
+      // clear cash accounts
+      this.form.payment.cashAccounts.forEach((cashAccount) => {
+        cashAccount.amount = 0;
+      });
+
+      this.calcRemaining();
+
     },
     getAccounts() {
       this.loading = true;
@@ -387,6 +421,9 @@ export default {
       remaining -= this.form.payment.credit;
       this.form.payment.remaining = remaining;
     },
+    exit() {
+      this.$emit('exit', true);
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;

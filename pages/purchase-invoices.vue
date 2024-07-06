@@ -102,6 +102,15 @@
                      icon>
                 <v-icon size="15">mdi-pencil</v-icon>
               </v-btn>
+
+              <!--  Edit   -->
+              <v-btn class="mx-2"
+                     color="blue"
+                     size="25"
+                     @click="setSettlement(item)"
+                     icon>
+                <v-icon size="15">mdi-cash-fast</v-icon>
+              </v-btn>
             </template>
 
             <!--      Pagination      -->
@@ -142,11 +151,11 @@ export default {
   components: {AddPurchaseInvoice, SettlementDialog},
   data() {
     return {
-      user            : {},
-      action          : 'list',
-      loading         : true,
-      list            : [],
-      listHeaders     : [
+      user         : {},
+      action       : 'list',
+      loading      : true,
+      list         : [],
+      listHeaders  : [
         {
           title   : 'فروشنده',
           align   : 'center',
@@ -178,12 +187,12 @@ export default {
           sortable: false
         }
       ],
-      listTotal       : 100,
-      page            : 1,
-      perPage         : 10,
-      pageCount       : 1,
-      sortColumn      : '',
-      sortDirection   : ''
+      listTotal    : 100,
+      page         : 1,
+      perPage      : 10,
+      pageCount    : 1,
+      sortColumn   : '',
+      sortDirection: ''
     }
   },
   methods: {
@@ -257,6 +266,10 @@ export default {
         this.$refs.addPurchaseInvoices.setEdit(response);
         this.toggleAction();
       });
+    },
+    async setSettlement(data) {
+      await this.setEdit(data);
+      this.$refs.addPurchaseInvoices.setSettlement();
     },
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {

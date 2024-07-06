@@ -7,6 +7,7 @@
     <SettlementDialog v-model="settlementDialog"
                       :_id="settlementId"
                       type="purchase-invoices"
+                      @exit="closeSettlementDialog"
                       ref="settlementDialog"/>
 
     <!--    Information     -->
@@ -702,6 +703,11 @@ export default {
     setSettlement() {
       this.settlementId     = this.form._id;
       this.settlementDialog = true;
+    },
+    closeSettlementDialog() {
+      this.settlementDialog = false;
+      this.$emit('exit', true);
+      this.$emit('refresh', true);
     }
   },
   mounted() {
