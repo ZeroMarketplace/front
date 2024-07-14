@@ -10,27 +10,37 @@
                 item-value="_id"
                 density="compact"
                 variant="outlined"
+                auto-select-first="exact"
                 @input="searchProduct"
                 clearable
                 hide-details>
-      <!--    <template #item="{ item, index }">-->
-      <!--      <v-list-item link @click="selectProduct(index)">-->
+      <!--   Item    -->
+      <template #item="{ item, index, props }">
+        <v-list-item v-bind="props">
+          <template v-slot:prepend>
+            <ProductImage class="ml-2"
+                          :file="(item.raw.files && item.raw.files[0]) ? item.raw.files[0] : undefined"
+                          :size="35"/>
+          </template>
+        </v-list-item>
+      </template>
 
-      <!--        <template v-slot:prepend>-->
-      <!--          <ProductImage class="ml-2" :files="item.files" :size="35"/>-->
-      <!--        </template>-->
-
-      <!--        <v-list-item-title>-->
-      <!--          {{ item.title }}-->
-      <!--        </v-list-item-title>-->
-
-      <!--      </v-list-item>-->
-      <!--    </template>-->
-
-      <!--    <template #selection="{item,index}">-->
-      <!--      <ProductImage v-if="item.files" class="ml-2" :files="item.files" :size="25"/>-->
-      <!--      {{ item.title }}-->
-      <!--    </template>-->
+      <!--   Selection    -->
+      <template v-slot:selection="data">
+        <v-label class="text-black font-weight-bold"
+                 :key="JSON.stringify(data.item)"
+                 v-bind="data.attrs"
+                 :disabled="data.disabled"
+                 :model-value="data.selected"
+                 size="small"
+                 @click:close="data.parent.selectItem(data.item)">
+          <ProductImage class="ml-2"
+                        v-if="data.item.raw"
+                        :file="(data.item.raw.files && data.item.raw.files[0]) ? data.item.raw.files[0] : undefined"
+                        :size="35"/>
+          {{ data.item.title }}
+        </v-label>
+      </template>
     </v-combobox>
   </div>
 </template>
@@ -44,10 +54,11 @@ export default {
   props     : ['inputId'],
   data() {
     return {
-      title  : '',
-      items  : [],
-      loading: false,
-      rules  : {
+      title     : '',
+      items     : [],
+      properties: [],
+      loading   : false,
+      rules     : {
         notEmptySelectable: [
           value => {
             if (value) return true;
@@ -88,6 +99,7 @@ export default {
     },
     getProduct() {
       this.loading = true;
+      this.items   = [];
       fetch(this.runtimeConfig.public.API_BASE_URL + 'products/' + this.inputId, {
         method : 'get',
         headers: {
@@ -102,27 +114,41 @@ export default {
         this.loading = false;
       });
     },
+    getProperty(_id) {
+      fetch(this.runtimeConfig.public.API_BASE_URL + 'properties/' + _id, {
+        method : 'get',
+        headers: {
+          'Content-Type' : 'application/json',
+          'authorization': 'Bearer ' + this.user.token
+        }
+      }).then(async (response) => {
+        response = await response.json();
+        this.properties.push(response);
+      });
+    },
     reformatProducts(list) {
-      list.forEach((product) => {
+      list.forEach((product, index) => {
         // every variant must add to list
-        product.variants.forEach((variant) => {
-          let additionProduct  = structuredClone(toRaw(product));
-          additionProduct._id  = variant._id;
-          additionProduct.code = variant.code;
-
-          // create title with properties
-          additionProduct.title = product.title + ' | ';
-          variant.properties.forEach((property, index) => {
-            additionProduct.title += property._property.values[0].title;
-            if (variant.properties.length !== (index + 1)) {
-              additionProduct.title += ' | ';
-            }
+        if (product.variants && product.variants.length > 0) {
+          product.variants.forEach((variant) => {
+            let additionProduct   = structuredClone(toRaw(product));
+            additionProduct._id   = variant._id;
+            additionProduct.code  = variant.code;
+            // create title with properties
+            additionProduct.title = variant.title;
+            additionProduct.price = variant.price;
+            // add to list
+            list.push(additionProduct);
           });
 
-          // add to list
-          list.push(additionProduct);
-        });
+          // remove original product
+          list.splice(index, 1);
+        }
       });
+
+      // sort list
+      list.sort((a, b) => a.title.localeCompare(b.text));
+
       return list;
     }
   },

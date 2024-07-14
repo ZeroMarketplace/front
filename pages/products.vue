@@ -67,13 +67,16 @@
 
               <!--      Image        -->
               <template v-slot:prepend>
-                <ProductImage :files="item.files" :size="100"/>
+                <ProductImage :file="(item.files && item.files[0]) ? item.files[0] : undefined" :size="100"/>
               </template>
 
               <!--      Name        -->
               <v-list-item-title class="mr-2">
                 {{ item.name }}
-                <v-label class="d-block">۰ تومان</v-label>
+                <v-label class="d-block">
+                  <label v-if="item.price">{{ item.price.store }} تومان</label>
+                  <label v-if="item.variants && item.variants.length">{{ getProductPriceRange(item) }}</label>
+                </v-label>
               </v-list-item-title>
 
               <!--      Actions        -->
@@ -219,6 +222,28 @@ export default {
     setDelete(data) {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
+      }
+    },
+    getProductPriceRange(item) {
+      let min = 0, max = 0;
+      item.variants.forEach((variant) => {
+        if(variant.price) {
+          // first measuring
+          if(min === 0)
+            min = variant.price.store;
+
+          if(variant.price.store >= max)
+            max = variant.price.store;
+          if(variant.price.store <= min)
+            min = variant.price.store;
+        }
+      });
+      if(min === 0 && max === 0) {
+        return 'قیمت ندارد';
+      } else if(min === max) {
+        return min + ' تومان';
+      } else {
+        return 'از ' + min + ' تا ' + max + ' تومان';
       }
     }
   },

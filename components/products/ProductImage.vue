@@ -1,11 +1,11 @@
 <template>
   <div v-if="render">
     <!--  Image   -->
-    <v-img v-if="files && files.length"
+    <v-img v-if="file"
            :width="size"
            :height="size"
            max-width="100"
-           :src="staticsUrl + 'products/' + files[0]"
+           :src="staticsUrl + 'products/' + file"
            aspect-ratio="1/1"
            cover>
       <template v-slot:placeholder>
@@ -16,13 +16,13 @@
     </v-img>
 
     <!--        Icon        -->
-    <v-icon v-if="!files || !files.length" class="mx-0" :size="size">mdi-image-outline</v-icon>
+    <v-icon v-if="!file" class="mx-0" :size="size">mdi-image-outline</v-icon>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['files', 'size'],
+  props: ['file', 'size'],
   data() {
     return {
       render: false
