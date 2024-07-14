@@ -77,6 +77,7 @@ export default {
         },
         {
           text: 'فاکتور فروش',
+          link: '/sales-invoices',
           icon: 'mdi-receipt-text-edit'
         },
         {
