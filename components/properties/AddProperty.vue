@@ -104,7 +104,7 @@
 
         <!--       Submit       -->
         <v-btn class="border rounded-lg"
-               :loading="form.loading"
+               :loading="loading"
                prepend-icon="mdi-check-circle-outline"
                height="40"
                width="100"
@@ -242,7 +242,7 @@ export default {
           await this.edit();
         }
 
-        this.form.loading = false;
+        this.loading = false;
       }
     },
     setEdit(data) {
@@ -250,7 +250,7 @@ export default {
         title  : data.title,
         variant: data.variant,
         values : data.values,
-        _id     : data._id
+        _id    : data._id
       };
       this.action = 'edit';
     },
