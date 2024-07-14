@@ -196,14 +196,15 @@
     <v-label class="text-black font-weight-bold mx-3">اضافات و کسورات</v-label>
 
     <!--  Add Operation   -->
-    <v-btn class="border"
-           @click="addProduct"
-           size="30"
-           variant="outlined"
-           color="pink"
-           icon>
-      <v-icon>mdi-plus</v-icon>
-    </v-btn>
+    <nuxt-link target="_blank" to="/add-and-subtract">
+      <v-btn class="border"
+             size="30"
+             variant="outlined"
+             color="pink"
+             icon>
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+    </nuxt-link>
 
     <!--  Add-And-Subtract & Total   -->
     <v-row class="mt-2 mx-4">
@@ -677,28 +678,30 @@ export default {
       });
     },
     setEdit(data) {
-      this.reset();
+      if(this.form._id !== data._id) {
+        this.reset();
 
-      this.form.customer       = data._customer;
-      this.form.dateTime       = data.dateTime;
-      this.form.warehouse      = data._warehouse;
-      this.form.description    = data.description;
-      this.form.products       = data.products;
-      this.form.addAndSubtract = data.AddAndSub;
+        this.form.customer       = data._customer;
+        this.form.dateTime       = data.dateTime;
+        this.form.warehouse      = data._warehouse;
+        this.form.description    = data.description;
+        this.form.products       = data.products;
+        this.form.addAndSubtract = data.AddAndSub;
 
-      // add and subtract
-      data.AddAndSub.forEach((addAndSub) => {
-        this.selectedAddAndSubtract.push(addAndSub._reason);
-      });
+        // add and subtract
+        data.AddAndSub.forEach((addAndSub) => {
+          this.selectedAddAndSubtract.push(addAndSub._reason);
+        });
 
-      // _id and action
-      this.form._id = data._id;
-      this.action   = 'edit';
-      setTimeout(() => {
-        this.$forceUpdate();
-      }, 2500);
+        // _id and action
+        this.form._id = data._id;
+        this.action   = 'edit';
+        setTimeout(() => {
+          this.$forceUpdate();
+        }, 2500);
 
-      this.calculateInvoiceTotal();
+        this.calculateInvoiceTotal();
+      }
     },
     setSettlement() {
       this.settlementId     = this.form._id;
