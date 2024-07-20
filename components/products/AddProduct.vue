@@ -313,10 +313,11 @@
           <td class="text-center w-25">
             <!--  Delete Property   -->
             <v-btn class="border"
-                   @click="deleteVariant(index)"
+                   :loading="variant.deleteLoading"
                    size="30"
                    variant="outlined"
                    color="pink"
+                   @click="deleteVariant(index)"
                    icon>
               <v-icon>mdi-delete</v-icon>
 
@@ -848,7 +849,7 @@ export default {
             this.form.tags         = data.tags;
             this.form.title        = data.title;
             this.form.content      = data.content;
-            this.form._id           = data._id;
+            this.form._id          = data._id;
             this.action            = 'edit';
 
             // set files
@@ -864,6 +865,9 @@ export default {
 
             // set variants props
             data.variants.forEach((variant) => {
+              // set delete Loading field
+              variant.deleteLoading = false;
+
               variant.properties.forEach((property) => {
                 let variantProp = this.form.variantsProps.find(prop => prop._id === property._property);
                 if (variantProp) {
@@ -871,7 +875,7 @@ export default {
                     variantProp.values.push(property.value);
                 } else {
                   this.form.variantsProps.push({
-                    _id    : property._property,
+                    _id   : property._property,
                     values: [property.value]
                   });
                 }
@@ -898,7 +902,7 @@ export default {
       // wait for load data
       setTimeout(() => {
         this.action            = 'add';
-        this.form._id           = '';
+        this.form._id          = '';
         this.form.files        = [];
         this.form.filesPreview = [];
         this.form.filesError   = false;
@@ -1034,7 +1038,7 @@ export default {
         variantProp.values.forEach((propValue) => {
 
           // create base variant
-          let variant = {properties: []};
+          let variant = {properties: [], deleteLoading: false};
 
           // add base prop value
           variant.properties.push({_property: variantProp._id, value: propValue});
@@ -1060,15 +1064,46 @@ export default {
           this.form.lastVariants.forEach((lVariant) => {
             if (JSON.stringify(variant.properties) === JSON.stringify(lVariant.properties)) {
               variant.code = lVariant.code;
+              variant._id = lVariant._id;
             }
           });
         });
       }
 
     },
-    deleteVariant(index) {
-      if (confirm('آیا مطمئن هستید؟'))
-        this.form.variants.splice(index, 1);
+    async deleteVariant(index) {
+      if (confirm('آیا مطمئن هستید؟')) {
+        if (this.form.variants[index]._id) {
+          this.form.variants[index].deleteLoading = true;
+
+          // request to delete variant
+          await fetch(
+              this.runtimeConfig.public.API_BASE_URL +
+              'products/' + this.form._id + '/variants/' + this.form.variants[index]._id, {
+                method : 'delete',
+                headers: {
+                  'authorization': 'Bearer ' + this.user.token
+                }
+              }).then(async response => {
+            const {$showMessage} = useNuxtApp();
+            if (response.status === 200) {
+              // remove item from files preview
+              this.form.variants.splice(index, 1);
+
+              $showMessage('عملیات با موفقت انجام شد', 'success');
+            } else if(response.status === 400) {
+              $showMessage('این تنوع در فاکتور خریدی استفاده شده است و قابل حذف نیست', 'error');
+            } else {
+              // show error
+              $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+            }
+          });
+
+          this.form.variants[index].deleteLoading = false;
+        } else {
+          this.form.variants.splice(index, 1);
+        }
+      }
     },
     getPropertyValue(_property, valueCode) {
       let property = this.categoryProperties.find(prop => prop._id === _property);
@@ -1128,7 +1163,7 @@ export default {
         this.form.properties.push({
           title: title,
           value: '',
-          _id   : _id
+          _id  : _id
         });
       } else {
         // remove property
