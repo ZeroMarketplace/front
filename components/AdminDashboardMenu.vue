@@ -106,6 +106,11 @@ export default {
           link: "/warehouses"
         },
         {
+          text: 'موجودی کالا‌ها',
+          icon: 'mdi-home-silo-outline',
+          link: "/inventories"
+        },
+        {
           text: 'اطلاعات پروفایل',
           icon: 'mdi-card-account-details-outline'
         },
