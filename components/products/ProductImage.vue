@@ -22,7 +22,16 @@
 
 <script>
 export default {
-  props: ['file', 'size'],
+  props: {
+    file: {
+      type: String,
+      default: ''
+    },
+    size: {
+      type: Number,
+      default: 100
+    }
+  },
   data() {
     return {
       render: false
@@ -31,11 +40,6 @@ export default {
   created() {
     this.runtimeConfig = useRuntimeConfig();
     this.staticsUrl    = this.runtimeConfig.public.STATICS_URL;
-
-    // size
-    if(!this.size)
-      this.size = 100;
-
     this.render        = true;
   }
 }
