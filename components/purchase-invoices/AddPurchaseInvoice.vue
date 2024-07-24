@@ -54,17 +54,10 @@
 
       <!--   Warehouse   -->
       <v-col class="mt-n8 mt-md-0" cols="12" md="4">
-        <v-select class="mt-3"
-                  v-model="form.warehouse"
-                  label="انبار"
-                  :readonly="loading"
-                  :rules="rules.notEmptySelectable"
-                  :items="warehouses"
-                  item-title="title.fa"
-                  item-value="_id"
-                  density="compact"
-                  variant="outlined">
-        </v-select>
+        <warehouses-warehouse-input class="mt-3"
+                                    :input-rules="rules.notEmptySelectable"
+                                    v-model="form.warehouse">
+        </warehouses-warehouse-input>
       </v-col>
 
       <!--   Description   -->
@@ -642,18 +635,6 @@ export default {
         this.loading = false;
       });
     },
-    getWarehouses() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response        = await response.json();
-        this.warehouses = response.list;
-        this.loading    = false;
-      });
-    },
     getAddAndSubtract() {
       this.loading = true;
       fetch(
@@ -678,7 +659,7 @@ export default {
       });
     },
     setEdit(data) {
-      if(this.form._id !== data._id) {
+      if (this.form._id !== data._id) {
         this.reset();
 
         this.form.customer       = data._customer;
@@ -717,7 +698,6 @@ export default {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getUsers();
-    this.getWarehouses();
     this.getAddAndSubtract();
   },
   computed: {},
