@@ -107,7 +107,7 @@ export default {
         },
         {
           text: 'موجودی کالا‌ها',
-          icon: 'mdi-home-silo-outline',
+          icon: 'mdi-clipboard-list-outline',
           link: "/inventories"
         },
         {

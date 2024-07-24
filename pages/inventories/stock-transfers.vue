@@ -1,6 +1,5 @@
 <template>
   <v-row>
-
     <!--  Admin Dashboard Menu   -->
     <v-col class="pa-0 d-none d-md-inline" md="3">
       <AdminDashboardMenu/>
@@ -20,19 +19,21 @@
             <!--      Title      -->
             <v-col class="mt-2" cols="9">
               <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-home-silo-outline
+                mdi-clipboard-list-outline
               </v-icon>
 
               <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-warehouse
+                mdi-human-dolly
               </v-icon>
 
               <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-warehouse
+                mdi-human-dolly
               </v-icon>
 
               <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">موجودی کالا‌ها</span>
+                <span v-if="action === 'list'">انتقالات موجودی</span>
+                <span v-if="action === 'add'">افزودن انتقال</span>
+                <span v-if="action === 'edit'">ویرایش انتقال</span>
               </v-label>
             </v-col>
 
@@ -43,15 +44,23 @@
                      @click="toggleAction"
                      icon>
                 <v-icon v-if="action === 'list'">mdi-human-dolly</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-receipt-text-outline</v-icon>
-                <v-icon v-if="action === 'add'">mdi-receipt-text-outline</v-icon>
+                <v-icon v-if="action === 'edit'">mdi-clipboard-list-outline</v-icon>
+                <v-icon v-if="action === 'add'">mdi-clipboard-list-outline</v-icon>
               </v-btn>
             </v-col>
           </v-row>
           <v-divider class="mt-3"></v-divider>
         </v-col>
 
-        <!--    Inventories List   -->
+        <!--    Inventories Stock Transfer   -->
+        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+          <inventories-add-stock-transfer
+              ref="addStockTransfers"
+              @exit="toggleAction"
+              @refresh="getStockTransfers"/>
+        </v-col>
+
+        <!--    Stock Transfers List   -->
         <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
           <!--    loading      -->
@@ -165,7 +174,7 @@ export default {
       if (this.action === 'add' || this.action === 'edit')
         this.action = 'list';
       else
-        this.action = this.$refs.addWarehouse.action;
+        this.action = this.$refs.addStockTransfers.action;
     },
     filter() {
       let search = new URLSearchParams();
@@ -181,10 +190,10 @@ export default {
 
       return search;
     },
-    getInventories() {
+    getStockTransfers() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories?' + this.filter(), {
+          this.runtimeConfig.public.API_BASE_URL + 'inventories/stock-transfers?' + this.filter(), {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -212,12 +221,12 @@ export default {
 
         this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
 
-        this.getInventories();
+        this.getStockTransfers();
       }
     },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'inventories/stock-transfers' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -229,7 +238,7 @@ export default {
           $showMessage('عملیات با موفقت انجام شد', 'success');
 
           // refresh list
-          this.getInventories();
+          this.getStockTransfers();
         } else {
           // show error
           $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -266,18 +275,11 @@ export default {
   mounted() {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
-    this.getInventories();
+    this.getStockTransfers();
     this.getWarehouses();
   },
   computed: {},
-  watch: {
-    filters: {
-      handler(newVal, oldVal) {
-        this.getInventories();
-      },
-      deep: true
-    },
-  }
+  watch: {}
 }
 </script>
 
