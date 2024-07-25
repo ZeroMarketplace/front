@@ -101,7 +101,7 @@
               <v-btn class="mx-2"
                      color="red"
                      size="25"
-                     @click="setDelete({_id: item._id})"
+                     @click="setDelete(item._id)"
                      icon>
                 <v-icon size="15">mdi-delete-outline</v-icon>
               </v-btn>
@@ -253,9 +253,14 @@ export default {
         this.getStockTransfers();
       }
     },
+    setDelete(_id) {
+      if (confirm('آیا مطمئن هستید؟')) {
+        this.delete(_id);
+      }
+    },
     async delete(_id) {
       await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/stock-transfers' + _id, {
+          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers/' + _id, {
             method : 'delete',
             headers: {
               'Content-Type' : 'application/json',
@@ -274,14 +279,6 @@ export default {
         }
       });
     },
-    getCountInWarehouse(item,_warehouse) {
-      let warehouse = item.warehouses.find(warehouse => warehouse._id === _warehouse);
-      if(warehouse) {
-        return warehouse.count;
-      } else {
-        return '-';
-      }
-    }
   },
   mounted() {
     this.user          = useCookie('user').value;
