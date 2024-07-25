@@ -50,7 +50,10 @@
     </div>
 
     <!--  Products List   -->
-    <v-row class="border mr-md-8 rounded-lg mx-5 mt-3 mb-2 pt-1 pb-2" v-for="(product,index) in form.products">
+    <v-row class="border mr-md-8 rounded-lg mx-5 mt-3 mb-2 pt-1 pb-2"
+           v-for="(product,index) in form.products"
+           :key="index"
+           :class="product.error ? 'error' : ''">
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
@@ -71,7 +74,8 @@
                       variant="outlined"
                       hide-details>
           <template v-slot:append-inner>
-            <v-label class="mx-2">از {{ product.totalCount }}</v-label>
+            <v-label v-if="!product.loading" class="mx-2">از {{ product.totalCount }}</v-label>
+            <v-progress-circular indeterminate v-else></v-progress-circular>
           </template>
         </v-text-field>
       </v-col>
@@ -100,6 +104,7 @@
       <v-col class="pt-4" cols="12" md="1">
         <!--  Delete Product   -->
         <v-btn class="bg-white float-end"
+               v-if="!product.loading && !product.done"
                @click="deleteProduct(index)"
                size="30"
                variant="outlined"
@@ -107,6 +112,10 @@
                icon>
           <v-icon>mdi-delete</v-icon>
         </v-btn>
+        <v-progress-circular indeterminate v-if="product.loading"></v-progress-circular>
+        <v-icon v-if="product.done" color="green">
+          mdi-check-circle
+        </v-icon>
       </v-col>
 
     </v-row>
@@ -196,15 +205,14 @@
 </template>
 
 <script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
-import ProductInput   from "~/components/products/ProductInput.vue";
+import {useCookie}  from "#app";
+import ProductInput from "~/components/products/ProductInput.vue";
 
 export default {
   components: {ProductInput},
   data() {
     return {
-      form   : {
+      form       : {
         _id                 : '',
         sourceWarehouse     : null,
         destinationWarehouse: null,
@@ -212,7 +220,7 @@ export default {
         totalCount          : 0,
         total               : 0
       },
-      rules  : {
+      rules      : {
         notEmpty          : [
           value => {
             if (value) return true;
@@ -226,8 +234,9 @@ export default {
           }
         ],
       },
-      loading: false,
-      action : 'add'
+      inventories: {},
+      loading    : false,
+      action     : 'add'
     }
   },
   methods: {
@@ -242,38 +251,22 @@ export default {
       this.$forceUpdate();
     },
     async add() {
-
       // convert numbers and create products array
-      let products = [];
-      this.form.products.forEach((product) => {
-        products.push({
-          _id  : product._id,
-          count: Number(product.count)
-        });
-      });
+      for (const product of this.form.products) {
+        const index = this.form.products.indexOf(product);
+        await this.stockTransferProduct(index);
+      }
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              sourceWarehouse     : this.form.sourceWarehouse,
-              destinationWarehouse: this.form.destinationWarehouse,
-              products            : products
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          response = await response.json();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+      let countOfSuccess = 0;
+      for (const product of this.form.products) {
+        if(product.done)
+          countOfSuccess++;
+      }
+      if(countOfSuccess === this.form.products.length) {
+        this.notify('عملیات با موفقیت انجام شد','success');
+        this.$emit('exit');
+        this.$emit('refresh');
+      }
     },
     async edit() {
 
@@ -333,6 +326,34 @@ export default {
         this.loading = false;
       }
     },
+    async stockTransferProduct(index) {
+      this.form.products[index].loading = true;
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers', {
+            method : 'post',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            },
+            body   : JSON.stringify({
+              _sourceWarehouse     : this.form.sourceWarehouse,
+              _destinationWarehouse: this.form.destinationWarehouse,
+              _product             : this.form.products[index]._id,
+              count                : Number(this.form.products[index].count)
+            })
+          }).then(async response => {
+        if (response.status === 200) {
+          response                          = await response.json();
+          this.form.products[index].loading = false;
+          this.form.products[index].done    = true;
+        } else {
+          this.form.products[index].loading = false;
+          this.form.products[index].error   = true;
+          // show error
+          this.notify('مشکلی در انتقال به وجود آمد', 'error');
+        }
+      });
+    },
     addProduct() {
       this.form.products.push({
         _id       : '',
@@ -340,7 +361,9 @@ export default {
         totalCount: 0,
         price     : 0,
         total     : 0,
-        loading   : false
+        loading   : false,
+        error     : false,
+        done      : false,
       });
     },
     async onProductSelected(val, index) {
@@ -351,13 +374,32 @@ export default {
       else
         this.form.products[index]['price'] = 0;
 
-      if(val._id) {
+      if (val._id) {
         this.form.products[index]['loading'] = true;
-        await this.getInventoryByProductId(val._id);
+        await this.setProductTotalCount(index);
         this.form.products[index]['loading'] = false;
       }
 
       this.calculateProductTotal(index);
+    },
+    async setProductTotalCount(index) {
+      let _id       = this.form.products[index]._id;
+      let inventory = this.inventories[_id];
+      if (inventory) {
+        if (this.form.sourceWarehouse) {
+          // find total count of warehouse (source)
+          let warehouse = inventory.warehouses.find(warehouse => warehouse._id === this.form.sourceWarehouse);
+          if (warehouse)
+            this.form.products[index].totalCount = warehouse.count;
+          else
+            this.form.products[index].totalCount = 0;
+        } else {
+          this.notify('انبار مبدا را انتخاب کنید', 'warning');
+        }
+      } else {
+        await this.getInventoryByProductId(_id);
+        await this.setProductTotalCount(index);
+      }
     },
     async getInventoryByProductId(_id) {
       await fetch(
@@ -368,8 +410,8 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             }
           }).then(async response => {
-        response       = await response.json();
-        console.log(response);
+        response              = await response.json();
+        this.inventories[_id] = response;
       });
     },
     deleteProduct(index) {
@@ -402,14 +444,28 @@ export default {
     }
   },
   mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
+    this.user            = useCookie('user').value;
+    this.runtimeConfig   = useRuntimeConfig();
+    const {$showMessage} = useNuxtApp();
+    this.notify          = $showMessage;
   },
-  computed: {},
-  watch   : {}
+  computed: {
+    sourceWarehouse() {
+      return this.form.sourceWarehouse;
+    }
+  },
+  watch   : {
+    sourceWarehouse(val, oldVal) {
+      this.form.products.forEach((product, index) => {
+        this.setProductTotalCount(index);
+      });
+    }
+  }
 }
 </script>
 
 <style scoped>
-
+.error {
+  border-color: red !important;
+}
 </style>

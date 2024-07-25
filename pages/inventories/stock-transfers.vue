@@ -79,21 +79,32 @@
                         show-current-page>
 
             <!--     Items       -->
+            <template v-slot:item._sourceWarehouse="{ item }">
+              {{ item._sourceWarehouse.title.fa }}
+            </template>
+            <template v-slot:item._destinationWarehouse="{ item }">
+              {{ item._destinationWarehouse.title.fa }}
+            </template>
+            <template v-slot:item.count="{ item }">
+              {{ item.count + ' ' }}
+              {{ item.productDetails._unit.title.fa }}
+            </template>
             <template v-slot:item.code="{ item }">
               {{ item.productDetails.code }}
-            </template>
-            <template v-slot:item.barcode="{ item }">
-              {{ item.productDetails.barcode }}
             </template>
             <template v-slot:item.productDetails="{ item }">
               {{ item.productDetails.title }}
             </template>
-            <template v-slot:item.total="{ item }">
-              {{ item.total + ' ' }}
-              {{ item.productDetails._unit.title.fa }}
-            </template>
-            <template v-slot:item._warehouse="{ item, column }">
-              {{ getCountInWarehouse(item, column._id) }}
+
+            <template v-slot:item.operation="{ item }">
+              <!--  Delete   -->
+              <v-btn class="mx-2"
+                     color="red"
+                     size="25"
+                     @click="setDelete({_id: item._id})"
+                     icon>
+                <v-icon size="15">mdi-delete-outline</v-icon>
+              </v-btn>
             </template>
 
             <!--      Pagination      -->
@@ -142,20 +153,38 @@ export default {
           sortable: false
         },
         {
-          title   : 'بارکد',
-          key     : 'barcode',
-          align   : 'center',
-          sortable: false
-        },
-        {
           title   : 'محصول',
           key     : 'productDetails',
           align   : 'center',
           sortable: false
         },
         {
-          title   : 'تعداد کل',
-          key     : 'total',
+          title   : 'تعداد',
+          key     : 'count',
+          align   : 'center',
+          sortable: false
+        },
+        {
+          title   : 'انبار مبدا',
+          key     : '_sourceWarehouse',
+          align   : 'center',
+          sortable: false
+        },
+        {
+          title   : 'انبار مقصد',
+          key     : '_destinationWarehouse',
+          align   : 'center',
+          sortable: false
+        },
+        {
+          title   : 'تاریخ',
+          key     : 'updatedAtJalali',
+          align   : 'center',
+          sortable: false
+        },
+        {
+          title   : 'عملیات',
+          key     : 'operation',
           align   : 'center',
           sortable: false
         },
@@ -193,7 +222,7 @@ export default {
     getStockTransfers() {
       this.loading = true;
       fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/stock-transfers?' + this.filter(), {
+          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers?' + this.filter(), {
             method : 'get',
             headers: {
               'Content-Type' : 'application/json',
@@ -245,24 +274,6 @@ export default {
         }
       });
     },
-    getWarehouses() {
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response     = await response.json();
-        response.list.forEach((warehouse) => {
-          this.listHeaders.push({
-            title   : warehouse.title.fa,
-            key     : '_warehouse',
-            align   : 'center',
-            sortable: false,
-            _id: warehouse._id,
-          });
-        });
-      });
-    },
     getCountInWarehouse(item,_warehouse) {
       let warehouse = item.warehouses.find(warehouse => warehouse._id === _warehouse);
       if(warehouse) {
@@ -276,7 +287,6 @@ export default {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
     this.getStockTransfers();
-    this.getWarehouses();
   },
   computed: {},
   watch: {}
