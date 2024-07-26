@@ -74,7 +74,7 @@
                       variant="outlined"
                       hide-details>
           <template v-slot:append-inner>
-            <v-label v-if="!product.loading" class="mx-2">از {{ product.totalCount }}</v-label>
+            <v-label v-if="!product.loading" class="mx-2 text-caption">از {{ product.totalCount }}</v-label>
             <v-progress-circular indeterminate v-else></v-progress-circular>
           </template>
         </v-text-field>
