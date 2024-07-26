@@ -81,6 +81,51 @@
       <v-icon>mdi-plus</v-icon>
     </v-btn>
 
+    <!--  Product Selector   -->
+    <v-row class="mt-2 mb-2">
+      <!--      Product      -->
+      <v-col cols="12" md="6" offset-md="3">
+        <ProductInput :inputId="form.productSelector._product"
+                      @selected="val => onProductSelector(val)"/>
+      </v-col>
+      <v-col class="text-caption" cols="12" md="6" offset-md="3">
+
+        <v-row>
+          <v-col cols="5">
+            <!--    Price    -->
+            <v-row v-if="form.productSelector.price" class="text-caption mx-5">
+              قیمت: {{ form.productSelector.price }}
+            </v-row>
+            <!--    Inventory    -->
+            <v-row class="text-caption mx-5" v-if="form.productSelector.inventory">
+              موجودی کل:
+              {{ form.productSelector.inventory.total }}
+              {{ this.form.productSelector.unit.title.fa }}
+            </v-row>
+          </v-col>
+          <v-col v-if="form.productSelector.inventory" cols="5">
+            <v-row v-for="warehouse in form.productSelector.inventory.warehouses">
+              {{ warehouse.title.fa }}:
+              {{ warehouse.count }}
+              {{ this.form.productSelector.unit.title.fa }}
+            </v-row>
+          </v-col>
+          <v-col  class="text-center" cols="2">
+            <v-btn v-if="form.productSelector.inventory && form.productSelector.inventory.total"
+                   class="mt-n2"
+                   @click="addProductSelectorItem"
+                   size="small"
+                   color="green"
+                   icon>
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+            <v-progress-circular v-if="form.productSelector.loading" indeterminate></v-progress-circular>
+          </v-col>
+        </v-row>
+
+      </v-col>
+    </v-row>
+
     <!-- Products List is Empty -->
     <div v-if="!form.products.length" class="d-flex justify-center w-100 my-16">
       <v-label>اقلامی ندارد</v-label>
@@ -318,14 +363,21 @@ export default {
       settlementDialog      : false,
       settlementId          : '',
       form                  : {
-        _id           : '',
-        customer      : null,
-        dateTime      : new Date(),
-        description   : '',
-        products      : [],
-        addAndSubtract: [],
-        sum           : 0,
-        total         : 0
+        _id            : '',
+        customer       : null,
+        dateTime       : new Date(),
+        description    : '',
+        productSelector: {
+          _product : '',
+          price    : '',
+          unit     : '',
+          inventory: undefined,
+          loading  : false
+        },
+        products       : [],
+        addAndSubtract : [],
+        sum            : 0,
+        total          : 0
       },
       rules                 : {
         notEmpty          : [
@@ -472,6 +524,14 @@ export default {
         total: 0
       });
     },
+    addProductSelectorItem() {
+      this.form.products.push({
+        _id  : this.form.productSelector._product,
+        count: 0,
+        price: this.form.productSelector.price,
+        total: 0
+      });
+    },
     async onProductSelected(val, index) {
       this.form.products[index]['_id'] = val._id;
       // set product price
@@ -481,6 +541,20 @@ export default {
         this.form.products[index]['price'] = 0;
 
       this.calculateProductTotal(index);
+    },
+    async onProductSelector(val, index) {
+      this.form.productSelector._product = val._id;
+      // set product price
+      if (val.price)
+        this.form.productSelector.price = val.price.consumer;
+      else
+        this.form.productSelector.price = 0;
+
+      this.form.productSelector.unit = val._unit;
+
+      this.form.productSelector.loading = true;
+      await this.getInventoryByProductId(val._id);
+      this.form.productSelector.loading = false;
     },
     deleteProduct(index) {
       this.form.products.splice(index, 1);
@@ -625,7 +699,22 @@ export default {
       this.settlementDialog = false;
       this.$emit('exit', true);
       this.$emit('refresh', true);
-    }
+    },
+    async getInventoryByProductId(_id) {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id + '?typeOfSales=retail', {
+            method : 'get',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(
+          async (response) => {
+            response                            = await response.json();
+            this.form.productSelector.inventory = response;
+          }
+      );
+    },
   },
   mounted() {
     this.user          = useCookie('user').value;
