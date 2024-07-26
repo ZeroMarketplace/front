@@ -30,13 +30,23 @@
       </v-col>
 
       <!--      Sell Online      -->
-      <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="4">
+      <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="2">
         <v-checkbox class="mt-2"
-                    v-model="form.sellOnline"
+                    v-model="form.onlineSales"
                     :readonly="loading"
                     label="فروش آنلاین"
                     hide-details
         ></v-checkbox>
+      </v-col>
+
+      <!--      Retail      -->
+      <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="2">
+        <v-checkbox class="mt-2"
+                    v-model="form.retail"
+                    :readonly="loading"
+                    label="خرده فروشی"
+                    hide-details>
+        </v-checkbox>
       </v-col>
 
       <!--     Actions       -->
@@ -80,11 +90,12 @@ export default {
   data() {
     return {
       form   : {
-        title     : {
+        title      : {
           en: '',
           fa: ''
         },
-        sellOnline: false
+        onlineSales: false,
+        retail     : false
       },
       rules  : {
         notEmpty: [
@@ -101,9 +112,10 @@ export default {
   methods: {
     reset() {
       this.$refs.addWarehouseForm.reset();
-      this.form.sellOnline = false;
-      this.loading         = false;
-      this.action          = 'add';
+      this.form.onlineSales = false;
+      this.form.retail      = false;
+      this.loading          = false;
+      this.action           = 'add';
     },
     async add() {
       await fetch(
@@ -114,8 +126,9 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title     : this.form.title,
-              sellOnline: this.form.sellOnline
+              title      : this.form.title,
+              onlineSales: this.form.onlineSales,
+              retail     : this.form.retail
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -143,8 +156,9 @@ export default {
               'authorization': 'Bearer ' + this.user.token
             },
             body   : JSON.stringify({
-              title     : this.form.title,
-              sellOnline: this.form.sellOnline
+              title      : this.form.title,
+              onlineSales: this.form.onlineSales,
+              retail     : this.form.retail
             })
           }).then(async response => {
         const {$showMessage} = useNuxtApp();
@@ -178,9 +192,10 @@ export default {
     },
     setEdit(data) {
       this.form   = {
-        title     : data.title,
-        sellOnline: data.sellOnline,
-        _id       : data._id
+        title      : data.title,
+        onlineSales: data.onlineSales,
+        retail     : data.retail,
+        _id        : data._id
       };
       this.action = 'edit';
     }
