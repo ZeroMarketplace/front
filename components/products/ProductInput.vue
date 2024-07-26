@@ -1,48 +1,46 @@
 <template>
-  <div>
-    <v-combobox class="w-100"
-                v-model="title"
-                label="نام یا کد کالا"
-                :readonly="loading"
-                :loading="loading"
-                :items="items"
-                item-title="title"
-                item-value="_id"
-                density="compact"
-                variant="outlined"
-                auto-select-first="exact"
-                @input="searchProduct"
-                clearable
-                hide-details>
-      <!--   Item    -->
-      <template #item="{ item, index, props }">
-        <v-list-item v-bind="props">
-          <template v-slot:prepend>
-            <ProductImage class="ml-2"
-                          :file="(item.raw.files && item.raw.files[0]) ? item.raw.files[0] : undefined"
-                          :size="35"/>
-          </template>
-        </v-list-item>
-      </template>
-
-      <!--   Selection    -->
-      <template v-slot:selection="data">
-        <v-label class="text-black font-weight-bold"
-                 :key="JSON.stringify(data.item)"
-                 v-bind="data.attrs"
-                 :disabled="data.disabled"
-                 :model-value="data.selected"
-                 size="small"
-                 @click:close="data.parent.selectItem(data.item)">
+  <v-combobox class="w-100"
+              v-model="title"
+              label="نام یا کد کالا"
+              :readonly="loading"
+              :loading="loading"
+              :items="items"
+              item-title="title"
+              item-value="_id"
+              density="compact"
+              variant="outlined"
+              auto-select-first="exact"
+              @input="searchProduct"
+              clearable
+              hide-details>
+    <!--   Item    -->
+    <template #item="{ item, index, props }">
+      <v-list-item v-bind="props">
+        <template v-slot:prepend>
           <ProductImage class="ml-2"
-                        v-if="data.item.raw"
-                        :file="(data.item.raw.files && data.item.raw.files[0]) ? data.item.raw.files[0] : undefined"
+                        :file="(item.raw.files && item.raw.files[0]) ? item.raw.files[0] : undefined"
                         :size="35"/>
-          {{ data.item.title }}
-        </v-label>
-      </template>
-    </v-combobox>
-  </div>
+        </template>
+      </v-list-item>
+    </template>
+
+    <!--   Selection    -->
+    <template v-slot:selection="data">
+      <v-label class="text-black font-weight-bold"
+               :key="JSON.stringify(data.item)"
+               v-bind="data.attrs"
+               :disabled="data.disabled"
+               :model-value="data.selected"
+               size="small"
+               @click:close="data.parent.selectItem(data.item)">
+        <ProductImage class="ml-2"
+                      v-if="data.item.raw"
+                      :file="(data.item.raw.files && data.item.raw.files[0]) ? data.item.raw.files[0] : undefined"
+                      :size="35"/>
+        {{ data.item.title }}
+      </v-label>
+    </template>
+  </v-combobox>
 </template>
 
 <script>
