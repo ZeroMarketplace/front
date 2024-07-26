@@ -97,26 +97,29 @@
               قیمت: {{ form.productSelector.price }}
             </v-row>
             <!--    Inventory    -->
-            <v-row class="text-caption mx-5" v-if="form.productSelector.inventory">
+            <v-row class="text-caption mx-5"
+                   v-if="form.productSelector._product && form.inventories[form.productSelector._product]">
               موجودی کل:
-              {{ form.productSelector.inventory.total }}
+              {{ form.inventories[form.productSelector._product].total }}
               {{ this.form.productSelector.unit.title.fa }}
             </v-row>
           </v-col>
-          <v-col v-if="form.productSelector.inventory" cols="5">
-            <v-row v-for="warehouse in form.productSelector.inventory.warehouses">
+          <v-col v-if="form.productSelector._product && form.inventories[form.productSelector._product]"
+                 cols="5">
+            <v-row v-for="warehouse in form.inventories[form.productSelector._product].warehouses">
               {{ warehouse.title.fa }}:
               {{ warehouse.count }}
               {{ this.form.productSelector.unit.title.fa }}
             </v-row>
           </v-col>
-          <v-col  class="text-center" cols="2">
-            <v-btn v-if="form.productSelector.inventory && form.productSelector.inventory.total"
-                   class="mt-n2"
-                   @click="addProductSelectorItem"
-                   size="small"
-                   color="green"
-                   icon>
+          <v-col class="text-center" cols="2">
+            <v-btn
+                v-if="form.productSelector._product && form.inventories[form.productSelector._product] && form.inventories[form.productSelector._product].total"
+                class="mt-n2"
+                @click="addProductSelectorItem"
+                size="small"
+                color="green"
+                icon>
               <v-icon>mdi-plus</v-icon>
             </v-btn>
             <v-progress-circular v-if="form.productSelector.loading" indeterminate></v-progress-circular>
@@ -148,10 +151,14 @@
                       label="تعداد"
                       type="number"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.notEmpty, maxCountRule(product.totalCount)]"
                       density="compact"
                       variant="outlined"
                       hide-details>
+          <template v-slot:append-inner>
+            <v-label v-if="!product.loading" class="mx-2 text-caption">از {{ product.totalCount }}</v-label>
+            <v-progress-circular indeterminate v-else></v-progress-circular>
+          </template>
         </v-text-field>
       </v-col>
 
@@ -374,6 +381,7 @@ export default {
           inventory: undefined,
           loading  : false
         },
+        inventories    : {},
         products       : [],
         addAndSubtract : [],
         sum            : 0,
@@ -518,18 +526,22 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        _id  : '',
-        count: 0,
-        price: 0,
-        total: 0
+        _id       : '',
+        count     : 0,
+        price     : 0,
+        totalCount: 0,
+        loading   : false,
+        total     : 0
       });
     },
     addProductSelectorItem() {
       this.form.products.push({
-        _id  : this.form.productSelector._product,
-        count: 0,
-        price: this.form.productSelector.price,
-        total: 0
+        _id       : this.form.productSelector._product,
+        count     : 0,
+        price     : this.form.productSelector.price,
+        totalCount: this.form.inventories[this.form.productSelector._product].total,
+        loading   : false,
+        total     : 0
       });
     },
     async onProductSelected(val, index) {
@@ -539,6 +551,12 @@ export default {
         this.form.products[index]['price'] = val.price.consumer;
       else
         this.form.products[index]['price'] = 0;
+
+      this.form.products[index]['loading'] = true;
+      await this.getInventoryByProductId(val._id);
+      this.form.products[index]['loading'] = false;
+
+      this.form.products[index]['totalCount'] = this.form.inventories[val._id].total;
 
       this.calculateProductTotal(index);
     },
@@ -710,11 +728,20 @@ export default {
             }
           }).then(
           async (response) => {
-            response                            = await response.json();
-            this.form.productSelector.inventory = response;
+            response                   = await response.json();
+            this.form.inventories[_id] = response;
           }
       );
     },
+    maxCountRule(count) {
+      return value => {
+        if (value > count) {
+          return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
+        } else {
+          return true;
+        }
+      };
+    }
   },
   mounted() {
     this.user          = useCookie('user').value;
