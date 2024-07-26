@@ -75,6 +75,45 @@
               <!--      Actions        -->
               <template v-slot:append>
 
+                <!--  Set Default   -->
+                <v-btn class="mx-2"
+                       v-bind="props"
+                       :class="item.defaultFor ? 'bg-secondary' : 'bg-white border'"
+                       size="30"
+                       icon>
+                  <v-icon size="15">mdi-star-outline</v-icon>
+                  <v-menu activator="parent">
+                    <v-list>
+                      <!--         Online Sales             -->
+                      <v-list-item @click="setDefault('onlineSales',item._id)"
+                                   key="1"
+                                   value="onlineSales">
+                        <v-list-item-title>
+                          فروش آنلاین
+                          <v-icon v-if="item.defaultFor === 'onlineSales'"
+                                  size="15"
+                                  color="secondary">mdi-star-outline
+                          </v-icon>
+                        </v-list-item-title>
+                      </v-list-item>
+
+                      <!--          Retail            -->
+                      <v-list-item @click="setDefault('retail',item._id)"
+                                   key="2"
+                                   value="retail">
+                        <v-list-item-title>
+                          خرده فروشی
+                          <v-icon v-if="item.defaultFor === 'retail'"
+                                  size="15"
+                                  color="secondary">mdi-star-outline
+                          </v-icon>
+                        </v-list-item-title>
+                      </v-list-item>
+
+                    </v-list>
+                  </v-menu>
+                </v-btn>
+
                 <!--  inventory of products   -->
                 <v-btn class="mx-2"
                        color="secondary"
@@ -179,7 +218,26 @@ export default {
       if (confirm('آیا مطمئن هستید؟')) {
         this.delete(data._id);
       }
-    }
+    },
+    async setDefault(typeOfSales, _id) {
+      await fetch(
+          this.runtimeConfig.public.API_BASE_URL + 'warehouses/default/' + typeOfSales + '/' + _id, {
+            method : 'put',
+            headers: {
+              'Content-Type' : 'application/json',
+              'authorization': 'Bearer ' + this.user.token
+            }
+          }).then(async response => {
+        const {$showMessage} = useNuxtApp();
+        if (response.status === 200) {
+          $showMessage('عملیات با موفقت انجام شد', 'success');
+          this.getWarehouses();
+        } else {
+          // show error
+          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      });
+    },
   },
   mounted() {
     this.user          = useCookie('user').value;
