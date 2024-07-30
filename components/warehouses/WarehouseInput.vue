@@ -14,12 +14,20 @@
 import {useCookie} from "#app";
 
 export default {
-  props: ['input-rules'],
+  props: {
+    'input-rules': {
+      type: Array
+    },
+    preload      : {
+      type   : Boolean,
+      default: true
+    }
+  },
   data() {
     return {
-      loading  : false,
-      list     : [],
-      rules    : [],
+      loading: false,
+      list   : [],
+      rules  : [],
     }
   },
   methods: {
@@ -37,13 +45,16 @@ export default {
     },
   },
   created() {
-    if(this.inputRules)
+    if (this.inputRules)
       this.rules = this.inputRules;
   },
   mounted() {
     this.user          = useCookie('user').value;
     this.runtimeConfig = useRuntimeConfig();
-    this.getWarehouses();
+    // check has items
+    if (!this.list.length && this.preload) {
+      this.getWarehouses();
+    }
   }
 }
 </script>
