@@ -286,7 +286,11 @@ export default {
     this.getStockTransfers();
   },
   computed: {},
-  watch: {}
+  watch: {
+    page(val, oldVal) {
+      this.getStockTransfers();
+    }
+  }
 }
 </script>
 
