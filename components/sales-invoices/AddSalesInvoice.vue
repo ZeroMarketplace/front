@@ -145,7 +145,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="4">
-        <ProductInput :inputId="product._id"
+        <ProductInput :inputId="product._product"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -182,7 +182,7 @@
                   @update:modelValue="setProductTotalCount(index)"
                   :readonly="loading"
                   :rules="rules.notEmptySelectable"
-                  :items="form.inventories[product._id] ? form.inventories[product._id].warehouses : []"
+                  :items="form.inventories[product._product] ? form.inventories[product._product].warehouses : []"
                   item-title="title.fa"
                   item-value="_id"
                   density="compact"
@@ -464,7 +464,7 @@ export default {
       let products = [];
       this.form.products.forEach((product) => {
         products.push({
-          _id       : product._id,
+          _product  : product._product,
           count     : Number(product.count),
           price     : Number(product.price),
           _warehouse: product._warehouse
@@ -565,7 +565,7 @@ export default {
     },
     addProduct() {
       this.form.products.push({
-        _id               : '',
+        _product          : '',
         count             : 0,
         price             : 0,
         totalCount        : 0,
@@ -595,7 +595,7 @@ export default {
 
       // add product
       this.form.products.push({
-        _id               : this.form.productSelector._product,
+        _product          : this.form.productSelector._product,
         count             : 0,
         price             : this.form.productSelector.price,
         totalCount        : totalCount,
@@ -606,7 +606,7 @@ export default {
       });
     },
     async onProductSelected(val, index) {
-      this.form.products[index]['_id'] = val._id;
+      this.form.products[index]['_product'] = val._id;
       // set product price
       if (val.price)
         this.form.products[index]['price'] = val.price.consumer;
