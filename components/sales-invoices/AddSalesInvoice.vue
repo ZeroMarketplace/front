@@ -812,7 +812,7 @@ export default {
 
             // update product totalCount
             if (updateTotalCount) {
-              let product = this.form.products.find(p => p._id === _id);
+              let product = this.form.products.find(p => p._product === _id);
               let index   = this.form.products.indexOf(product);
               this.setProductTotalCount(index);
             }
@@ -848,7 +848,7 @@ export default {
     setProductTotalCount(index) {
       // set total count
       if (this.form.products[index]['_warehouse']) {
-        let warehouse                           = this.form.inventories[this.form.products[index]['_id']].warehouses.find(
+        let warehouse                           = this.form.inventories[this.form.products[index]['_product']].warehouses.find(
             warehouse => warehouse._id === this.form.products[index]['_warehouse']
         );
         this.form.products[index]['totalCount'] = warehouse.count;
@@ -858,17 +858,17 @@ export default {
       this.$refs.addSalesInvoiceForm.validate();
     },
     checkProductStockTransferError(index, count) {
-      let inventory = this.form.inventories[this.form.products[index]['_id']];
+      let inventory = this.form.inventories[this.form.products[index]['_product']];
       // check has multiple warehouse
       if (inventory.total > count) {
         this.form.products[index]['stockTransferError'] = true;
       }
     },
     showStockTransferDialog(index) {
-      let inventory                                  = this.form.inventories[this.form.products[index]['_id']];
+      let inventory                                  = this.form.inventories[this.form.products[index]['_product']];
       let warehouse                                  = inventory.warehouses.find(warehouse => warehouse._id === this.form.products[index]['_warehouse']);
       this.stockTransferDialog.count                 = this.form.products[index]['count'] - warehouse.count;
-      this.stockTransferDialog._product              = this.form.products[index]['_id'];
+      this.stockTransferDialog._product              = this.form.products[index]['_product'];
       this.stockTransferDialog._destinationWarehouse = this.form.products[index]['_warehouse'];
       this.stockTransferDialog.show                  = true;
       // set transfer data
