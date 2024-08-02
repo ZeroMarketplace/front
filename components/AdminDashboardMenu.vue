@@ -73,7 +73,12 @@ export default {
         },
         {
           text: 'لیست فروش',
-          icon: 'mdi-cart'
+          icon: 'mdi-cart',
+        },
+        {
+          text: 'سود فروش کالا‌ها',
+          icon: 'mdi-cart',
+          link: '/commodity-profits'
         },
         {
           text: 'فاکتور فروش',
