@@ -81,6 +81,11 @@
             <template v-slot:item.productDetails="{ item }">
               {{ item.productDetails.title }}
             </template>
+            <template v-slot:item.description="{ item }">
+              <span v-if="item.referenceType === 'sales-invoices'">
+                فاکتور فروش ({{ item._reference.code }})
+              </span>
+            </template>
 
             <template v-slot:item.operation="{ item }">
               <!--  Delete   -->
@@ -157,17 +162,23 @@ export default {
           sortable: false
         },
         {
+          title   : 'شرح',
+          key     : 'description',
+          align   : 'center',
+          sortable: false
+        },
+        {
           title   : 'تاریخ',
           key     : 'updatedAtJalali',
           align   : 'center',
           sortable: false
         },
-        {
-          title   : 'عملیات',
-          key     : 'operation',
-          align   : 'center',
-          sortable: false
-        },
+        // {
+        //   title   : 'عملیات',
+        //   key     : 'operation',
+        //   align   : 'center',
+        //   sortable: false
+        // },
       ],
       listTotal    : 100,
       page         : 1,
