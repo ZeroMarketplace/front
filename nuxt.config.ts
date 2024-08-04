@@ -24,7 +24,11 @@ export default defineNuxtConfig({
                 "charset": "utf-8"
             },
         ],
-        pageTransition: {name: 'page', mode: 'out-in'}
+        pageTransition: false,
+        layoutTransition: {
+            name: 'fade',
+            mode: 'out-in' // default
+        }
     },
 
     css: [
