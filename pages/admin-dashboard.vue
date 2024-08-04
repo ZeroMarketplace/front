@@ -13,7 +13,7 @@
 <script>
 
 definePageMeta({
-  layout: "admin-layout",
+  layout: "admin",
 });
 export default {
   data() {

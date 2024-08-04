@@ -1,120 +1,103 @@
 <template>
-  <v-row>
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-    <!--  Admin Dashboard Menu   -->
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
+    <!--    Title And Action    -->
+    <v-col cols="12">
+      <v-row>
+        <!--      Title      -->
+        <v-col class="mt-2" cols="9">
+          <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+            mdi-file-document-outline
+          </v-icon>
+
+          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+            mdi-file-document-plus-outline
+          </v-icon>
+
+          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+            mdi-file-document-edit-outline
+          </v-icon>
+
+          <v-label class="font-weight-bold mr-2">
+            <span v-if="action === 'list'">اسناد حسابداری</span>
+            <span v-if="action === 'add'">افزودن سند</span>
+            <span v-if="action === 'edit'">ویرایش سند</span>
+          </v-label>
+        </v-col>
+
+        <!--     Action       -->
+        <v-col class="text-end" cols="3">
+          <v-btn class="bg-secondary"
+                 size="small"
+                 @click="toggleAction"
+                 icon>
+            <v-icon v-if="action === 'list'">mdi-receipt-text-plus-outline</v-icon>
+            <v-icon v-if="action === 'edit'">mdi-receipt-text-outline</v-icon>
+            <v-icon v-if="action === 'add'">mdi-receipt-text-outline</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-divider class="mt-3"></v-divider>
     </v-col>
 
-    <!--  Page   -->
-    <v-col cols="12" md="9">
+    <!--    Add Accounting Documents   -->
+    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+      <add-accounting-document
+          ref="addAccountingDocument"
+          @exit="toggleAction"
+          @refresh="getAccountingDocuments"/>
+    </v-col>
 
-      <AdminHeaderBar class="mb-3"/>
+    <!--    accounting-documents List   -->
+    <v-col v-show="action === 'list'" class="pb-16" cols="12">
 
-      <!--   Content     -->
-      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+      <!--    loading      -->
+      <Loading :loading="loading"/>
 
-        <!--    Title And Action    -->
-        <v-col cols="12">
-          <v-row>
-            <!--      Title      -->
-            <v-col class="mt-2" cols="9">
-              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-file-document-outline
-              </v-icon>
+      <!--    List      -->
+      <v-data-table v-if="list.length" class="mt-n5"
+                    :loading="loading"
+                    :headers="listHeaders"
+                    :items="list"
+                    :items-per-page="perPage"
+                    :pageCount="listTotal"
+                    @update:options="setListOptions"
+                    sticky
+                    show-current-page>
+        <template v-slot:item.operation="{ item }">
+          <!--  Delete   -->
+          <v-btn class="mx-2"
+                 color="red"
+                 size="25"
+                 @click="setDelete({_id: item._id})"
+                 icon>
+            <v-icon size="15">mdi-delete-outline</v-icon>
+          </v-btn>
 
-              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-file-document-plus-outline
-              </v-icon>
+          <!--  Edit   -->
+          <v-btn class="mx-2"
+                 color="secondary"
+                 size="25"
+                 @click="setEdit(item)"
+                 icon>
+            <v-icon size="15">mdi-pencil</v-icon>
+          </v-btn>
+        </template>
 
-              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-file-document-edit-outline
-              </v-icon>
-
-              <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">اسناد حسابداری</span>
-                <span v-if="action === 'add'">افزودن سند</span>
-                <span v-if="action === 'edit'">ویرایش سند</span>
-              </v-label>
-            </v-col>
-
-            <!--     Action       -->
-            <v-col class="text-end" cols="3">
-              <v-btn class="bg-secondary"
-                     size="small"
-                     @click="toggleAction"
-                     icon>
-                <v-icon v-if="action === 'list'">mdi-receipt-text-plus-outline</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-receipt-text-outline</v-icon>
-                <v-icon v-if="action === 'add'">mdi-receipt-text-outline</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-divider class="mt-3"></v-divider>
-        </v-col>
-
-        <!--    Add Accounting Documents   -->
-        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-          <add-accounting-document
-              ref="addAccountingDocument"
-              @exit="toggleAction"
-              @refresh="getAccountingDocuments"/>
-        </v-col>
-
-        <!--    accounting-documents List   -->
-        <v-col v-show="action === 'list'" class="pb-16" cols="12">
-
-          <!--    loading      -->
-          <Loading :loading="loading"/>
-
-          <!--    List      -->
-          <v-data-table v-if="list.length" class="mt-n5"
-                        :loading="loading"
-                        :headers="listHeaders"
-                        :items="list"
-                        :items-per-page="perPage"
-                        :pageCount="listTotal"
-                        @update:options="setListOptions"
-                        sticky
-                        show-current-page>
-            <template v-slot:item.operation="{ item }">
-              <!--  Delete   -->
-              <v-btn class="mx-2"
-                     color="red"
-                     size="25"
-                     @click="setDelete({_id: item._id})"
-                     icon>
-                <v-icon size="15">mdi-delete-outline</v-icon>
-              </v-btn>
-
-              <!--  Edit   -->
-              <v-btn class="mx-2"
-                     color="secondary"
-                     size="25"
-                     @click="setEdit(item)"
-                     icon>
-                <v-icon size="15">mdi-pencil</v-icon>
-              </v-btn>
-            </template>
-
-            <!--      Pagination      -->
-            <template v-slot:bottom>
-              <v-pagination class="mt-5"
-                            active-color="secondary"
-                            v-model="page"
-                            :length="pageCount"
-                            rounded="circle">
-              </v-pagination>
-            </template>
-          </v-data-table>
+        <!--      Pagination      -->
+        <template v-slot:bottom>
+          <v-pagination class="mt-5"
+                        active-color="secondary"
+                        v-model="page"
+                        :length="pageCount"
+                        rounded="circle">
+          </v-pagination>
+        </template>
+      </v-data-table>
 
 
-          <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
-
-        </v-col>
-
-      </v-row>
+      <!--    Empty List Alert      -->
+      <EmptyList :list="list" :loading="loading"/>
 
     </v-col>
 
@@ -126,7 +109,7 @@ import {useCookie}           from "#app";
 import AddAccountingDocument from "~/components/accounting-documents/AddAccountingDocument.vue";
 
 definePageMeta({
-  layout: "admin-layout"
+  layout: "admin"
 });
 
 export default {

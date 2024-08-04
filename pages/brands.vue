@@ -1,108 +1,91 @@
 <template>
-  <v-row>
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-    <!--  Admin Dashboard Menu   -->
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
+    <!--    Title And Action    -->
+    <v-col cols="12">
+      <v-row>
+        <!--      Title      -->
+        <v-col class="mt-2" cols="9">
+          <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+            mdi-draw-pen
+          </v-icon>
+
+          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+            mdi-draw-pen
+          </v-icon>
+
+          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+            mdi-draw-pen
+          </v-icon>
+
+          <v-label class="font-weight-bold mr-2">
+            <span v-if="action === 'list'">برند‌ها</span>
+            <span v-if="action === 'add'">افزودن برند</span>
+            <span v-if="action === 'edit'">ویرایش برند</span>
+          </v-label>
+        </v-col>
+
+        <!--     Action       -->
+        <v-col class="text-end" cols="3">
+          <v-btn class="bg-secondary"
+                 size="small"
+                 @click="toggleAction"
+                 icon>
+            <v-icon v-if="action === 'list'">mdi-plus</v-icon>
+            <v-icon v-if="action === 'edit'">mdi-draw-pen</v-icon>
+            <v-icon v-if="action === 'add'">mdi-draw-pen</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-divider class="mt-3"></v-divider>
     </v-col>
 
-    <!--  Page   -->
-    <v-col cols="12" md="9">
+    <!--    Add Brand   -->
+    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+      <brands-add-brand ref="addBrand" @exit="toggleAction" @refresh="getBrands"/>
+    </v-col>
 
-      <AdminHeaderBar class="mb-3"/>
+    <!--    Brands List   -->
+    <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
-      <!--   Content     -->
-      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+      <!--    loading      -->
+      <Loading :loading="loading"/>
 
-        <!--    Title And Action    -->
-        <v-col cols="12">
-          <v-row>
-            <!--      Title      -->
-            <v-col class="mt-2" cols="9">
-              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-draw-pen
-              </v-icon>
+      <!--    List      -->
+      <v-list class="mx-5">
+        <v-list-item v-for="item in list"
+                     class="rounded border-b pa-2" link>
 
-              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-draw-pen
-              </v-icon>
+          <!--      Title        -->
+          <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
 
-              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-draw-pen
-              </v-icon>
+          <!--      Actions        -->
+          <template v-slot:append>
+            <!--  Delete   -->
+            <v-btn class="mx-2"
+                   color="red"
+                   size="30"
+                   @click="setDelete({_id: item._id})"
+                   icon>
+              <v-icon size="15">mdi-delete-outline</v-icon>
+            </v-btn>
 
-              <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">برند‌ها</span>
-                <span v-if="action === 'add'">افزودن برند</span>
-                <span v-if="action === 'edit'">ویرایش برند</span>
-              </v-label>
-            </v-col>
+            <!--  Edit   -->
+            <v-btn class="mx-2"
+                   color="secondary"
+                   size="30"
+                   @click="setEdit(item)"
+                   icon>
+              <v-icon size="15">mdi-pencil</v-icon>
+            </v-btn>
 
-            <!--     Action       -->
-            <v-col class="text-end" cols="3">
-              <v-btn class="bg-secondary"
-                     size="small"
-                     @click="toggleAction"
-                     icon>
-                <v-icon v-if="action === 'list'">mdi-plus</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-draw-pen</v-icon>
-                <v-icon v-if="action === 'add'">mdi-draw-pen</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-divider class="mt-3"></v-divider>
-        </v-col>
+          </template>
 
-        <!--    Add Brand   -->
-        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-          <brands-add-brand ref="addBrand" @exit="toggleAction" @refresh="getBrands"/>
-        </v-col>
+        </v-list-item>
+      </v-list>
 
-        <!--    Brands List   -->
-        <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
-          <!--    loading      -->
-          <Loading :loading="loading"/>
-
-          <!--    List      -->
-          <v-list class="mx-5">
-            <v-list-item v-for="item in list"
-                         class="rounded border-b pa-2" link>
-
-              <!--      Title        -->
-              <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
-
-              <!--      Actions        -->
-              <template v-slot:append>
-                <!--  Delete   -->
-                <v-btn class="mx-2"
-                       color="red"
-                       size="30"
-                       @click="setDelete({_id: item._id})"
-                       icon>
-                  <v-icon size="15">mdi-delete-outline</v-icon>
-                </v-btn>
-
-                <!--  Edit   -->
-                <v-btn class="mx-2"
-                       color="secondary"
-                       size="30"
-                       @click="setEdit(item)"
-                       icon>
-                  <v-icon size="15">mdi-pencil</v-icon>
-                </v-btn>
-
-              </template>
-
-            </v-list-item>
-          </v-list>
-
-          <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
-
-        </v-col>
-
-      </v-row>
+      <!--    Empty List Alert      -->
+      <EmptyList :list="list" :loading="loading"/>
 
     </v-col>
 
@@ -114,7 +97,7 @@ import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
 
 definePageMeta({
-  layout: "admin-layout"
+  layout: "admin"
 });
 
 export default {

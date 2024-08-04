@@ -1,120 +1,104 @@
 <template>
-  <v-row>
-    <!--  Admin Dashboard Menu   -->
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
-    </v-col>
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-    <!--  Page   -->
-    <v-col cols="12" md="9">
+    <!--    Title And Action    -->
+    <v-col cols="12">
+      <v-row>
+        <!--      Title      -->
+        <v-col class="mt-2" cols="9">
+          <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+            mdi-clipboard-list-outline
+          </v-icon>
 
-      <AdminHeaderBar class="mb-3"/>
+          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+            mdi-human-dolly
+          </v-icon>
 
-      <!--   Content     -->
-      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+            mdi-human-dolly
+          </v-icon>
 
-        <!--    Title And Action    -->
-        <v-col cols="12">
-          <v-row>
-            <!--      Title      -->
-            <v-col class="mt-2" cols="9">
-              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-clipboard-list-outline
-              </v-icon>
-
-              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-human-dolly
-              </v-icon>
-
-              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-human-dolly
-              </v-icon>
-
-              <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">سود فروش کالا‌ها</span>
-                <span v-if="action === 'add'">افزودن انتقال</span>
-                <span v-if="action === 'edit'">ویرایش انتقال</span>
-              </v-label>
-            </v-col>
-
-            <!--     Action       -->
-            <v-col class="text-end" cols="3">
-<!--              <v-btn class="bg-secondary"-->
-<!--                     size="small"-->
-<!--                     @click="toggleAction"-->
-<!--                     icon>-->
-<!--                <v-icon v-if="action === 'list'">mdi-human-dolly</v-icon>-->
-<!--                <v-icon v-if="action === 'edit'">mdi-clipboard-list-outline</v-icon>-->
-<!--                <v-icon v-if="action === 'add'">mdi-clipboard-list-outline</v-icon>-->
-<!--              </v-btn>-->
-            </v-col>
-          </v-row>
-          <v-divider class="mt-3"></v-divider>
+          <v-label class="font-weight-bold mr-2">
+            <span v-if="action === 'list'">سود فروش کالا‌ها</span>
+            <span v-if="action === 'add'">افزودن انتقال</span>
+            <span v-if="action === 'edit'">ویرایش انتقال</span>
+          </v-label>
         </v-col>
 
-        <!--    Commodity Profits List   -->
-        <v-col v-show="action === 'list'" cols="12" class="pb-16">
+        <!--     Action       -->
+        <v-col class="text-end" cols="3">
+          <!--              <v-btn class="bg-secondary"-->
+          <!--                     size="small"-->
+          <!--                     @click="toggleAction"-->
+          <!--                     icon>-->
+          <!--                <v-icon v-if="action === 'list'">mdi-human-dolly</v-icon>-->
+          <!--                <v-icon v-if="action === 'edit'">mdi-clipboard-list-outline</v-icon>-->
+          <!--                <v-icon v-if="action === 'add'">mdi-clipboard-list-outline</v-icon>-->
+          <!--              </v-btn>-->
+        </v-col>
+      </v-row>
+      <v-divider class="mt-3"></v-divider>
+    </v-col>
 
-          <!--    loading      -->
-          <Loading :loading="loading"/>
+    <!--    Commodity Profits List   -->
+    <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
-          <!--    List      -->
-          <v-data-table class="mt-n5 overflow-auto"
-                        v-if="list.length"
-                        :loading="loading"
-                        :headers="listHeaders"
-                        :items="list"
-                        :items-per-page="perPage"
-                        :pageCount="listTotal"
-                        @update:options="setListOptions"
-                        sticky
-                        show-current-page>
+      <!--    loading      -->
+      <Loading :loading="loading"/>
 
-            <!--     Items       -->
-            <template v-slot:item.count="{ item }">
-              {{ item.count + ' ' }}
-              {{ item.productDetails._unit.title.fa }}
-            </template>
-            <template v-slot:item.code="{ item }">
-              {{ item.productDetails.code }}
-            </template>
-            <template v-slot:item.productDetails="{ item }">
-              {{ item.productDetails.title }}
-            </template>
-            <template v-slot:item.description="{ item }">
+      <!--    List      -->
+      <v-data-table class="mt-n5 overflow-auto"
+                    v-if="list.length"
+                    :loading="loading"
+                    :headers="listHeaders"
+                    :items="list"
+                    :items-per-page="perPage"
+                    :pageCount="listTotal"
+                    @update:options="setListOptions"
+                    sticky
+                    show-current-page>
+
+        <!--     Items       -->
+        <template v-slot:item.count="{ item }">
+          {{ item.count + ' ' }}
+          {{ item.productDetails._unit.title.fa }}
+        </template>
+        <template v-slot:item.code="{ item }">
+          {{ item.productDetails.code }}
+        </template>
+        <template v-slot:item.productDetails="{ item }">
+          {{ item.productDetails.title }}
+        </template>
+        <template v-slot:item.description="{ item }">
               <span v-if="item.referenceType === 'sales-invoices'">
                 فاکتور فروش ({{ item._reference.code }})
               </span>
-            </template>
+        </template>
 
-            <template v-slot:item.operation="{ item }">
-              <!--  Delete   -->
-<!--              <v-btn class="mx-2"-->
-<!--                     color="red"-->
-<!--                     size="25"-->
-<!--                     @click="setDelete(item._id)"-->
-<!--                     icon>-->
-<!--                <v-icon size="15">mdi-delete-outline</v-icon>-->
-<!--              </v-btn>-->
-            </template>
+        <template v-slot:item.operation="{ item }">
+          <!--  Delete   -->
+          <!--              <v-btn class="mx-2"-->
+          <!--                     color="red"-->
+          <!--                     size="25"-->
+          <!--                     @click="setDelete(item._id)"-->
+          <!--                     icon>-->
+          <!--                <v-icon size="15">mdi-delete-outline</v-icon>-->
+          <!--              </v-btn>-->
+        </template>
 
-            <!--      Pagination      -->
-            <template v-slot:bottom>
-              <v-pagination class="mt-5"
-                            active-color="secondary"
-                            v-model="page"
-                            :length="pageCount"
-                            rounded="circle">
-              </v-pagination>
-            </template>
-          </v-data-table>
+        <!--      Pagination      -->
+        <template v-slot:bottom>
+          <v-pagination class="mt-5"
+                        active-color="secondary"
+                        v-model="page"
+                        :length="pageCount"
+                        rounded="circle">
+          </v-pagination>
+        </template>
+      </v-data-table>
 
-          <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
-
-        </v-col>
-
-      </v-row>
+      <!--    Empty List Alert      -->
+      <EmptyList :list="list" :loading="loading"/>
 
     </v-col>
 
@@ -122,11 +106,10 @@
 </template>
 
 <script>
-import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
 
 definePageMeta({
-  layout: "admin-layout"
+  layout: "admin"
 });
 
 export default {

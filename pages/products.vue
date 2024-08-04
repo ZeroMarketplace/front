@@ -1,131 +1,114 @@
 <template>
-  <v-row>
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-    <!--  Admin Dashboard Menu   -->
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
+    <!--    Title And Action    -->
+    <v-col cols="12">
+      <v-row>
+        <!--      Title      -->
+        <v-col class="mt-2" cols="9">
+          <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+            mdi-archive-outline
+          </v-icon>
+
+          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
+            mdi-archive-plus-outline
+          </v-icon>
+
+          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
+            mdi-archive-outline
+          </v-icon>
+
+          <v-label class="font-weight-bold mr-2">
+            <span v-if="action === 'list'">محصولات</span>
+            <span v-if="action === 'add'">افزودن محصول</span>
+            <span v-if="action === 'edit'">ویرایش محصول</span>
+          </v-label>
+        </v-col>
+
+        <!--     Action       -->
+        <v-col class="text-end" cols="3">
+          <v-btn class="bg-secondary"
+                 size="small"
+                 @click="toggleAction"
+                 icon>
+            <v-icon v-if="action === 'list'">mdi-archive-plus-outline</v-icon>
+            <v-icon v-if="action === 'edit'">mdi-archive-outline</v-icon>
+            <v-icon v-if="action === 'add'">mdi-archive-outline</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-divider class="mt-3"></v-divider>
     </v-col>
 
-    <!--  Page   -->
-    <v-col cols="12" md="9">
+    <!--    Products List   -->
+    <v-col v-show="action === 'list'" cols="12" class="">
 
-      <AdminHeaderBar class="mb-3"/>
+      <!--    loading      -->
+      <Loading :loading="loading"/>
 
-      <!--   Content     -->
-      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+      <!--    List      -->
+      <v-list class="mx-5" v-show="list.length">
+        <v-list-item v-for="item in list"
+                     class="rounded border-b pa-2"
+                     link>
 
-        <!--    Title And Action    -->
-        <v-col cols="12">
-          <v-row>
-            <!--      Title      -->
-            <v-col class="mt-2" cols="9">
-              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-archive-outline
-              </v-icon>
+          <!--      Image        -->
+          <template v-slot:prepend>
+            <ProductImage :file="(item.files && item.files[0]) ? item.files[0] : undefined" :size="100"/>
+          </template>
 
-              <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-                mdi-archive-plus-outline
-              </v-icon>
+          <!--      Name        -->
+          <v-list-item-title class="mr-2">
+            {{ item.name }}
+            <v-label class="d-block">
+              <label v-if="item.price">{{ item.price.store }} تومان</label>
+              <label v-if="item.variants && item.variants.length">{{ getProductPriceRange(item) }}</label>
+            </v-label>
+          </v-list-item-title>
 
-              <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-                mdi-archive-outline
-              </v-icon>
+          <!--      Actions        -->
+          <template v-slot:append>
 
-              <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">محصولات</span>
-                <span v-if="action === 'add'">افزودن محصول</span>
-                <span v-if="action === 'edit'">ویرایش محصول</span>
-              </v-label>
-            </v-col>
+            <!--  Delete   -->
+            <v-btn class="mx-1"
+                   color="red"
+                   size="30"
+                   @click="setDelete({_id: item._id})"
+                   icon>
+              <v-icon size="15">mdi-delete-outline</v-icon>
+            </v-btn>
 
-            <!--     Action       -->
-            <v-col class="text-end" cols="3">
-              <v-btn class="bg-secondary"
-                     size="small"
-                     @click="toggleAction"
-                     icon>
-                <v-icon v-if="action === 'list'">mdi-archive-plus-outline</v-icon>
-                <v-icon v-if="action === 'edit'">mdi-archive-outline</v-icon>
-                <v-icon v-if="action === 'add'">mdi-archive-outline</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-divider class="mt-3"></v-divider>
-        </v-col>
+            <!--  Copy   -->
+            <v-btn class="mx-1"
+                   color="secondary"
+                   size="30"
+                   @click="setCopy(item)"
+                   icon>
+              <v-icon size="15">mdi-content-copy</v-icon>
+            </v-btn>
 
-        <!--    Products List   -->
-        <v-col v-show="action === 'list'" cols="12" class="">
+            <!--  Edit   -->
+            <v-btn class="mx-1"
+                   color="secondary"
+                   size="30"
+                   @click="setEdit(item)"
+                   icon>
+              <v-icon size="15">mdi-pencil</v-icon>
+            </v-btn>
 
-          <!--    loading      -->
-          <Loading :loading="loading"/>
+          </template>
 
-          <!--    List      -->
-          <v-list class="mx-5" v-show="list.length">
-            <v-list-item v-for="item in list"
-                         class="rounded border-b pa-2"
-                         link>
+        </v-list-item>
+      </v-list>
 
-              <!--      Image        -->
-              <template v-slot:prepend>
-                <ProductImage :file="(item.files && item.files[0]) ? item.files[0] : undefined" :size="100"/>
-              </template>
+      <!--    Empty List Alert      -->
+      <EmptyList :list="list" :loading="loading"/>
 
-              <!--      Name        -->
-              <v-list-item-title class="mr-2">
-                {{ item.name }}
-                <v-label class="d-block">
-                  <label v-if="item.price">{{ item.price.store }} تومان</label>
-                  <label v-if="item.variants && item.variants.length">{{ getProductPriceRange(item) }}</label>
-                </v-label>
-              </v-list-item-title>
+    </v-col>
 
-              <!--      Actions        -->
-              <template v-slot:append>
-
-                <!--  Delete   -->
-                <v-btn class="mx-1"
-                       color="red"
-                       size="30"
-                       @click="setDelete({_id: item._id})"
-                       icon>
-                  <v-icon size="15">mdi-delete-outline</v-icon>
-                </v-btn>
-
-                <!--  Copy   -->
-                <v-btn class="mx-1"
-                       color="secondary"
-                       size="30"
-                       @click="setCopy(item)"
-                       icon>
-                  <v-icon size="15">mdi-content-copy</v-icon>
-                </v-btn>
-
-                <!--  Edit   -->
-                <v-btn class="mx-1"
-                       color="secondary"
-                       size="30"
-                       @click="setEdit(item)"
-                       icon>
-                  <v-icon size="15">mdi-pencil</v-icon>
-                </v-btn>
-
-              </template>
-
-            </v-list-item>
-          </v-list>
-
-          <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
-
-        </v-col>
-
-        <!--    Add Product    -->
-        <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-          <products-add-product ref="addProduct" @exit="toggleAction" @refresh="getProducts"/>
-        </v-col>
-
-      </v-row>
-
+    <!--    Add Product    -->
+    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+      <products-add-product ref="addProduct" @exit="toggleAction" @refresh="getProducts"/>
     </v-col>
 
   </v-row>
@@ -136,7 +119,7 @@ import {useUserStore} from "~/store/user";
 import ProductImage   from "~/components/products/ProductImage.vue";
 
 definePageMeta({
-  layout: "admin-layout"
+  layout: "admin"
 });
 
 export default {

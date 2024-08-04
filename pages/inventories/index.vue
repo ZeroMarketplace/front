@@ -1,101 +1,85 @@
 <template>
-  <v-row>
+  <!--   Content     -->
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
 
-    <!--  Admin Dashboard Menu   -->
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
+    <!--    Title And Action    -->
+    <v-col cols="12">
+      <v-row>
+        <!--      Title      -->
+        <v-col class="mt-2" cols="9">
+          <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
+            mdi-clipboard-list-outline
+          </v-icon>
+
+          <v-label class="font-weight-bold mr-2">
+            <span v-if="action === 'list'">موجودی کالا‌ها</span>
+          </v-label>
+        </v-col>
+
+        <!--     Action       -->
+        <v-col class="text-end" cols="3">
+          <nuxt-link to="inventories/stock-transfers">
+            <v-btn class="bg-secondary"
+                   size="small"
+                   @click="toggleAction"
+                   icon>
+              <v-icon>mdi-human-dolly</v-icon>
+            </v-btn>
+          </nuxt-link>
+        </v-col>
+      </v-row>
+      <v-divider class="mt-3"></v-divider>
     </v-col>
 
-    <!--  Page   -->
-    <v-col cols="12" md="9">
+    <!--    Inventories List   -->
+    <v-col v-show="action === 'list'" cols="12" class="pb-16">
 
-      <AdminHeaderBar class="mb-3"/>
+      <!--    loading      -->
+      <Loading :loading="loading"/>
 
-      <!--   Content     -->
-      <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+      <!--    List      -->
+      <v-data-table class="mt-n5 overflow-auto"
+                    v-if="list.length"
+                    :loading="loading"
+                    :headers="listHeaders"
+                    :items="list"
+                    :items-per-page="perPage"
+                    :pageCount="listTotal"
+                    @update:options="setListOptions"
+                    sticky
+                    show-current-page>
 
-        <!--    Title And Action    -->
-        <v-col cols="12">
-          <v-row>
-            <!--      Title      -->
-            <v-col class="mt-2" cols="9">
-              <v-icon v-if="action === 'list'" class="mt-1 mr-2" color="grey">
-                mdi-clipboard-list-outline
-              </v-icon>
+        <!--     Items       -->
+        <template v-slot:item.code="{ item }">
+          {{ item.productDetails.code }}
+        </template>
+        <template v-slot:item.barcode="{ item }">
+          {{ item.productDetails.barcode }}
+        </template>
+        <template v-slot:item.productDetails="{ item }">
+          {{ item.productDetails.title }}
+        </template>
+        <template v-slot:item.total="{ item }">
+          {{ item.total + ' ' }}
+          {{ item.productDetails._unit.title.fa }}
+        </template>
+        <template v-slot:item._warehouse="{ item, column }">
+          {{ getCountInWarehouse(item, column._id) }}
+        </template>
 
-              <v-label class="font-weight-bold mr-2">
-                <span v-if="action === 'list'">موجودی کالا‌ها</span>
-              </v-label>
-            </v-col>
+        <!--      Pagination      -->
+        <template v-slot:bottom>
+          <v-pagination class="mt-5"
+                        active-color="secondary"
+                        v-model="page"
+                        :length="pageCount"
+                        rounded="circle">
+          </v-pagination>
+        </template>
+      </v-data-table>
 
-            <!--     Action       -->
-            <v-col class="text-end" cols="3">
-              <nuxt-link to="inventories/stock-transfers">
-                <v-btn class="bg-secondary"
-                       size="small"
-                       @click="toggleAction"
-                       icon>
-                  <v-icon>mdi-human-dolly</v-icon>
-                </v-btn>
-              </nuxt-link>
-            </v-col>
-          </v-row>
-          <v-divider class="mt-3"></v-divider>
-        </v-col>
-
-        <!--    Inventories List   -->
-        <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
-          <!--    loading      -->
-          <Loading :loading="loading"/>
-
-          <!--    List      -->
-          <v-data-table class="mt-n5 overflow-auto"
-                        v-if="list.length"
-                        :loading="loading"
-                        :headers="listHeaders"
-                        :items="list"
-                        :items-per-page="perPage"
-                        :pageCount="listTotal"
-                        @update:options="setListOptions"
-                        sticky
-                        show-current-page>
-
-            <!--     Items       -->
-            <template v-slot:item.code="{ item }">
-              {{ item.productDetails.code }}
-            </template>
-            <template v-slot:item.barcode="{ item }">
-              {{ item.productDetails.barcode }}
-            </template>
-            <template v-slot:item.productDetails="{ item }">
-              {{ item.productDetails.title }}
-            </template>
-            <template v-slot:item.total="{ item }">
-              {{ item.total + ' ' }}
-              {{ item.productDetails._unit.title.fa }}
-            </template>
-            <template v-slot:item._warehouse="{ item, column }">
-              {{ getCountInWarehouse(item, column._id) }}
-            </template>
-
-            <!--      Pagination      -->
-            <template v-slot:bottom>
-              <v-pagination class="mt-5"
-                            active-color="secondary"
-                            v-model="page"
-                            :length="pageCount"
-                            rounded="circle">
-              </v-pagination>
-            </template>
-          </v-data-table>
-
-          <!--    Empty List Alert      -->
-          <EmptyList :list="list" :loading="loading"/>
-
-        </v-col>
-
-      </v-row>
+      <!--    Empty List Alert      -->
+      <EmptyList :list="list" :loading="loading"/>
 
     </v-col>
 
@@ -107,7 +91,7 @@ import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
 
 definePageMeta({
-  layout: "admin-layout"
+  layout: "admin"
 });
 
 export default {
