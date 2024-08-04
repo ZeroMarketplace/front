@@ -1,12 +1,6 @@
 <template>
-  <v-row>
-    <v-col class="pa-0 d-none d-md-inline" md="3">
-      <AdminDashboardMenu/>
-    </v-col>
-
-    <v-col cols="12" md="9">
-      <AdminHeaderBar/>
-    </v-col>
+  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+    Dashboard
   </v-row>
 </template>
 
