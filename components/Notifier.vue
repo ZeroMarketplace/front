@@ -1,43 +1,63 @@
 <template>
-  <div>
-    <v-snackbar v-model="show"
-                class="notifier text-justify"
-                height="50"
-                max-width="100"
-                :color="color"
-                timeout="3000"
-                elevation="24"
-                location="bottom"
-                eager>
-      {{ text }}
-    </v-snackbar>
+  <div class="notifier-container">
+    <v-slide-x-transition v-for="notification in list"
+                         :key="notification._id"
+                         mode="in-out">
+      <v-alert v-show="notification.show"
+               class="my-1 text-caption"
+               :icon="'$' + notification.color"
+               :color="notification.color"
+               :text="notification.text"
+               min-width="300"
+               closable>
+      </v-alert>
+    </v-slide-x-transition>
   </div>
 </template>
 
 <script>
-import {defineStore} from "pinia";
+import {defineStore}      from "pinia";
 import {useNotifierStore} from "~/store/notifier";
 
 export default {
   data() {
     return {
-      show : false,
-      text : '',
-      color: 'success'
+      count: 0,
+      list : []
     }
   },
   mounted() {
     // use notifier store
     const notifierStore = useNotifierStore();
-    notifierStore.$subscribe((mutation, state) => {
-      this.show  = state.show;
-      this.text  = state.text;
-      this.color = state.color;
-    });
+    notifierStore.$onAction(({name, store, args}) => {
+      if (name === 'addNotification') {
+        this.count++;
+        let _id = this.count;
+        this.list.push({
+          _id  : _id,
+          show : true,
+          text : args[0],
+          color: args[1]
+        });
+
+        // set hider
+        setTimeout(() => {
+          let notification = this.list.find(notification => notification._id === _id);
+          notification.show = !notification.show;
+        },3000);
+
+      }
+    }, true);
   }
 }
 </script>
 
 <style scoped>
-
+.notifier-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+}
 </style>
