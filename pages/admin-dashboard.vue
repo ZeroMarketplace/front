@@ -8,6 +8,9 @@
 
 definePageMeta({
   layout: "admin",
+  middleware: 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin'
 });
 export default {
   data() {

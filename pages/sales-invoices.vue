@@ -123,7 +123,10 @@ import SettlementDialog   from "~/components/SettlementDialog.vue";
 import {useCookie}        from "#app";
 
 definePageMeta({
-  layout: "admin"
+  layout: "admin",
+  middleware: 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin'
 });
 
 export default {

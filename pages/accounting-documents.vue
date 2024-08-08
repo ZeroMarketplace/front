@@ -109,7 +109,10 @@ import {useCookie}           from "#app";
 import AddAccountingDocument from "~/components/accounting-documents/AddAccountingDocument.vue";
 
 definePageMeta({
-  layout: "admin"
+  layout: "admin",
+  middleware: 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin'
 });
 
 export default {

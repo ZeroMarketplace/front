@@ -1,19 +1,20 @@
 export default defineNuxtPlugin((nuxtApp) => {
     // const { session } = useUserSession()
-    const config = useRuntimeConfig()
+    const config = useRuntimeConfig();
+    const token = useCookie('token');
     const api = $fetch.create({
         baseURL: config.public.API_BASE_URL,
         onRequest({ request, options, error }) {
-            // if (session.value?.token) {
-            //     const headers = options.headers ||= {}
-            //     if (Array.isArray(headers)) {
-            //         headers.push(['Authorization', `Bearer ${session.value?.token}`])
-            //     } else if (headers instanceof Headers) {
-            //         headers.set('Authorization', `Bearer ${session.value?.token}`)
-            //     } else {
-            //         headers.Authorization = `Bearer ${session.value?.token}`
-            //     }
-            // }
+            if (token.value) {
+                const headers = options.headers ||= {}
+                if (Array.isArray(headers)) {
+                    headers.push(['Authorization', `Bearer ${token.value}`])
+                } else if (headers instanceof Headers) {
+                    headers.set('Authorization', `Bearer ${token.value}`)
+                } else {
+                    headers.Authorization = `Bearer ${token.value}`
+                }
+            }
         },
         onResponse({response}){
             const {$showMessage} = useNuxtApp();

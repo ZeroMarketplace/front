@@ -70,7 +70,10 @@ import {useUserStore} from "~/store/user";
 import {useCookie}    from "#app";
 
 definePageMeta({
-  layout: "admin"
+  layout: "admin",
+  middleware: 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin'
 });
 
 export default {

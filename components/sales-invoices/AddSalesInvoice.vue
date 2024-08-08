@@ -16,17 +16,12 @@
     <v-row class="mx-5">
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
-        <v-autocomplete class="mt-3"
+        <UserInput      class="mt-3"
                         v-model="form.customer"
                         label="کاربر"
                         :readonly="loading"
-                        :rules="rules.notEmptySelectable"
-                        :items="users"
-                        item-title="title"
-                        item-value="_id"
-                        density="compact"
-                        variant="outlined">
-        </v-autocomplete>
+                        :rules="rules.notEmptySelectable">
+        </UserInput>
       </v-col>
 
       <!--   Date   -->
@@ -390,9 +385,10 @@ import {useUserStore}      from "~/store/user";
 import {useCookie}         from "#app";
 import ProductInput        from "~/components/products/ProductInput.vue";
 import StockTransferDialog from "~/components/inventories/StockTransferDialog.vue";
+import UserInput           from "~/components/users/UserInput.vue";
 
 export default {
-  components: {StockTransferDialog, ProductInput},
+  components: {UserInput, StockTransferDialog, ProductInput},
   data() {
     return {
       settlementDialog      : false,

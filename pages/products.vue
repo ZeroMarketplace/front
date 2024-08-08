@@ -119,7 +119,10 @@ import {useUserStore} from "~/store/user";
 import ProductImage   from "~/components/products/ProductImage.vue";
 
 definePageMeta({
-  layout: "admin"
+  layout: "admin",
+  middleware: 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin'
 });
 
 export default {
