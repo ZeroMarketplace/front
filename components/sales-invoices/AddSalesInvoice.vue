@@ -16,11 +16,11 @@
     <v-row class="mx-5">
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
-        <UserInput      class="mt-3"
-                        v-model="form.customer"
-                        label="کاربر"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectable">
+        <UserInput class="mt-3"
+                   label="کاربر"
+                   @selected="val => onUserSelected(val)"
+                   :readonly="loading"
+                   :rules="rules.notEmptySelectable">
         </UserInput>
       </v-col>
 
@@ -600,6 +600,9 @@ export default {
         stockTransferError: false,
         total             : 0
       });
+    },
+    onUserSelected(val) {
+      this.form.customer = val._id;
     },
     async onProductSelected(val, index) {
       this.form.products[index]['_product'] = val._id;
