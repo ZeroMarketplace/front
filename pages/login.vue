@@ -17,6 +17,8 @@
             <v-form :readonly="loading" @submit.prevent="submit" ref="loginForm">
               <!-- Step 1 -->
               <v-window-item :value="1">
+                <v-label class="text-subtitle-2 mb-2">لطفا شماره موبایل خود را وارد نمایید.</v-label>
+
                 <!-- Phone Number -->
                 <v-text-field class="mt-2" v-model="form.phoneNumber" label="شماره موبایل" placeholder="وارد کنید"
                               :readonly="loading" :rules="[rules.notEmpty, rules.phone]" density="compact"
@@ -42,7 +44,30 @@
 
               <!-- Step 3 -->
               <v-window-item :value="3">
-                <v-label class="text-subtitle-2 mb-2">لطفا رمز عبور خود را وارد نمایید.</v-label>
+                <v-label class="text-subtitle-2 mb-2" v-if="action === 2">لطفا رمز عبور خود را وارد نمایید.</v-label>
+                <v-label class="text-subtitle-2 mb-2" v-if="action === 1">لطفا مشخصات خود را وارد نمایید.</v-label>
+
+                <!-- First Name -->
+                <v-text-field v-if="action === 1"
+                              class="mt-3"
+                              v-model="form.firstName"
+                              label="نام"
+                              placeholder="وارد کنید"
+                              :rules="[rules.notEmpty]"
+                              density="compact"
+                              variant="outlined">
+                </v-text-field>
+
+                <!-- Last Name -->
+                <v-text-field v-if="action === 1"
+                              class="mt-3"
+                              v-model="form.lastName"
+                              label="نام خانوادگی"
+                              placeholder="وارد کنید"
+                              :rules="[rules.notEmpty]"
+                              density="compact"
+                              variant="outlined">
+                </v-text-field>
 
                 <!-- Password -->
                 <v-text-field class="mt-3"
@@ -128,11 +153,25 @@ const form       = ref({
   password       : '',
   confirmPassword: '',
   showPassword   : false,
+  firstName      : '',
+  lastName       : ''
 });
 const rules      = {
   notEmpty       : (value) => (value ? true : 'پر کردن این فیلد اجباری است'),
   phone          : (value) => (value.length === 11 ? true : 'شماره موبایل باید ۱‍۱ رقمی باشد'),
-  password       : (value) => (value.length > 7 ? true : 'رمز عبور باید حداقل ۸ رقم باشد'),
+  password       : (value) => {
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber    = /[0-9]/.test(value);
+    const hasSymbol    = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+    const minLength    = value.length >= 8;
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSymbol || !minLength) {
+      return 'رمز عبور ضعیف است';
+    } else {
+      return true;
+    }
+  },
   confirmPassword: (value) => (value === form.value.password ? true : 'رمز عبور یکسان نیست'),
 };
 
@@ -166,17 +205,16 @@ const startTimer = () => {
 };
 
 const sendOTP = async () => {
-  loading.value = true;
 
   // request
   await useAPI('auth/login', {
     method: 'post',
     body  : {
       method: 'phone',
+      action: 'authenticate',
       phone : form.value.phoneNumber,
     },
     onResponse({response}) {
-      loading.value = false;
       if (response.status === 200) {
         startTimer();
         changeStep(2);
@@ -189,18 +227,16 @@ const sendOTP = async () => {
 
 const verifyOTP = async () => {
 
-  loading.value = true;
-
   // request
   await useAPI('auth/login', {
     method: 'post',
     body  : {
+      method: 'phone',
+      action: 'verification',
       phone : form.value.phoneNumber,
       code  : form.value.otp,
-      method: 'phone',
     },
     onResponse({response}) {
-      loading.value = false;
 
       if (response.status === 200) {
         // set validation and action(1 -> register , 2 -> login)
@@ -219,18 +255,19 @@ const verifyOTP = async () => {
 };
 
 const login = async () => {
-  loading.value = true;
   // request
   await useAPI('auth/login', {
     method: 'post',
     body  : {
       method    : 'phone',
+      action    : 'access',
       phone     : form.value.phoneNumber,
       password  : form.value.password,
       validation: validation.value,
+      firstName : form.value.firstName,
+      lastName  : form.value.lastName
     },
     async onResponse({response}) {
-      loading.value = false;
       if (response.status === 200) {
         const userState = useState('user', () => ({
           authenticated: true,
@@ -253,8 +290,19 @@ const login = async () => {
         await navigateTo(response._data.role === 'admin' ? '/admin-dashboard' : '/dashboard');
       } else if (response.status === 401) {
         $notify('رمز عبور وارد شده اشتباه است', 'error');
-      } else if (response._data && response._data.message === 'Validation has expired') {
-        $notify('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
+      } else if (response.status === 400) {
+        if (response._data && response._data.message) {
+          // validation has expired
+          if (response._data.message === 'Validation has expired') {
+            $notify('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
+          } else if (response._data.message === 'Validation error') {
+            $notify('مقادیر وارد شده معتبر نیستند', 'error');
+            // password
+            if (response._data.message.errors.includes('password must be a Strong Password')) {
+              $notify('رمز عبور وارد شده ضعیف است', 'error');
+            }
+          }
+        }
       }
     },
   });
@@ -284,6 +332,7 @@ const submit = async () => {
     loading.value = false;
   }
 };
+
 </script>
 
 <style scoped>
