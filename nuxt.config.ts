@@ -79,7 +79,8 @@ export default defineNuxtConfig({
         // Keys within public, will be also exposed to the client-side
         public: {
             API_BASE_URL: process.env.API_BASE_URL,
-            STATICS_URL: process.env.STATICS_URL
+            STATICS_URL: process.env.STATICS_URL,
+            SOCKET_URL: process.env.SOCKET_URL
         }
     }
 

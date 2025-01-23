@@ -131,9 +131,21 @@ definePageMeta({
   layout: "blank"
 });
 
-import {ref, computed}                                      from 'vue';
-import {useState, useNuxtApp, navigateTo, useRuntimeConfig} from '#app';
-import {useAPI}                                             from '~/composables/useAPI';
+import {ref, computed}                     from 'vue';
+import {useCookie, useNuxtApp, navigateTo} from '#app';
+import {useAPI}                            from '~/composables/useAPI';
+
+const user = useCookie('user');
+if(user.value) {
+  switch (user.value.role) {
+    case 'admin':
+      navigateTo('/admin-dashboard');
+      break;
+    case 'user':
+      navigateTo('/dashboard');
+      break;
+  }
+}
 
 const {$notify} = useNuxtApp();
 
@@ -269,25 +281,30 @@ const login = async () => {
     },
     async onResponse({response}) {
       if (response.status === 200) {
-        const userState = useState('user', () => ({
-          authenticated: true,
-          token        : response._data.token,
-          role         : response._data.role,
-        }));
 
         const user = useCookie('user', {
           secure: true,
           maxAge: 86400 * 30,
         });
 
-        user.value = {
-          authenticated: true,
-          token        : response._data.token,
-          role         : response._data.role,
-        };
+        user.value = response._data.user;
+
+        const token = useCookie('token', {
+          secure: true,
+          maxAge: 86400 * 30,
+        });
+
+        token.value = response._data.token;
 
         $notify('خوش آمدید', 'success');
-        await navigateTo(response._data.role === 'admin' ? '/admin-dashboard' : '/dashboard');
+        switch (user.value.role) {
+          case 'admin':
+            navigateTo('/admin-dashboard');
+            break;
+          case 'user':
+            navigateTo('/dashboard');
+            break;
+        }
       } else if (response.status === 401) {
         $notify('رمز عبور وارد شده اشتباه است', 'error');
       } else if (response.status === 400) {
