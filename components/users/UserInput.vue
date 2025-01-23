@@ -1,40 +1,52 @@
 <template>
-  <v-combobox class="w-100"
-              v-model="user"
-              label="کاربر"
-              :readonly="loading"
-              :loading="loading"
-              :items="items"
-              item-title="name.fullName"
-              :custom-filter="itemsFilter"
-              density="compact"
-              variant="outlined"
-              auto-select-first="exact"
-              @input="searchUser"
-              clearable
-              hide-details>
-  </v-combobox>
+  <div>
+
+    <UserInsertDialog v-model="insertDialog" @exit="insertDialog = false" @submitted="onUserSubmitted"/>
+
+    <!--  Input  -->
+    <v-combobox class="w-100"
+                v-model="user"
+                label="کاربر"
+                :readonly="loading"
+                :loading="loading"
+                :items="items"
+                item-title="name.fullName"
+                :custom-filter="itemsFilter"
+                density="compact"
+                variant="outlined"
+                auto-select-first="exact"
+                @input="searchUser"
+                :append-inner-icon="insertDialogIcon ? 'mdi-account-plus-outline' : ''"
+                @click:append-inner="insertDialog = true"
+                clearable
+                hide-details>
+    </v-combobox>
+  </div>
 </template>
 
 <script setup>
-import {ref, watch} from "vue";
-import {useAPI}     from "~/composables/useAPI";
+import {ref, watch}     from "vue";
+import {useAPI}         from "~/composables/useAPI";
+import UserInsertDialog from "~/components/users/UserInsertDialog.vue";
 
-const user      = ref(null);
-const loading   = ref(false);
-const items     = ref([]);
-const timer     = ref(0);
-const preload   = ref(true);
+const user         = ref(null);
+const loading      = ref(false);
+const items        = ref([]);
+const timer        = ref(0);
+const preload      = ref(true);
+const insertDialog = ref(false);
 
 // define Props
 const props = defineProps({
-  inputId: String
+  inputId         : String,
+  insertDialogIcon: Boolean
 });
 
 // define emits
 const emit = defineEmits(['selected']);
 
-const itemsFilter = (value, query, item) => {};
+const itemsFilter = (value, query, item) => {
+};
 
 const filter = () => {
   let search = new URLSearchParams();
@@ -85,6 +97,11 @@ const getUser = async () => {
     }
   });
 
+};
+
+const onUserSubmitted = (response) => {
+  items.value.push(response);
+  user.value = items.value.find(row => row._id === response._id);
 };
 
 // watch when user selected

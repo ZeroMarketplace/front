@@ -48,7 +48,7 @@
                 <v-label class="text-subtitle-2 mb-2" v-if="action === 1">لطفا مشخصات خود را وارد نمایید.</v-label>
 
                 <!-- First Name -->
-                <v-text-field v-if="action === 1"
+                <v-text-field v-if="action === 1 && !userHasPassword"
                               class="mt-3"
                               v-model="form.firstName"
                               label="نام"
@@ -59,7 +59,7 @@
                 </v-text-field>
 
                 <!-- Last Name -->
-                <v-text-field v-if="action === 1"
+                <v-text-field v-if="action === 1 && !userHasPassword"
                               class="mt-3"
                               v-model="form.lastName"
                               label="نام خانوادگی"
@@ -83,7 +83,7 @@
                 </v-text-field>
 
                 <!-- Confirm Password -->
-                <v-text-field v-if="action === 1"
+                <v-text-field v-if="action === 1 || !userHasPassword"
                               v-model="form.confirmPassword"
                               class="mt-3"
                               label="تکرار رمز عبور"
@@ -136,7 +136,7 @@ import {useCookie, useNuxtApp, navigateTo} from '#app';
 import {useAPI}                            from '~/composables/useAPI';
 
 const user = useCookie('user');
-if(user.value) {
+if (user.value) {
   switch (user.value.role) {
     case 'admin':
       navigateTo('/admin-dashboard');
@@ -149,17 +149,18 @@ if(user.value) {
 
 const {$notify} = useNuxtApp();
 
-const step       = ref(1);
-const action     = ref(1);
-const loading    = ref(false);
-const validation = ref('');
-const timer      = ref({
+const step            = ref(1);
+const action          = ref(1);
+const userHasPassword = ref(false);
+const loading         = ref(false);
+const validation      = ref('');
+const timer           = ref({
   active : false,
   minutes: 1,
   second : 60,
   counter: null,
 });
-const form       = ref({
+const form            = ref({
   phoneNumber    : '',
   otp            : '',
   password       : '',
@@ -168,9 +169,16 @@ const form       = ref({
   firstName      : '',
   lastName       : ''
 });
-const rules      = {
+const rules           = {
   notEmpty       : (value) => (value ? true : 'پر کردن این فیلد اجباری است'),
-  phone          : (value) => (value.length === 11 ? true : 'شماره موبایل باید ۱‍۱ رقمی باشد'),
+  phone          : (value) => {
+    const mobileRegex = /^(\+98|0)?9\d{9}$/;
+    if (mobileRegex.test(value)) {
+      return true;
+    } else {
+      return 'فرمت شماره موبایل اشتباه است';
+    }
+  },
   password       : (value) => {
     const hasUpperCase = /[A-Z]/.test(value);
     const hasLowerCase = /[a-z]/.test(value);
@@ -252,8 +260,9 @@ const verifyOTP = async () => {
 
       if (response.status === 200) {
         // set validation and action(1 -> register , 2 -> login)
-        validation.value = response._data.validation;
-        action.value     = response._data.userIsExists ? 2 : 1;
+        validation.value      = response._data.validation;
+        action.value          = response._data.userIsExists ? 2 : 1;
+        userHasPassword.value = response._data.userHasPassword;
         changeStep(3);
       } else {
         // parse error

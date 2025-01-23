@@ -20,6 +20,7 @@
                    label="کاربر"
                    @selected="val => onUserSelected(val)"
                    :readonly="loading"
+                   :insert-dialog-icon="true"
                    :rules="rules.notEmptySelectable">
         </UserInput>
       </v-col>
