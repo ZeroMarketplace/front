@@ -102,12 +102,12 @@ definePageMeta({
   requiresRole: 'admin'
 });
 
-const {$notify}      = useNuxtApp();
-const user           = ref({});
-const list           = ref([]);
-const action         = ref('list');
-const loading        = ref(true);
-const addPropertyRef = ref(null);
+const {$notify}   = useNuxtApp();
+const user        = ref({});
+const list        = ref([]);
+const action      = ref('list');
+const loading     = ref(true);
+const addProperty = ref(null);
 
 // get All properties from API
 const getProperties = async () => {
@@ -138,7 +138,7 @@ const deleteProperty = async (_id) => {
 };
 
 const setEdit = (data) => {
-  addPropertyRef.value.setEdit(data);
+  addProperty.value.setEdit(data);
   action.value = 'edit';
 };
 
@@ -148,7 +148,6 @@ const setDelete = (data) => {
   }
 };
 
-const addProperty  = ref(null);
 const toggleAction = () => {
   if (action.value === 'add' || action.value === 'edit') {
     action.value = 'list';

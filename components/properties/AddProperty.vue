@@ -81,6 +81,7 @@ import {useNuxtApp} from '#app';
 import {useAPI}     from '~/composables/useAPI';
 
 const {$notify} = useNuxtApp();
+const emit      = defineEmits(['exit', 'refresh']);
 
 // Reactive data for the form and configuration
 const form = ref({
@@ -144,16 +145,7 @@ const add = async () => {
 
 // Edit an existing property
 const edit = async () => {
-  const response = await fetch(runtimeConfig.public.API_BASE_URL + 'properties/' + form.value._id, {
-    method : 'put',
-    headers: {
-      'Content-Type' : 'application/json',
-      'authorization': 'Bearer ' + user.value.token
-    },
-    body   : JSON.stringify(form.value)
-  });
-
-  await useAPI('properties/' + fromNodeMiddleware.value._id, {
+  await useAPI('properties/' + form.value._id, {
     method    : 'put',
     body      : form.value,
     onResponse: ({response}) => {
@@ -210,7 +202,8 @@ const addValue = () => {
 };
 
 defineExpose({
-  action
+  action,
+  setEdit
 });
 
 </script>
