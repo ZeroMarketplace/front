@@ -55,7 +55,7 @@
         <v-list-item v-for="item in list" class="rounded border-b pa-2" link>
 
           <!--      Title        -->
-          <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
 
           <!--      Actions        -->
           <template v-slot:append>
@@ -90,79 +90,80 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, onMounted}        from 'vue';
+import {useCookie, useNuxtApp} from '#app';
+import {useAPI}                from '~/composables/useAPI';
 
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : 'admin',
+  middleware  : 'auth',
   requiresAuth: true,
   requiresRole: 'admin'
 });
 
-export default {
-  data() {
-    return {
-      user   : {},
-      list   : [],
-      action : 'list',
-      loading: true
-    }
-  },
-  methods: {
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const {$notify}      = useNuxtApp();
+const user           = ref({});
+const list           = ref([]);
+const action         = ref('list');
+const loading        = ref(true);
+const addPropertyRef = ref(null);
 
-          // refresh list
-          this.getProperties();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    getProperties() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'properties', {method: 'get',}).then(async response => {
-        response     = await response.json();
-        this.list    = response.list;
-        this.loading = false;
-      });
-    },
-    setEdit(data) {
-      this.$refs.addProperty.setEdit(data);
-      this.action = 'edit';
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addProperty.action;
+// get All properties from API
+const getProperties = async () => {
+  loading.value = true;
+  // Request
+  await useAPI('properties', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // fill the list and stop loading
+      list.value    = response._data.list;
+      loading.value = false;
     }
-  },
-  mounted() {
-    this.user = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getProperties();
-  },
-  computed: {}
-}
+  });
+};
+
+const deleteProperty = async (_id) => {
+  await useAPI('properties/' + _id, {
+    method    : 'delete',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        await getProperties();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const setEdit = (data) => {
+  addPropertyRef.value.setEdit(data);
+  action.value = 'edit';
+};
+
+const setDelete = (data) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    deleteProperty(data._id);
+  }
+};
+
+const addProperty  = ref(null);
+const toggleAction = () => {
+  if (action.value === 'add' || action.value === 'edit') {
+    action.value = 'list';
+  } else {
+    action.value = addProperty.value.action;
+  }
+};
+
+onMounted(async () => {
+  user.value = useCookie('user').value;
+  // set delay for sync mounted and getProperties
+  setTimeout(async () => {
+    await getProperties();
+  }, 10);
+});
 </script>
 
 

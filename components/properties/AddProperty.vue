@@ -4,38 +4,15 @@
 
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3"
-                      v-model="form.title.fa"
-                      label="عنوان"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
-        </v-text-field>
-      </v-col>
-
-      <!--      Title EN      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3"
-                      v-model="form.title.en"
-                      label="Title"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
+        <v-text-field class="mt-3" v-model="form.title" label="عنوان" placeholder="وارد کنید" :readonly="loading"
+                      :rules="rules.notEmpty" density="compact" variant="outlined">
         </v-text-field>
       </v-col>
 
       <!--      Variant      -->
       <v-col class="mt-n5 mt-md-0 text-center" cols="12" md="4">
-        <v-checkbox class="mt-2"
-                    v-model="form.variant"
-                    :readonly="loading"
-                    label="ایجاد تنوع"
-                    hide-details
-        ></v-checkbox>
+        <v-checkbox class="mt-2" v-model="form.variant" :readonly="loading" label="ایجاد تنوع"
+                    hide-details></v-checkbox>
       </v-col>
 
       <!--      Values      -->
@@ -44,54 +21,32 @@
           مقادیر
 
           <!--  Add Value   -->
-          <v-btn class="border mr-3"
-                 @click="addValue"
-                 size="30"
-                 variant="outlined"
-                 color="pink"
-                 icon>
+          <v-btn class="border mr-3" @click="addValue" size="30" variant="outlined" color="pink" icon>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
 
         </v-label>
         <v-row v-for="(valueItem, index) in form.values">
 
-          <!--         Title         -->
+          <!--         Title fa         -->
           <v-col>
-            <v-text-field class="mt-3"
-                          v-model="valueItem.title"
-                          label="عنوان"
-                          placeholder="وارد کنید"
-                          :readonly="loading"
-                          :rules="rules.notEmpty"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
+            <v-text-field class="mt-3" v-model="valueItem.title" label="عنوان" placeholder="وارد کنید"
+                          :readonly="loading" :rules="rules.notEmpty" density="compact" variant="outlined" hide-details>
             </v-text-field>
           </v-col>
 
           <!--         Value         -->
           <v-col>
-            <v-text-field class="mt-3 ltrDirection"
-                          v-model="valueItem.value"
-                          label="مقدار"
+            <v-text-field class="mt-3 ltrDirection" v-model="valueItem.value" label="مقدار عددی یا رنگ یا ..."
                           placeholder="وارد کنید"
-                          :readonly="loading"
-                          :rules="rules.notEmpty"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
+                          :readonly="loading" density="compact" variant="outlined" hide-details>
             </v-text-field>
           </v-col>
 
           <!--         Actions         -->
           <v-col class="text-center align-center">
             <!--  Delete Value   -->
-            <v-btn class="border float-start mt-5"
-                   @click="deleteValue(index)"
-                   size="30"
-                   variant="outlined"
-                   color="pink"
+            <v-btn class="border float-start mt-5" @click="deleteValue(index)" size="30" variant="outlined" color="pink"
                    icon>
               <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -103,26 +58,14 @@
       <v-col cols="12">
 
         <!--       Submit       -->
-        <v-btn class="border rounded-lg"
-               :loading="loading"
-               prepend-icon="mdi-check-circle-outline"
-               height="40"
-               width="100"
-               variant="text"
-               type="submit"
-               density="compact">
+        <v-btn class="border rounded-lg" :loading="loading" prepend-icon="mdi-check-circle-outline" height="40"
+               width="100" variant="text" type="submit" density="compact">
           ثبت
         </v-btn>
 
         <!--       Reset       -->
-        <v-btn class="border mx-2 rounded-lg"
-               color="pink"
-               prepend-icon="mdi-delete-outline"
-               height="40"
-               width="100"
-               variant="text"
-               @click="reset"
-               density="compact">
+        <v-btn class="border mx-2 rounded-lg" color="pink" prepend-icon="mdi-delete-outline" height="40" width="100"
+               variant="text" @click="reset" density="compact">
           بازنگری
         </v-btn>
 
@@ -132,144 +75,144 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref}        from 'vue';
+import {useNuxtApp} from '#app';
+import {useAPI}     from '~/composables/useAPI';
 
-export default {
-  data() {
-    return {
-      form   : {
-        title  : {
-          en: '',
-          fa: ''
-        },
-        variant: false,
-        values : [
-          {
-            title: '',
-            value: ''
-          }
-        ]
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ]
-      },
-      action : 'add',
-      loading: false
+const {$notify} = useNuxtApp();
+
+// Reactive data for the form and configuration
+const form = ref({
+  title  : '',
+  variant: false,
+  values : [
+    {
+      title: '',
+      value: ''
     }
-  },
-  methods: {
-    reset() {
-      this.$refs.addPropertyForm.reset();
-      this.form.values  = [{title: '', value: ''}];
-      this.form.variant = false;
-      this.action       = 'add';
-      this.loading      = false;
-    },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title  : this.form.title,
-              variant: this.form.variant,
-              values : this.form.values
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+  ]
+});
 
-          // reset form
-          this.reset();
+const rules = {
+  notEmpty: [
+    value => {
+      if (value) return true;
+      return 'پر کردن این فیلد اجباری است';
+    }
+  ]
+};
 
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'properties/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title  : this.form.title,
-              variant: this.form.variant,
-              values : this.form.values
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const action  = ref('add');
+const loading = ref(false);
 
-          // reset form
-          this.reset();
 
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addPropertyForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
-      }
-    },
-    setEdit(data) {
-      this.form   = {
-        title  : data.title,
-        variant: data.variant,
-        values : data.values,
-        _id    : data._id
-      };
-      this.action = 'edit';
-    },
-    deleteValue(index) {
-      this.form.values.splice(index, 1);
-    },
-    addValue() {
-      this.form.values.push({
+// Reset the form to its initial state
+const reset = () => {
+  form.value    = {
+    title  : '',
+    variant: false,
+    values : [
+      {
         title: '',
         value: ''
-      });
+      }
+    ]
+  };
+  action.value  = 'add';
+  loading.value = false;
+};
+
+// Add a new property
+const add = async () => {
+  await useAPI('properties', {
+    method    : 'post',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        reset(); // Reset form after success
+        // Notify parent components to refresh
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+// Edit an existing property
+const edit = async () => {
+  const response = await fetch(runtimeConfig.public.API_BASE_URL + 'properties/' + form.value._id, {
+    method : 'put',
+    headers: {
+      'Content-Type' : 'application/json',
+      'authorization': 'Bearer ' + user.value.token
     },
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
+    body   : JSON.stringify(form.value)
+  });
+
+  await useAPI('properties/' + fromNodeMiddleware.value._id, {
+    method    : 'put',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        reset(); // Reset form after success
+        // Notify parent components to refresh
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const addPropertyForm = ref(null);
+// Submit the form data based on action type
+const submit          = async () => {
+  await addPropertyForm.value.validate();
+  if (addPropertyForm.value.isValid) {
+    loading.value = true;
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+    loading.value = false;
+  }
+};
+
+// Set the form for editing a property
+const setEdit = (data) => {
+  form.value   = {
+    title  : data.title,
+    variant: data.variant,
+    values : data.values,
+    _id    : data._id
+  };
+  action.value = 'edit';
+};
+
+// Delete a specific value from the form values
+const deleteValue = (index) => {
+  form.value.values.splice(index, 1);
+};
+
+// Add a new value entry to the form values
+const addValue = () => {
+  form.value.values.push({
+    title: '',
+    value: ''
+  });
+};
+
+defineExpose({
+  action
+});
+
 </script>
 
 <style scoped>

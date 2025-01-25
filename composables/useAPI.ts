@@ -5,6 +5,8 @@ export function useAPI<T>(
     options: Omit<UseFetchOptions<T>, 'default'> & { default: () => T | Ref<T> },
 ) {
     return useFetch(url, {
+        cache: false,
+        immediate: true,
         ...options,
         $fetch: useNuxtApp().$api
     })
