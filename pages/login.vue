@@ -227,11 +227,10 @@ const startTimer = () => {
 const sendOTP = async () => {
 
   // request
-  await useAPI('auth/login', {
+  await useAPI('auth/login/authenticate', {
     method: 'post',
     body  : {
       method: 'phone',
-      action: 'authenticate',
       phone : form.value.phoneNumber,
     },
     onResponse({response}) {
@@ -248,11 +247,10 @@ const sendOTP = async () => {
 const verifyOTP = async () => {
 
   // request
-  await useAPI('auth/login', {
+  await useAPI('auth/login/verification', {
     method: 'post',
     body  : {
       method: 'phone',
-      action: 'verification',
       phone : form.value.phoneNumber,
       code  : form.value.otp,
     },
@@ -277,11 +275,10 @@ const verifyOTP = async () => {
 
 const login = async () => {
   // request
-  await useAPI('auth/login', {
+  await useAPI('auth/login/access', {
     method: 'post',
     body  : {
       method    : 'phone',
-      action    : 'access',
       phone     : form.value.phoneNumber,
       password  : form.value.password,
       validation: validation.value,
