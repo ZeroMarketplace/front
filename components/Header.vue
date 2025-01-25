@@ -129,33 +129,24 @@
   </v-container>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
+<script setup>
+const user = useCookie('user');
 
-export default {
-  data() {
-    return {
-      navigationMenu: false
+const openProfile = () => {
+  if (user.value) {
+    switch (user.value.role) {
+      case 'admin':
+        navigateTo('/admin-dashboard');
+        break;
+      case 'user':
+        navigateTo('/dashboard');
+        break;
     }
-  },
-  methods : {
-    async openProfile() {
-      if (this.user.value && this.user.value.authenticated) {
-        await navigateTo(this.user.value.role === 'admin' ? '/admin-dashboard' : '/dashboard');
-      } else {
-        this.$refs.login.openModal();
-      }
-    }
-  },
-  computed: {
-    user() {
-      return useCookie('user')
-    }
-  },
-  mounted() {
-
+  } else { 
+    navigateTo('/login');
   }
-}
+};
+
 </script>
 
 <style scoped>
