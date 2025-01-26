@@ -82,6 +82,14 @@
         </v-list-item>
       </v-list>
 
+      <!--   Pagination    -->
+      <v-pagination class="mt-5"
+                    active-color="secondary"
+                    v-model="page"
+                    :length="pageCount"
+                    rounded="circle">
+      </v-pagination>
+
       <!--    Empty List Alert      -->
       <EmptyList :list="list" :loading="loading"/>
 
@@ -91,7 +99,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted}        from 'vue';
+import {ref, onMounted, watch} from 'vue';
 import {useCookie, useNuxtApp} from '#app';
 import {useAPI}                from '~/composables/useAPI';
 
@@ -102,23 +110,46 @@ definePageMeta({
   requiresRole: 'admin'
 });
 
-const {$notify}   = useNuxtApp();
-const user        = ref({});
-const list        = ref([]);
-const action      = ref('list');
-const loading     = ref(true);
-const addProperty = ref(null);
+const {$notify}     = useNuxtApp();
+const user          = ref({});
+const list          = ref([]);
+const action        = ref('list');
+const loading       = ref(true);
+const addProperty   = ref(null);
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref('');
+const sortDirection = ref(1);
+
+// filter the table
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // pagination
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+
+  // sort
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', sortDirection.value);
+
+  return search;
+};
 
 // get All properties from API
 const getProperties = async () => {
   loading.value = true;
   // Request
-  await useAPI('properties', {
+  await useAPI('properties?' + filter(), {
     method    : 'get',
     onResponse: ({response}) => {
       // fill the list and stop loading
       list.value    = response._data.list;
       loading.value = false;
+
+      // set page count from list total
+      pageCount.value = Math.ceil((response._data.total / perPage.value));
     }
   });
 };
@@ -155,6 +186,10 @@ const toggleAction = () => {
     action.value = addProperty.value.action;
   }
 };
+
+watch(page, (newValue) => {
+  getProperties();
+});
 
 onMounted(async () => {
   user.value = useCookie('user').value;
