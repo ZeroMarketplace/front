@@ -65,84 +65,91 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {useNuxtApp}     from "#app";
+import {ref, onMounted} from "vue";
+import {useAPI}         from '~/composables/useAPI'
 
+// Page metadata configuration
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : "admin",
+  middleware  : "auth",
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: "admin",
 });
 
-export default {
-  data() {
-    return {
-      user   : {},
-      loading: true,
-      action : 'list',
-      list   : []
-    }
-  },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addCategory.action;
-    },
-    getCategories() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'categories', {method: 'get'})
-          .then(async response => {
-            response     = await response.json();
-            this.list    = response.list;
-            this.loading = false;
-          });
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'categories/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+// Reactive variables
+const loading     = ref(true); // Tracks loading state
+const action      = ref("list"); // Determines current view state (list/add/edit)
+const list        = ref([]); // Stores the list of categories
+const {$notify}   = useNuxtApp();
+const addCategory = ref(null); // Store the ref of child component
 
-          // refresh list
-          await this.getCategories();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    setEdit(data) {
-      this.$refs.addCategory.setEdit(data);
-      this.action = 'edit';
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
+// Toggles between different actions
+const toggleAction = () => {
+  if (action.value === "add" || action.value === "edit") {
+    action.value = "list";
+  } else {
+    action.value = "list"; // Default fallback
+    action.value = addCategory.value.action;
+  }
+};
+
+// Fetches the list of categories
+const getCategories = async () => {
+  loading.value = true;
+  await useAPI('categories', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      list.value    = response._data.list; // set list of categories
+      loading.value = false; // stop loading
+    }
+  });
+};
+
+// Deletes a category by ID
+const deleteCategory = async (_id) => {
+  await useAPI('categories/' + _id, {
+    method    : 'delete',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+      } else {
+        $notify('مشکلی در پردازش عملیات پیش آمد. لطفا دوباره تلاش کنید.', 'error');
       }
-    },
-    setParent(data) {
-      this.$refs.addCategory.setParent(data);
-      this.action = 'add';
-    },
-  },
-  mounted() {
-    this.user = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getCategories();
-  },
-  computed: {}
-}
+    }
+  })
+};
+
+// Prepares data for editing a category
+const setEdit = (data) => {
+  // Call the relevant function in the child component
+  addCategory.value.setEdit(data);
+  action.value = "edit";
+};
+
+// Confirms and deletes a category
+const setDelete = (data) => {
+  if (confirm("آیا مطمئن هستید؟")) {
+    deleteCategory(data._id);
+  }
+};
+
+// Prepares to add a subcategory
+const setParent = (data) => {
+  // Call the relevant function in the child component
+  addCategory.value.setParent(data);
+  action.value = "add";
+};
+
+// Initialize the component on mount
+onMounted(() => {
+
+  // fix the onMounted bug for reload categories
+  setTimeout(() => {
+    getCategories(); // Fetch the list of categories
+  },10);
+});
 </script>
 
 
