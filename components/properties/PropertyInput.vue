@@ -1,6 +1,5 @@
 <template>
   <v-autocomplete
-      v-model="selectedItem"
       :items="items"
       :loading="true"
       :search-input.sync="searchQuery"
@@ -31,7 +30,6 @@ import { debounce } from 'lodash'
 
 // Variables
 const searchQuery = ref('')
-const selectedItem = ref([])
 const items = ref([]) // Holds all loaded items (including selected ones)
 const searchResults = ref([]) // Holds only the search results
 const isLoading = ref(false)

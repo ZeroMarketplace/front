@@ -200,7 +200,7 @@ const setParent = data => {
   // Set parent information for the form
   form.value._parent      = data._id;
   form.value._parentTitle = data.title;
-  form.value._properties  = data._properties;
+  form.value._properties  = data._properties ?? [];
 };
 
 onMounted(() => {

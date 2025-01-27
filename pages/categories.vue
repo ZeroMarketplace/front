@@ -117,6 +117,7 @@ const deleteCategory = async (_id) => {
     onResponse: ({response}) => {
       if (response.status === 200) {
         $notify('عملیات با موفقت انجام شد', 'success');
+        getCategories();
       } else {
         $notify('مشکلی در پردازش عملیات پیش آمد. لطفا دوباره تلاش کنید.', 'error');
       }
