@@ -150,12 +150,12 @@ const add = async () => {
 
 const edit = async () => {
   // Edit an existing category
-  await useAPI('categories' + form.value.id, {
+  await useAPI('categories/' + form.value._id, {
     method    : 'put',
     body      : {
-      title        : form.title,
-      profitPercent: Number(form.profitPercent),
-      _properties  : form._properties
+      title        : form.value.title,
+      profitPercent: Number(form.value.profitPercent),
+      _properties  : form.value._properties
     },
     onResponse: ({response}) => {
       if (response.status === 200) {
@@ -189,7 +189,7 @@ const setEdit = data => {
   // Set the form for editing a category
   form.value.title         = data.title;
   form.value.profitPercent = data.profitPercent;
-  form.value._parent       = "";
+  form.value._parent       = undefined;
   form.value._parentTitle  = "";
   form.value._properties   = data._properties;
   form.value._id           = data._id;

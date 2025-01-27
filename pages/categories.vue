@@ -51,11 +51,14 @@
       <!--    loading      -->
       <Loading :loading="loading"/>
 
-      <categories-category-view class="mt-5"
-                                :list="list"
-                                @setParent="setParent"
-                                @setDelete="setDelete"
-                                @setEdit="setEdit"/>
+      <!--   List   -->
+      <v-list class="w-100">
+        <categories-category-view v-for="item in list"
+                                  @setEdit="setEdit"
+                                  @setParent="setParent"
+                                  @setDelete="setDelete"
+                                  :item="item"/>
+      </v-list>
 
       <!--    Empty List Alert      -->
       <EmptyList class="py-16 mb-16" :list="list" :loading="loading"/>
@@ -148,7 +151,7 @@ onMounted(() => {
   // fix the onMounted bug for reload categories
   setTimeout(() => {
     getCategories(); // Fetch the list of categories
-  },10);
+  }, 10);
 });
 </script>
 

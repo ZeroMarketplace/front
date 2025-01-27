@@ -5,13 +5,8 @@
   </v-row>
 </template>
 
-<script>
-export default {
-  props: ['loading'],
-  data() {
-    return {}
-  }
-}
+<script setup>
+
 </script>
 
 <style scoped>
