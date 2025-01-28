@@ -6,21 +6,8 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.fa"
+                      v-model="form.title"
                       label="عنوان"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
-        </v-text-field>
-      </v-col>
-
-      <!--      Title EN      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.en"
-                      label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
                       :rules="rules.notEmpty"
@@ -62,125 +49,112 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref}        from "vue"; // Vue composition API functions
+import {useNuxtApp} from "#app"; // Nuxt composables
+import {useAPI}     from '~/composables/useAPI';
 
-export default {
-  data() {
-    return {
-      form   : {
-        title: {
-          en: '',
-          fa: ''
-        }
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-      },
-      action : 'add',
-      loading: false
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.addUnitForm.reset();
-      this.loading = false;
-      this.action  = 'add';
+// Reactive state
+const form = ref({
+  title: '',
+  _id  : null,
+});
+
+const rules = {
+  notEmpty: [
+    (value) => {
+      if (value) return true;
+      return "پر کردن این فیلد اجباری است";
     },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'units', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title: this.form.title
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+  ],
+};
 
-          // reset form
-          this.reset();
+const action      = ref("add");
+const loading     = ref(false);
+const addUnitForm = ref(null);
+const {$notify}   = useNuxtApp();
+const emit        = defineEmits(['exit', 'refresh']);
 
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          },500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+// Reset form state
+const reset = (addUnitFormRef) => {
+  addUnitForm?.value.reset(); // Reset the form if the reference exists
+  loading.value = false;
+  action.value  = "add";
+};
+
+// Add a new unit
+const add = async () => {
+  await useAPI('units', {
+    method    : 'post',
+    body      : {
+      title: form.value.title
     },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'units/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title: this.form.title
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقیت انجام شد", "success");
 
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          },500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addUnitForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
+        // Reset form and emit events
+        reset();
+        emit("exit");
+        emit("refresh");
+      } else {
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
       }
-    },
-    setEdit(data) {
-      this.form   = {
-        title: data.title,
-        _id   : data._id
-      };
-      this.action = 'edit';
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
+  });
+};
+
+// Edit an existing unit
+const edit = async () => {
+  await useAPI('units/' + form.value._id, {
+    method    : 'put',
+    body      : {
+      title: form.value.title
+    },
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقیت انجام شد", "success");
+
+        // Reset form and emit events
+        reset();
+        emit("exit");
+        emit("refresh");
+      } else {
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+      }
+    }
+  });
+};
+
+// Submit the form based on action type
+const submit = async () => {
+  addUnitForm?.value.validate();
+  if (addUnitForm?.value.isValid) {
+    loading.value = true;
+
+    if (action.value === "add") {
+      await add();
+    } else if (action.value === "edit") {
+      await edit();
+    }
+
+    loading.value = false;
+  }
+};
+
+// Set the form to edit mode
+const setEdit = (data) => {
+  form.value.title = data.title;
+  form.value._id   = data._id;
+  action.value     = "edit";
+};
+
+defineExpose({
+  action,
+  setEdit
+});
 </script>
+
 
 <style scoped>
 
