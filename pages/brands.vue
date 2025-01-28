@@ -57,7 +57,7 @@
                      class="rounded border-b pa-2" link>
 
           <!--      Title        -->
-          <v-list-item-title>{{ item.title.fa }}</v-list-item-title>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
 
           <!--      Actions        -->
           <template v-slot:append>
@@ -84,6 +84,14 @@
         </v-list-item>
       </v-list>
 
+      <!--   Pagination    -->
+      <v-pagination class="mt-5"
+                    active-color="secondary"
+                    v-model="page"
+                    :length="pageCount"
+                    rounded="circle">
+      </v-pagination>
+
       <!--    Empty List Alert      -->
       <EmptyList :list="list" :loading="loading"/>
 
@@ -92,79 +100,113 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, onMounted, nextTick, watch} from "vue"; // Vue composition API functions
+import {useNuxtApp}                      from "#app"; // Nuxt composables
+import {useAPI}                          from '~/composables/useAPI';
 
+// Page meta for layout, middleware, and role
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : "admin",
+  middleware  : "auth",
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: "admin",
 });
 
-export default {
-  data() {
-    return {
-      user   : {},
-      list   : [],
-      loading: true,
-      action : 'list',
-    }
-  },
-  methods: {
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'brands/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+// Reactive state variables
+const list      = ref([]);
+const loading   = ref(true);
+const action    = ref("list");
+const {$notify} = useNuxtApp();
+const addBrand  = ref(null);
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref('');
+const sortDirection = ref(1);
 
-          // refresh list
-          this.getBrands();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    getBrands() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'brands', {method: 'get',}).then(async response => {
-        response     = await response.json();
-        this.list    = response.list;
-        this.loading = false;
-      });
-    },
-    setEdit(data) {
-      this.$refs.addBrand.setEdit(data);
-      this.action = 'edit';
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addBrand.action;
+// filter the table
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // pagination
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+
+  // sort
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', sortDirection.value);
+
+  return search;
+};
+
+// Fetch the list of brands from the API
+const getBrands = async () => {
+  loading.value = true;
+  await useAPI('brands?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // Set data to list variable and stop loading
+      list.value    = response._data.list;
+      loading.value = false;
+
+      // set page count from list total
+      pageCount.value = Math.ceil((response._data.total / perPage.value));
     }
-  },
-  mounted() {
-    this.user = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getBrands();
-  },
-  computed: {}
-}
+  });
+};
+
+// Delete a brand by ID
+const deleteBrand = async (_id) => {
+  await useAPI('brands/' + _id, {
+    method    : 'delete',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقت انجام شد", "success");
+        // Refresh the list
+        getBrands();
+      } else {
+        // Show error message
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+      }
+    }
+  });
+};
+
+// Set brand to edit mode
+const setEdit = (data) => {
+  // Accessing the child component through refs
+  addBrand.value?.setEdit(data);
+  action.value = "edit";
+};
+
+// Confirm and delete a brand
+const setDelete = (data) => {
+  if (confirm("آیا مطمئن هستید؟")) {
+    deleteBrand(data._id);
+  }
+};
+
+// Toggle between actions
+const toggleAction = () => {
+  if (action.value === "add" || action.value === "edit") {
+    action.value = "list";
+  } else {
+    action.value = addBrand.value?.action;
+  }
+};
+
+// watch page change for get brands
+watch(page, (newValue) => {
+  getBrands();
+});
+
+// On component mount, initialize the data
+onMounted(() => {
+  nextTick(() => {
+    getBrands();
+  });
+});
 </script>
 
 
