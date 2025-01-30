@@ -23,49 +23,28 @@
 
       <!--      Category      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-autocomplete class="mt-3"
-                        v-model="form.categories"
-                        label="دسته بندی"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectableMultiple"
-                        :items="categories"
-                        item-title="title.fa"
-                        item-value="_id"
-                        density="compact"
-                        variant="outlined"
-                        chips
-                        multiple>
-        </v-autocomplete>
+        <CategoryInput class="mt-3"
+                       v-model="form._categories"
+                       :rules="rules.notEmptySelectableMultiple"
+                       :readonly="loading"
+                       multiple
+                       chips/>
       </v-col>
 
       <!--      Brand      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-autocomplete class="mt-3"
-                        v-model="form.brand"
-                        label="برند"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectable"
-                        :items="brands"
-                        item-title="title.fa"
-                        item-value="_id"
-                        density="compact"
-                        variant="outlined">
-        </v-autocomplete>
+        <BrandInput class="mt-3"
+                    v-model="form._brand"
+                    :rules="rules.notEmptySelectable"
+                    :readonly="loading"/>
       </v-col>
 
       <!--      Unit      -->
       <v-col class="mt-n5 mt-md-n2" cols="12" md="4">
-        <v-autocomplete class=""
-                        v-model="form.unit"
-                        label="واحد"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectable"
-                        :items="units"
-                        item-title="title.fa"
-                        item-value="_id"
-                        density="compact"
-                        variant="outlined">
-        </v-autocomplete>
+        <UnitInput class=""
+                   v-model="form._unit"
+                   :rules="rules.notEmptySelectable"
+                   :readonly="loading"/>
       </v-col>
 
       <!--      Barcode      -->
@@ -247,12 +226,11 @@
                class="mt-2">
           <!--    Title    -->
           <v-col class="" cols="12" md="2">
-            <v-label class="mx-2">{{ property.title.fa }}</v-label>
+            <v-label class="mx-2">{{ property.title }}</v-label>
           </v-col>
 
           <!--    Values    -->
           <v-col cols="12" md="10" class="pt-0">
-
 
             <v-chip v-for="(value) in property.values"
                     :key="value.code"
@@ -287,7 +265,7 @@
         <thead>
         <tr>
           <th v-for="props in form.variantsProps" class="text-center font-weight-bold">
-            {{ categoryProperties.length ? (getVariantProps(props._id).title.fa ?? '') : '' }}
+            {{ getProperty(props._id).title }}
           </th>
           <th class="text-center">
             <v-icon>mdi-cog</v-icon>
@@ -367,10 +345,10 @@
                 :value="value._id"
                 class="mx-2"
                 variant="outlined"
-                @click="toggleDynamicProperty(value._id,value.title.fa)"
+                @click="toggleDynamicProperty(value._id,value.title)"
                 filter>
 
-          {{ value.title.fa }}
+          {{ value.title }}
 
         </v-chip>
 
@@ -422,7 +400,7 @@
             </v-text-field>
 
             <v-autocomplete v-if="property._id && getPropertyValues(property._id).length"
-                            class="mt-3"
+                            class=""
                             v-model="property.value"
                             label="مقدار"
                             :readonly="loading"
@@ -520,693 +498,662 @@
           بازنگری
         </v-btn>
 
+        <!--    Upload progress    -->
+        <v-label v-if="showUploadProgress" class="text-pink mx-5">
+          در حال بارگذاری ...
+          {{ '%' + uploadProgress }}
+        </v-label>
+
       </v-col>
     </v-row>
 
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, watch, nextTick}         from 'vue';
+import {useNuxtApp, useRuntimeConfig} from '#app';
+import {useAPI}                       from '~/composables/useAPI';
+import CategoryInput                  from "~/components/categories/CategoryInput.vue";
+import BrandInput                     from "~/components/brands/BrandInput.vue";
+import UnitInput                      from "~/components/units/UnitInput.vue";
 
-export default {
-  data() {
-    return {
-      user              : {},
-      form              : {
-        name             : '',
-        categories       : [],
-        brand            : null,
-        unit             : null,
-        barcode          : '',
-        iranCode         : '',
-        variants         : [],
-        variantsProps    : [],
-        variantsValues   : [],
-        files            : [],
-        filesPreview     : [],
-        filesError       : false,
-        weight           : '',
-        dimensions       : {
-          length: '',
-          width : ''
-        },
-        tags             : '',
-        properties       : [],
-        dynamicProperties: [],
-        title            : '',
-        content          : ''
-      },
-      rules             : {
-        notEmpty                  : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable        : [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-        notEmptySelectableMultiple: [
-          value => {
-            if (value.length) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-        filesIsValid              : [
-          value => {
-            let valid = true;
-            value.forEach((file) => {
-              // Allowing file type
-              let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+// Reactive variables using ref
+const {$notify, $axios}  = useNuxtApp();
+const runTimeConfig      = useRuntimeConfig();
+const action             = ref('add');
+const loading            = ref(false);
+const uploadProgress     = ref(0);
+const showUploadProgress = ref(false);
+const addProductForm     = ref(null);
+const filesInput         = ref(null);
+const emit               = defineEmits(['exit', 'refresh']);
 
-              // check format
-              if (!allowedExtensions.exec(file.name)) {
-                // show error
-                const {$showMessage} = useNuxtApp();
-                $showMessage('فرمت فایل انتخابی قابل قبول نیست', 'error');
-                valid = false;
-                return false;
-              }
-
-              // check size
-              if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
-                // show error
-                const {$showMessage} = useNuxtApp();
-                $showMessage('اندازه فایل بیش از حد مجاز است', 'error');
-                valid = false;
-                return false;
-              }
-
-            });
-            if (valid) {
-              this.createImagesPreview();
-              this.form.filesError = false;
-            } else {
-              this.form.filesPreview = [];
-              this.form.filesError   = true;
-            }
-            return valid;
-
-          }
-        ]
-      },
-      categories        : [],
-      units             : [],
-      brands            : [],
-      categoryProperties: [],
-      action            : 'add',
-      loading           : false,
-    }
+const form = ref({
+  name             : '',
+  _categories      : [],
+  _brand           : null,
+  _unit            : null,
+  barcode          : '',
+  iranCode         : '',
+  variants         : [],
+  variantsProps    : [],
+  variantsValues   : [],
+  lastVariants     : [],
+  files            : [],
+  filesPreview     : [],
+  filesError       : false,
+  weight           : '',
+  dimensions       : {
+    length: '',
+    width : '',
   },
-  methods: {
-    reset() {
-      this.$refs.addProductForm.reset();
-      this.form.files             = [];
-      this.form.variants          = [];
-      this.form.variantsProps     = [];
-      this.form.variantsValues    = [];
-      this.form.filesPreview      = [];
-      this.form.filesError        = false;
-      this.form.properties        = [];
-      this.form.dynamicProperties = [];
-      this.categoryProperties     = [];
-      this.action                 = 'add';
-      this.loading                = false;
+  tags             : '',
+  properties       : [],
+  dynamicProperties: [],
+  title            : '',
+  content          : '',
+});
+
+// init for first category information
+const category           = ref({});
+const categoryProperties = ref([]);
+
+const rules = ref({
+  notEmpty                  : [
+    (value) => {
+      if (value) return true;
+      return 'پر کردن این فیلد اجباری است';
     },
-    async add() {
+  ],
+  notEmptySelectable        : [
+    (value) => {
+      if (value) return true;
+      return 'لطفا انتخاب کنید';
+    },
+  ],
+  notEmptySelectableMultiple: [
+    (value) => {
+      if (value.length) return true;
+      return 'لطفا انتخاب کنید';
+    },
+  ],
+  filesIsValid              : [
+    (value) => {
+      let valid = true;
+      value.forEach((file) => {
+        const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
 
-      // exception remove dynamic properties titles
-      // this.form.properties.forEach((property) => {
-      //   if (property._id)
-      //     delete property['title'];
-      // });
+        if (!allowedExtensions.exec(file.name)) {
+          $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
+          valid = false;
+          return false;
+        }
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              name      : this.form.name,
-              categories: this.form.categories,
-              brand     : this.form.brand,
-              unit      : this.form.unit,
-              barcode   : this.form.barcode,
-              iranCode  : this.form.iranCode,
-              variants  : this.form.variants,
-              weight    : Number(this.form.weight),
-              dimensions: this.form.dimensions,
-              tags      : this.form.tags,
-              properties: this.form.properties,
-              title     : this.form.title,
-              content   : this.form.content
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
+        if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
+          $notify('اندازه فایل بیش از حد مجاز است', 'error');
+          valid = false;
+          return false;
+        }
+      });
+
+      if (valid) {
+        createImagesPreview();
+        form.value.filesError = false;
+      } else {
+        form.value.filesPreview = [];
+        form.value.filesError   = true;
+      }
+      return valid;
+    },
+  ],
+});
+
+// Methods
+const reset = () => {
+  form.value = {
+    name             : '',
+    _categories      : [],
+    _brand           : null,
+    _unit            : null,
+    barcode          : '',
+    iranCode         : '',
+    variants         : [],
+    variantsProps    : [],
+    variantsValues   : [],
+    lastVariants     : [],
+    files            : [],
+    filesPreview     : [],
+    filesError       : false,
+    weight           : '',
+    dimensions       : {
+      length: '',
+      width : '',
+    },
+    tags             : '',
+    properties       : [],
+    dynamicProperties: [],
+    title            : '',
+    content          : '',
+  };
+  categoryProperties.value     = [];
+  action.value                 = 'add';
+  loading.value                = false;
+};
+
+const add = async () => {
+  await useAPI('products', {
+    method    : 'post',
+    body      : {
+      name       : form.value.name,
+      _categories: form.value._categories,
+      _brand     : form.value._brand,
+      _unit      : form.value._unit,
+      barcode    : form.value.barcode,
+      iranCode   : form.value.iranCode,
+      variants   : form.value.variants,
+      weight     : Number(form.value.weight),
+      dimensions : form.value.dimensions,
+      tags       : form.value.tags,
+      properties : form.value.properties,
+      title      : form.value.title,
+      content    : form.value.content,
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        if (form.value.files.length) {
+          $notify('عملیات با موفقت انجام شد', 'success');
+          $notify('در حال بارگذاری فایل‌ها...', 'warning');
+          await uploadFiles(response._data._id);
+        } else {
+          reset();
+          emit('exit');
+          emit('refresh');
+          $notify('عملیات با موفقت انجام شد', 'success');
+        }
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const edit = async () => {
+  await useAPI('products/' + form.value._id, {
+    method    : 'put',
+    body      : {
+      name       : form.value.name,
+      _categories: form.value._categories,
+      _brand     : form.value._brand,
+      _unit      : form.value._unit,
+      barcode    : form.value.barcode,
+      iranCode   : form.value.iranCode,
+      variants   : form.value.variants,
+      weight     : Number(form.value.weight),
+      dimensions : form.value.dimensions,
+      tags       : form.value.tags,
+      properties : form.value.properties,
+      title      : form.value.title,
+      content    : form.value.content
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        if (form.value.files.length) {
+          $notify('عملیات با موفقت انجام شد', 'success');
+          $notify('در حال بارگذاری فایل‌ها...', 'warning');
+          await uploadFiles(form.value._id);
+        } else {
+          $notify('عملیات با موفقت انجام شد', 'success');
+          reset();
+          emit('exit');
+          emit('refresh');
+        }
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const submit = async () => {
+  addProductForm.value?.validate();
+  if (addProductForm.value?.isValid) {
+    loading.value = true;
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+    loading.value = false;
+  }
+};
+
+const uploadFiles = async (_id) => {
+  const filesForm = new FormData();
+  form.value.files.forEach((file) => filesForm.append('files', file));
+
+  // enable upload progress show
+  showUploadProgress.value = true;
+
+  // upload with axios
+  const response           = await $axios.post('products/' + _id + '/files', filesForm, {
+    onUploadProgress: (progressEvent) => {
+      // fill upload progress
+      uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    }
+  });
+  // disable upload progress show
+  showUploadProgress.value = false;
+
+  if (response.status === 200) {
+    $notify('بارگذاری فایل‌ها با موفقت انجام شد', 'success');
+    reset();
+    emit('exit');
+    emit('refresh');
+  } else {
+    $notify('مشکلی در بارگذاری فایل‌ها پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+  }
+};
+
+const deleteFile = async (fileName, index) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    await useAPI(`products/${form.value._id}/files/${fileName}`, {
+      method    : 'delete',
+      onResponse: ({response}) => {
         if (response.status === 200) {
-          if (this.form.files.length) {
-            response = await response.json();
-            await this.uploadFiles(response._id)
-          } else {
-            this.reset();
-            this.$emit('exit');
-            this.$emit('refresh');
-            $showMessage('عملیات با موفقت انجام شد', 'success');
+          form.value.filesPreview.splice(index, 1);
+          $notify('عملیات با موفقت انجام شد', 'success');
+        } else {
+          $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      }
+    });
+  }
+};
+
+const setEdit = async (data) => {
+  // get product data
+  await useAPI('products/' + data._id, {
+    method    : 'get',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        reset();
+        action.value = 'edit';
+
+        // set the data of product into form
+        form.value._categories  = response._data._categories;
+        form.value.name         = response._data.name;
+        form.value.properties   = response._data.properties;
+        form.value._brand       = response._data._brand;
+        form.value._unit        = response._data._unit;
+        form.value.barcode      = response._data.barcode;
+        form.value.iranCode     = response._data.iranCode;
+        form.value.variants     = response._data.variants;
+        form.value.lastVariants = response._data.variants;
+        form.value.weight       = response._data.weight;
+        form.value.dimensions   = response._data.dimensions;
+        form.value.tags         = response._data.tags;
+        form.value.title        = response._data.title;
+        form.value.content      = response._data.content;
+        form.value._id          = response._data._id;
+
+        // get category properties
+        await getCategoryProperties(data._categories);
+
+        // set files
+        if (response._data.files) {
+          const newFiles = response._data.files.map((fileName) => ({
+            uploaded: true,
+            name    : fileName,
+            src     : runTimeConfig.public.STATICS_URL + 'products/' + fileName
+          }));
+
+          form.value.filesPreview = [...form.value.filesPreview, ...newFiles];
+        }
+
+        // set variants props
+        response._data.variants.forEach((variant) => {
+          // set delete Loading field
+          variant.deleteLoading = false;
+
+          variant.properties.forEach((property) => {
+            let variantProp = form.value.variantsProps.find(prop => prop._id === property._property);
+            if (variantProp) {
+              if (!variantProp.values.includes(property.value))
+                variantProp.values.push(property.value);
+            } else {
+              form.value.variantsProps.push({
+                _id   : property._property,
+                values: [property.value]
+              });
+            }
+
+            // add to variants values
+            if (!form.value.variantsValues.includes(property.value))
+              form.value.variantsValues.push(property.value);
+          });
+        });
+
+        // set dynamic properties
+        response._data.properties.forEach((property) => {
+          if (property._id) {
+            form.value.dynamicProperties.push(property._id);
           }
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async uploadFiles(_id) {
-      // add files to form data
-      let filesForm = new FormData();
-      this.form.files.forEach((file) => {
-        filesForm.append('files', file);
-      });
+        });
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id + '/files', {
-            method : 'post',
-            headers: {
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : filesForm
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
+      }
+    }
+  });
+};
+
+const setCopy = async (data) => {
+  await setEdit(data);
+  await nextTick(() => {
+    action.value            = 'add';
+    form.value._id          = '';
+    form.value.files        = [];
+    form.value.filesPreview = [];
+    form.value.filesError   = false;
+  });
+};
+
+const getCategory = async () => {
+  let categoryId = form.value._categories[0];
+  if (categoryId) {
+    await useAPI('categories/' + categoryId, {
+      method    : 'get',
+      onResponse: async ({response}) => {
         if (response.status === 200) {
-          this.reset();
-          this.$emit('exit');
-          this.$emit('refresh');
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-        } else {
-          // show error
-          $showMessage('مشکلی در بارگذاری فایل‌ها پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+          // set the category detail
+          category.value = response._data;
+          nextTick(async () => {
+            await getCategoryProperties();
+          });
+        }
+      }
+    });
+  } else {
+    return false;
+  }
+};
+
+const getCategoryProperties = async (val) => {
+  if (category.value && category.value._properties) {
+    const propertiesIds = category.value._properties.join(',');
+    await useAPI('properties?perPage=50&ids=' + propertiesIds, {
+      method    : 'get',
+      onResponse: async ({response}) => {
+        if (response.status === 200) {
+          // set category properties list
+          categoryProperties.value = response._data.list;
+        }
+      }
+    });
+  }
+};
+
+const checkVariantExists = (variantInput) => {
+  form.value.variants.forEach((variant) => {
+    if (JSON.stringify(variant.properties) === JSON.stringify(variantInput.properties)) {
+      return true;
+    }
+  });
+  return false;
+};
+
+const createPropertyVariants = (variant, propsChecked) => {
+
+  // every other properties
+  form.value.variantsProps.forEach((variantProp) => {
+    if (!propsChecked.includes(variantProp._id)) {
+      // add to checked
+      propsChecked.push(variantProp._id);
+
+      // every value of other properties
+      variantProp.values.forEach((propValue) => {
+
+        // create the value sample
+        let propertyObject = {_property: variantProp._id, value: propValue};
+
+        // add the value sample
+        variant.properties.push(propertyObject);
+
+        // check if not exists
+        if (!checkVariantExists(variant)) {
+          // add to variants
+          form.value.variants.push(structuredClone(variant));
+        }
+
+        // create variants of this value
+        createPropertyVariants(structuredClone(variant), structuredClone(propsChecked));
+
+        variant.properties.splice(variant.properties.indexOf(propertyObject), 1);
+
+      });
+    }
+  });
+
+  return true;
+};
+
+const togglePropertyVariant = (_property, valueCode) => {
+
+  // create property array
+  let variantProp = form.value.variantsProps.find(prop => prop._id === _property);
+  if (!variantProp) {
+    form.value.variantsProps.push({_id: _property, values: []});
+    variantProp = form.value.variantsProps.find(prop => prop._id === _property);
+  }
+
+  // toggle value
+  if (variantProp.values.includes(valueCode)) {
+    variantProp.values.splice(variantProp.values.indexOf(valueCode), 1);
+  } else {
+    variantProp.values.push(valueCode);
+  }
+
+
+  // refresh variants list
+  reCreateVariants();
+};
+
+const reCreateVariants = () => {
+  // remove if is not selected value
+  form.value.variantsProps.forEach((prop, index) => {
+    if (!prop.values.length) {
+      form.value.variantsProps.splice(index, 1);
+    }
+  });
+
+  // reCreate variants
+  // every property
+  if (form.value.variantsProps.length) {
+
+    // get the first property
+    let variantProp = form.value.variantsProps[0];
+
+    form.value.variants = [];
+
+    // every value of property
+    variantProp.values.forEach((propValue) => {
+
+      // create base variant
+      let variant = {properties: [], deleteLoading: false};
+
+      // add base prop value
+      variant.properties.push({_property: variantProp._id, value: propValue});
+
+      // check exists other properties
+      if (form.value.variantsProps.length > 1) {
+        createPropertyVariants(structuredClone(variant), [variantProp._id]);
+      } else {
+        if (!checkVariantExists(variant)) {
+          form.value.variants.push(variant);
+        }
+      }
+
+    });
+
+  } else {
+    form.value.variants = [];
+  }
+
+  // set last variants code's
+  if (action.value === 'edit') {
+    form.value.variants.forEach((variant) => {
+      form.value.lastVariants.forEach((lVariant) => {
+        if (JSON.stringify(variant.properties) === JSON.stringify(lVariant.properties)) {
+          variant.code = lVariant.code;
+          variant._id  = lVariant._id;
         }
       });
-    },
-    async deleteFile(fileName, index) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        await fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id + '/files/' + fileName, {
-              method : 'delete',
-              headers: {
-                'authorization': 'Bearer ' + this.user.token
-              }
-            }).then(async response => {
-          const {$showMessage} = useNuxtApp();
+    });
+  }
+};
+
+const deleteVariant = async (index) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    if (form.value.variants[index]._id) {
+      form.value.variants[index].deleteLoading = true;
+
+      // request to delete variant
+      await useAPI(`products/${form.value._id}/variants/${form.value.variants[index]._id}`, {
+        method    : 'delete',
+        onResponse: async ({response}) => {
           if (response.status === 200) {
             // remove item from files preview
-            this.form.filesPreview.splice(index, 1);
+            form.value.variants.splice(index, 1);
 
-            $showMessage('عملیات با موفقت انجام شد', 'success');
+            $notify('عملیات با موفقت انجام شد', 'success');
+          } else if (response.status === 400) {
+            $notify('این تنوع در فاکتور خریدی استفاده شده است و قابل حذف نیست', 'error');
           } else {
             // show error
-            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+            $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
           }
-        });
-      }
-    },
-    async edit() {
-      // exception remove dynamic properties titles
-      // this.form.properties.forEach((property) => {
-      //   if (property._id)
-      //     delete property['title'];
-      // });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              name      : this.form.name,
-              categories: this.form.categories,
-              brand     : this.form.brand,
-              unit      : this.form.unit,
-              barcode   : this.form.barcode,
-              iranCode  : this.form.iranCode,
-              variants  : this.form.variants,
-              weight    : Number(this.form.weight),
-              dimensions: this.form.dimensions,
-              tags      : this.form.tags,
-              properties: this.form.properties,
-              title     : this.form.title,
-              content   : this.form.content
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          if (this.form.files.length) {
-            await this.uploadFiles(this.form._id);
-          } else {
-            this.reset();
-            this.$emit('exit');
-            this.$emit('refresh');
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-          }
-
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addProductForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
-      }
-    },
-    getUnits() {
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'units', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(async response => {
-        response   = await response.json();
-        this.units = response.list;
-      });
-    },
-    getBrands() {
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'brands', {
-            method : 'get',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }).then(async response => {
-        response    = await response.json();
-        this.brands = response.list;
-      });
-    },
-    getCategories() {
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'categories', {
-            method: 'get',
-          }).then(async response => {
-        response        = await response.json();
-        this.categories = this.reFormatCategories(response.list);
-      });
-    },
-    setEdit(data) {
-
-      this.reset();
-
-      // set data
-      this.getCategoryProperties(data._categories).then(
-          () => {
-            this.form.categories   = data._categories;
-            this.form.name         = data.name;
-            this.form.properties   = data.properties;
-            this.form.brand        = data._brand;
-            this.form.unit         = data._unit;
-            this.form.barcode      = data.barcode;
-            this.form.iranCode     = data.iranCode;
-            this.form.variants     = data.variants;
-            this.form.lastVariants = data.variants;
-            this.form.weight       = data.weight;
-            this.form.dimensions   = data.dimensions;
-            this.form.tags         = data.tags;
-            this.form.title        = data.title;
-            this.form.content      = data.content;
-            this.form._id          = data._id;
-            this.action            = 'edit';
-
-            // set files
-            if (data.files) {
-              data.files.forEach((filePreview) => {
-                this.form.filesPreview.push({
-                  uploaded: true,
-                  name    : filePreview,
-                  src     : this.runtimeConfig.public.STATICS_URL + 'products/' + filePreview
-                });
-              });
-            }
-
-            // set variants props
-            data.variants.forEach((variant) => {
-              // set delete Loading field
-              variant.deleteLoading = false;
-
-              variant.properties.forEach((property) => {
-                let variantProp = this.form.variantsProps.find(prop => prop._id === property._property);
-                if (variantProp) {
-                  if (!variantProp.values.includes(property.value))
-                    variantProp.values.push(property.value);
-                } else {
-                  this.form.variantsProps.push({
-                    _id   : property._property,
-                    values: [property.value]
-                  });
-                }
-
-                // add to variants values
-                if (!this.form.variantsValues.includes(property.value))
-                  this.form.variantsValues.push(property.value);
-              });
-            });
-
-            // set dynamic properties
-            data.properties.forEach((property) => {
-              if (property._id) {
-                this.form.dynamicProperties.push(property._id);
-              }
-            });
-
-          }
-      );
-    },
-    setCopy(data) {
-      this.setEdit(data);
-
-      // wait for load data
-      setTimeout(() => {
-        this.action            = 'add';
-        this.form._id          = '';
-        this.form.files        = [];
-        this.form.filesPreview = [];
-        this.form.filesError   = false;
-      }, 1000);
-    },
-    reFormatCategories(list) {
-      let result = [];
-      let lastChildren;
-      list.forEach((item) => {
-        result.push(item);
-        if (item.children) {
-          item.children.forEach((childItem) => {
-
-            childItem.title.fa = item.title.fa + " | " + childItem.title.fa;
-
-            result.push(childItem);
-
-            if (childItem.children) {
-              lastChildren = this.reFormatCategories(childItem.children);
-              lastChildren.forEach((childItemJ) => {
-                childItemJ.title.fa = childItem.title.fa + " | " + childItemJ.title.fa;
-                result.push(childItemJ);
-              });
-            }
-
-          });
-        }
-      });
-      return result;
-    },
-    async getCategoryProperties(val) {
-      if (this.form.categories.length) {
-        await fetch(this.runtimeConfig.public.API_BASE_URL + 'categories/' + val[0] + '/properties', {method: 'get'})
-            .then(async response => {
-              response                = await response.json();
-              this.categoryProperties = response.list;
-
-              this.$forceUpdate();
-
-              // set dynamic properties in edit mode
-              response.list.filter(property => property.variant === false).forEach((property) => {
-                if (this.action === 'edit') {
-                  let propertyFind = this.form.properties.find(prop => prop._id === property._id);
-                  if (propertyFind) propertyFind.title = property.title.fa;
-                }
-              });
-
-            });
-      }
-    },
-    checkVariantExists(variantInput) {
-      this.form.variants.forEach((variant) => {
-        if (JSON.stringify(variant.properties) === JSON.stringify(variantInput.properties)) {
-          return true;
         }
       });
 
-      return false;
-    },
-    createPropertyVariants(variant, propsChecked) {
-
-      // every other properties
-      this.form.variantsProps.forEach((variantProp) => {
-        if (!propsChecked.includes(variantProp._id)) {
-          // add to checked
-          propsChecked.push(variantProp._id);
-
-          // every value of other properties
-          variantProp.values.forEach((propValue) => {
-
-            // create the value sample
-            let propertyObject = {_property: variantProp._id, value: propValue};
-
-            // add the value sample
-            variant.properties.push(propertyObject);
-
-            // check if not exists
-            if (!this.checkVariantExists(variant)) {
-              // add to variants
-              this.form.variants.push(structuredClone(variant));
-            }
-
-            // create variants of this value
-            this.createPropertyVariants(structuredClone(variant), structuredClone(propsChecked));
-
-            variant.properties.splice(variant.properties.indexOf(propertyObject), 1);
-
-          });
-        }
-      });
-
-      return true;
-    },
-    togglePropertyVariant(_property, valueCode) {
-
-      // create property array
-      let variantProp = this.form.variantsProps.find(prop => prop._id === _property);
-      if (!variantProp) {
-        this.form.variantsProps.push({_id: _property, values: []});
-        variantProp = this.form.variantsProps.find(prop => prop._id === _property);
-      }
-
-      // toggle value
-      if (variantProp.values.includes(valueCode)) {
-        variantProp.values.splice(variantProp.values.indexOf(valueCode), 1);
-      } else {
-        variantProp.values.push(valueCode);
-      }
-
-
-      // refresh variants list
-      this.reCreateVariants();
-
-    },
-    reCreateVariants() {
-      // remove if is not selected value
-      this.form.variantsProps.forEach((prop, index) => {
-        if (!prop.values.length) {
-          this.form.variantsProps.splice(index, 1);
-        }
-      });
-
-      // reCreate variants
-      // every property
-      if (this.form.variantsProps.length) {
-
-        // get the first property
-        let variantProp = this.form.variantsProps[0];
-
-        this.form.variants = [];
-
-        // every value of property
-        variantProp.values.forEach((propValue) => {
-
-          // create base variant
-          let variant = {properties: [], deleteLoading: false};
-
-          // add base prop value
-          variant.properties.push({_property: variantProp._id, value: propValue});
-
-          // check exists other properties
-          if (this.form.variantsProps.length > 1) {
-            this.createPropertyVariants(structuredClone(variant), [variantProp._id]);
-          } else {
-            if (!this.checkVariantExists(variant)) {
-              this.form.variants.push(variant);
-            }
-          }
-
-        });
-
-      } else {
-        this.form.variants = [];
-      }
-
-      // set last variants code's
-      if (this.action === 'edit') {
-        this.form.variants.forEach((variant) => {
-          this.form.lastVariants.forEach((lVariant) => {
-            if (JSON.stringify(variant.properties) === JSON.stringify(lVariant.properties)) {
-              variant.code = lVariant.code;
-              variant._id = lVariant._id;
-            }
-          });
-        });
-      }
-
-    },
-    async deleteVariant(index) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        if (this.form.variants[index]._id) {
-          this.form.variants[index].deleteLoading = true;
-
-          // request to delete variant
-          await fetch(
-              this.runtimeConfig.public.API_BASE_URL +
-              'products/' + this.form._id + '/variants/' + this.form.variants[index]._id, {
-                method : 'delete',
-                headers: {
-                  'authorization': 'Bearer ' + this.user.token
-                }
-              }).then(async response => {
-            const {$showMessage} = useNuxtApp();
-            if (response.status === 200) {
-              // remove item from files preview
-              this.form.variants.splice(index, 1);
-
-              $showMessage('عملیات با موفقت انجام شد', 'success');
-            } else if(response.status === 400) {
-              $showMessage('این تنوع در فاکتور خریدی استفاده شده است و قابل حذف نیست', 'error');
-            } else {
-              // show error
-              $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-            }
-          });
-
-          this.form.variants[index].deleteLoading = false;
-        } else {
-          this.form.variants.splice(index, 1);
-        }
-      }
-    },
-    getPropertyValue(_property, valueCode) {
-      let property = this.categoryProperties.find(prop => prop._id === _property);
-      if (property) {
-        return property.values.find(value => value.code === valueCode);
-      } else {
-        return {};
-      }
-    },
-    getPropertyValues(_property) {
-      let property = this.categoryProperties.find(prop => prop._id === _property);
-      if (property && property.values) {
-        return property.values;
-      } else {
-        return [];
-      }
-    },
-    getVariantProps(_property) {
-      let property = this.categoryProperties.find(prop => prop._id === _property);
-      if (property) {
-        return property;
-      } else {
-        return {};
-      }
-    },
-    openFileDialog() {
-      this.$refs.filesInput.click();
-    },
-    createImagesPreview() {
-
-      let previews           = this.form.filesPreview;
-      this.form.filesPreview = [];
-      previews.forEach((filePreview, index) => {
-        if (filePreview.uploaded) {
-          this.form.filesPreview.push(filePreview);
-        }
-      });
-
-      this.form.files.forEach((file) => {
-        let fileReader = new FileReader();
-        fileReader.readAsDataURL(file);
-        fileReader.onload = (e) => {
-          this.form.filesPreview.push({src: e.target.result});
-        };
-      });
-
-    },
-    addProperty() {
-      this.form.properties.push({
-        title: '',
-        value: ''
-      });
-    },
-    toggleDynamicProperty(_id, title) {
-      // add property
-      if (!this.form.properties.find(p => p._id === _id)) {
-        this.form.properties.push({
-          title: title,
-          value: '',
-          _id  : _id
-        });
-      } else {
-        // remove property
-        this.form.properties.splice(
-            this.form.properties.indexOf(this.form.properties.find(p => p._id === _id)),
-            1
-        );
-      }
-    },
-    deleteProperty(index) {
-      // remove from dynamic properties chip input
-      if (this.form.properties[index]._id)
-        this.form.dynamicProperties.splice(this.form.dynamicProperties.indexOf(this.form.properties[index]._id), 1);
-
-      this.form.properties.splice(index, 1);
-    }
-  },
-  watch  : {
-    async selectedCategories(val, oldVal) {
-      // remove all variants
-      if (oldVal && oldVal[0]) {
-        if (val[0] !== oldVal[0]) {
-          this.form.variants      = [];
-          this.form.variantsProps = [];
-        }
-      }
-
-      await this.getCategoryProperties(val);
-    }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    if (!this.units.length) this.getUnits();
-    if (!this.categories.length) this.getCategories();
-    if (!this.brands.length) this.getBrands();
-  },
-  computed: {
-    selectedCategories() {
-      return this.form.categories;
+      this.form.variants[index].deleteLoading = false;
+    } else {
+      this.form.variants.splice(index, 1);
     }
   }
-}
+};
+
+const getPropertyValue = (_property, valueCode) => {
+  let property = categoryProperties.value.find(prop => prop._id === _property);
+  if (property) {
+    return property.values.find(value => value.code === valueCode);
+  } else {
+    return {};
+  }
+};
+
+const getPropertyValues = (_property) => {
+  let property = categoryProperties.value.find(prop => prop._id === _property);
+  if (property && property.values) {
+    return property.values;
+  } else {
+    return [];
+  }
+};
+
+const getProperty = (_id) => {
+  let property = categoryProperties.value.find(prop => prop._id === _id);
+  if (property) {
+    return property;
+  } else {
+    return {
+      title: ''
+    };
+  }
+};
+
+const openFileDialog = () => {
+  filesInput.value?.click();
+};
+
+const addProperty = () => {
+  form.value.properties.push({
+    title: '',
+    value: ''
+  });
+};
+
+const toggleDynamicProperty = (_id, title) => {
+  // add property
+  if (!form.value.properties.find(p => p._id === _id)) {
+    form.value.properties.push({
+      title: title,
+      value: '',
+      _id  : _id
+    });
+  } else {
+    // remove property
+    form.value.properties.splice(
+        form.value.properties.indexOf(
+            form.value.properties.find(p => p._id === _id)
+        ),
+        1
+    );
+  }
+};
+
+const deleteProperty = (index) => {
+  // remove from dynamic properties chip input
+  if (form.value.properties[index]._id)
+    form.value.dynamicProperties.splice(
+        form.value.dynamicProperties.indexOf(form.value.properties[index]._id),
+        1
+    );
+
+  form.value.properties.splice(index, 1);
+};
+
+const createImagesPreview = () => {
+  let previews            = form.value.filesPreview;
+  form.value.filesPreview = [];
+  // delete the candidate for upload
+  previews.forEach((filePreview, index) => {
+    if (filePreview.uploaded) {
+      form.value.filesPreview.push(filePreview);
+    }
+  });
+
+  // add new file to preview (candidate for upload)
+  form.value.files.forEach((file) => {
+    let fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = (e) => {
+      form.value.filesPreview.push({src: e.target.result});
+    };
+  });
+};
+
+// Watchers
+watch(
+    () => form.value._categories,
+    async (val, oldVal) => {
+      if (oldVal && oldVal[0] && val[0] !== oldVal[0]) {
+        form.value.variants      = [];
+        form.value.variantsProps = [];
+      }
+      await getCategory();
+    }
+);
+
+// Lifecycle hooks
+onMounted(() => {
+
+});
+
+// Expose
+defineExpose({
+  action,
+  setEdit,
+  setCopy
+});
 </script>
 
 <style scoped>

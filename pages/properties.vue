@@ -83,7 +83,8 @@
       </v-list>
 
       <!--   Pagination    -->
-      <v-pagination class="mt-5"
+      <v-pagination v-if="pageCount > 1"
+                    class="mt-5"
                     active-color="secondary"
                     v-model="page"
                     :length="pageCount"

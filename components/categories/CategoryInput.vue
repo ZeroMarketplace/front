@@ -2,15 +2,16 @@
   <v-autocomplete
       :items="items"
       :loading="true"
-      :search-input.sync="searchQuery"
+      :search-input="searchQuery"
       :hide-no-data="true"
       :hide-details="true"
       item-value="_id"
       item-title="title"
-      label="ویژگی‌ها"
+      label="دسته‌بندی"
       density="compact"
       variant="outlined"
       @scroll:bottom="loadMoreItems"
+      @update:model-value="handleItemSelect"
       @update:search="handleSearchUpdate">
     <template v-slot:loader>
       <v-progress-circular
@@ -49,7 +50,7 @@ const fetchItems = async (query = '', page = 1) => {
       isFetchingMore.value = true
     }
 
-    await useAPI(`properties?title=${query}&page=${page}&perPage=20`, {
+    await useAPI(`categories?title=${query}&page=${page}&perPage=20`, {
       method    : 'get',
       onResponse: ({response}) => {
         const data = response._data
@@ -67,7 +68,7 @@ const fetchItems = async (query = '', page = 1) => {
             mergedItems.push(item)
           }
         })
-        items.value = mergedItems
+        items.value = reFormatCategories(mergedItems)
 
         if (searchResults.value.length >= totalItems.value) {
           noMoreItems.value = true
@@ -82,17 +83,31 @@ const fetchItems = async (query = '', page = 1) => {
   }
 }
 
+const reFormatCategories = (list) => {
+  let result = [];
+  list.forEach((item) => {
+    result.push(item);
+    if (item.children) {
+      item.children.forEach((childItem) => {
+        childItem.title = `${item.title} | ${childItem.title}`;
+        result.push(childItem);
+      });
+    }
+  });
+  return result;
+};
+
 // Debounced fetch function
 const debouncedFetchItems = debounce((query, page) => {
   fetchItems(query, page)
 }, 300)
 
 // Watch search query changes
-watch(searchQuery, (newValue) => {
-  if (!isUserTyping.value || !newValue) return;
-  currentPage.value = 1
-  debouncedFetchItems(newValue, currentPage.value)
-})
+// watch(searchQuery, (newValue) => {
+  // if (!isUserTyping.value) return;
+  // currentPage.value = 1
+  // debouncedFetchItems(newValue, currentPage.value)
+// })
 
 // Load more items on scroll
 const loadMoreItems = () => {

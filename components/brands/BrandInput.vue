@@ -2,15 +2,16 @@
   <v-autocomplete
       :items="items"
       :loading="true"
-      :search-input.sync="searchQuery"
+      :search-input="searchQuery"
       :hide-no-data="true"
       :hide-details="true"
       item-value="_id"
       item-title="title"
-      label="ویژگی‌ها"
+      label="برند"
       density="compact"
       variant="outlined"
       @scroll:bottom="loadMoreItems"
+      @update:model-value="handleItemSelect"
       @update:search="handleSearchUpdate">
     <template v-slot:loader>
       <v-progress-circular
@@ -49,7 +50,7 @@ const fetchItems = async (query = '', page = 1) => {
       isFetchingMore.value = true
     }
 
-    await useAPI(`properties?title=${query}&page=${page}&perPage=20`, {
+    await useAPI(`brands?title=${query}&page=${page}&perPage=20`, {
       method    : 'get',
       onResponse: ({response}) => {
         const data = response._data

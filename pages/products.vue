@@ -82,6 +82,7 @@
             <v-btn class="mx-1"
                    color="secondary"
                    size="30"
+                   :loading="item.copyLoading"
                    @click="setCopy(item)"
                    icon>
               <v-icon size="15">mdi-content-copy</v-icon>
@@ -91,6 +92,7 @@
             <v-btn class="mx-1"
                    color="secondary"
                    size="30"
+                   :loading="item.editLoading"
                    @click="setEdit(item)"
                    icon>
               <v-icon size="15">mdi-pencil</v-icon>
@@ -100,6 +102,14 @@
 
         </v-list-item>
       </v-list>
+
+      <!--   Pagination    -->
+      <v-pagination class="mt-5"
+                    active-color="secondary"
+                    v-model="page"
+                    :length="pageCount"
+                    rounded="circle">
+      </v-pagination>
 
       <!--    Empty List Alert      -->
       <EmptyList :list="list" :loading="loading"/>
@@ -114,136 +124,177 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import ProductImage   from "~/components/products/ProductImage.vue";
+<script setup>
+import {ref, nextTick, onMounted} from "vue"; // Vue Composition API functions
+import {useNuxtApp}               from "#app"; // Nuxt composables
+import ProductImage               from "~/components/products/ProductImage.vue"; // Component import
+import {useAPI}                   from '~/composables/useAPI'
 
+// Define page meta
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : "admin",
+  middleware  : "auth",
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: "admin",
 });
 
-export default {
-  components: {ProductImage},
-  data() {
-    return {
-      loading: true,
-      action : 'list',
-      list   : [],
+// Reactive states
+const loading    = ref(true);
+const action     = ref("list");
+const list       = ref([]);
+const addProduct = ref(null);
+const {$notify}  = useNuxtApp();
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref('');
+const sortDirection = ref(1);
+
+// filter the table
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // pagination
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+
+  // sort
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', sortDirection.value);
+
+  return search;
+};
+
+// Fetch all products
+const getProducts = async () => {
+  loading.value = true;
+
+  await useAPI('products?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set data to list and stop loading
+      list.value = [];
+      response._data.list.forEach(item => {
+        item.editLoading   = false;
+        item.copyLoading   = false;
+        item.deleteLoading = false;
+        list.value.push(item);
+      })
+
+      // set page count from list total
+      pageCount.value = Math.ceil((response._data.total / perPage.value));
+
+      loading.value = false;
     }
-  },
-  methods: {
-    getProducts() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response     = await response.json();
-        this.list    = response.list;
-        this.loading = false;
-      });
-    },
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addProduct.action;
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+  });
+};
 
-          // refresh list
-          this.getProducts();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async setEdit(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response = await response.json();
-        this.$refs.addProduct.setEdit(response);
-        this.toggleAction();
-      });
-    },
-    async setCopy(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'products/' + data._id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response = await response.json();
-        this.$refs.addProduct.setCopy(response);
-        this.toggleAction();
-      });
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    getProductPriceRange(item) {
-      let min = 0, max = 0;
-      item.variants.forEach((variant) => {
-        if(variant.price) {
-          // first measuring
-          if(min === 0)
-            min = variant.price.store;
+// Toggle between actions
+const toggleAction = () => {
+  if (action.value === "add" || action.value === "edit") {
+    action.value = "list";
+  } else {
+    action.value = addProduct.value?.action || "list";
+  }
+};
 
-          if(variant.price.store >= max)
-            max = variant.price.store;
-          if(variant.price.store <= min)
-            min = variant.price.store;
-        }
-      });
-      if(min === 0 && max === 0) {
-        return 'قیمت ندارد';
-      } else if(min === max) {
-        return min + ' تومان';
+// Delete a product
+const deleteProduct = async (data) => {
+  let _id = data._id;
+
+  // start loading
+  data.deleteLoading = true;
+
+  await useAPI('products/' + _id, {
+    method    : 'delete',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقیت انجام شد", "success");
+
+        // stop loading
+        data.loading = false;
+
+        // Refresh the product list
+        getProducts();
       } else {
-        return 'از ' + min + ' تا ' + max + ' تومان';
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
       }
     }
-  },
-  mounted() {
-    this.user = useCookie('user').value;
-    this.getProducts();
-  },
-  created() {
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
-</script>
+  });
+};
 
+// Confirm and delete a product
+const setDelete = (data) => {
+  if (confirm("آیا مطمئن هستید؟")) {
+    deleteProduct(data);
+  }
+};
+
+// Fetch a single product for editing
+const setEdit = async (data) => {
+  // enable edit loading
+  data.editLoading = true;
+
+  // set edit to child component
+  await addProduct.value?.setEdit(data);
+
+  // stop loading
+  data.editLoading = false;
+
+  // toggle to child component
+  toggleAction();
+};
+
+// Fetch a single product for copying
+const setCopy = async (data) => {
+  // enable edit loading
+  data.copyLoading = true;
+
+  // set edit to child component
+  await addProduct.value?.setCopy(data);
+
+  // stop loading
+  data.copyLoading = false;
+
+  // toggle to child component
+  toggleAction();
+};
+
+// Get the price range of a product
+const getProductPriceRange = (item) => {
+  let min = 0,
+      max = 0;
+
+  item.variants.forEach((variant) => {
+    if (variant.price) {
+      if (min === 0) min = variant.price.store;
+
+      if (variant.price.store >= max) max = variant.price.store;
+      if (variant.price.store <= min) min = variant.price.store;
+    }
+  });
+
+  if (min === 0 && max === 0) {
+    return "قیمت ندارد";
+  } else if (min === max) {
+    return `${min} تومان`;
+  } else {
+    return `از ${min} تا ${max} تومان`;
+  }
+};
+
+// watch page change for get products
+watch(page, (newValue) => {
+  getProducts();
+});
+
+// Lifecycle hooks
+onMounted(() => {
+  nextTick(() => {
+    getProducts();
+  })
+});
+</script>
 
 <style scoped>
 
