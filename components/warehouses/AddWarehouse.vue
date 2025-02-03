@@ -6,21 +6,8 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.fa"
+                      v-model="form.title"
                       label="عنوان"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
-        </v-text-field>
-      </v-col>
-
-      <!--      Title EN      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.en"
-                      label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
                       :rules="rules.notEmpty"
@@ -82,130 +69,119 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, defineEmits, onMounted} from 'vue';
+import {useNuxtApp}                  from '#app';
+import {useAPI}                      from '~/composables/useAPI';
 
-export default {
-  data() {
-    return {
-      form   : {
-        title      : {
-          en: '',
-          fa: ''
-        },
-        onlineSales: false,
-        retail     : false
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-      },
-      action : 'add',
-      loading: false
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.addWarehouseForm.reset();
-      this.form.onlineSales = false;
-      this.form.retail      = false;
-      this.loading          = false;
-      this.action           = 'add';
+// Define reactive variables
+const form             = ref({
+  title      : '',
+  onlineSales: false,
+  retail     : false,
+  _id        : null
+});
+const action           = ref('add');
+const loading          = ref(false);
+const addWarehouseForm = ref(null);
+const {$notify}        = useNuxtApp();
+const emit             = defineEmits(['exit', 'refresh']);
+
+// Validation rules
+const rules = {
+  notEmpty: [(value) => (value ? true : 'پر کردن این فیلد اجباری است')]
+};
+
+// Reset form
+const reset = () => {
+  addWarehouseForm.value?.reset();
+  form.value    = {title: '', onlineSales: false, retail: false, _id: null};
+  loading.value = false;
+  action.value  = 'add';
+};
+
+// Add new warehouse
+const add = async () => {
+  await useAPI('warehouses', {
+    method    : 'post',
+    body      : {
+      title      : form.value.title,
+      onlineSales: form.value.onlineSales,
+      retail     : form.value.retail
     },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              onlineSales: this.form.onlineSales,
-              retail     : this.form.retail
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
 
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              onlineSales: this.form.onlineSales,
-              retail     : this.form.retail
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addWarehouseForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
+        // reset and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
-    },
-    setEdit(data) {
-      this.form   = {
-        title      : data.title,
-        onlineSales: data.onlineSales,
-        retail     : data.retail,
-        _id        : data._id
-      };
-      this.action = 'edit';
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
+  });
+};
+
+// Edit warehouse
+const edit = async () => {
+  await useAPI('warehouses/' + form.value._id, {
+    method    : 'put',
+    body      : {
+      title      : form.value.title,
+      onlineSales: form.value.onlineSales,
+      retail     : form.value.retail
+    },
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+
+        // reset and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+// Submit form
+const submit = async () => {
+  addWarehouseForm.value?.validate();
+  if (addWarehouseForm.value?.isValid) {
+    loading.value = true;
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+    loading.value = false;
+  }
+};
+
+// Set warehouse data for editing
+const setEdit = (data) => {
+  form.value   = {
+    title      : data.title,
+    onlineSales: data.onlineSales,
+    retail     : data.retail,
+    _id        : data._id
+  };
+  action.value = 'edit';
+};
+
+// Initialize component
+onMounted(() => {
+});
+
+defineExpose({
+  action,
+  setEdit
+});
+
 </script>
 
 <style scoped>
