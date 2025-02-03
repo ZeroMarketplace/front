@@ -60,7 +60,7 @@
             <v-card elevation="2">
               <!--        Title and Icon     -->
               <v-card-title class="border-b">
-                {{ item.title ? item.title.fa : 'USER' }}
+                {{ item.title ? item.title : 'USER' }}
 
                 <!--         Icon         -->
                 <v-icon v-if="item.type === 'bank'"
@@ -147,6 +147,15 @@
         </v-row>
       </v-dialog-transition>
 
+      <!--   Pagination    -->
+      <v-pagination v-if="pageCount > 1"
+                    class="mt-5"
+                    active-color="secondary"
+                    v-model="page"
+                    :length="pageCount"
+                    rounded="circle">
+      </v-pagination>
+
       <!--    Empty List Alert      -->
       <EmptyList :list="list" :loading="loading"/>
 
@@ -155,107 +164,122 @@
   </v-row>
 </template>
 
-<script>
-
-import {useCookie} from "#app";
+<script setup>
+import {ref, onMounted, nextTick} from 'vue';
+import {useNuxtApp}               from '#app';
+import {useAPI}                   from '~/composables/useAPI'
 
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : 'admin',
+  middleware  : 'auth',
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: 'admin',
 });
 
-export default {
-  data() {
-    return {
-      user   : {},
-      loading: true,
-      action : 'list',
-      list   : [],
-    }
-  },
-  methods: {
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const loading    = ref(true);
+const action     = ref('list');
+const list       = ref([]);
+const addAccount = ref(null);
+const {$notify}  = useNuxtApp();
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref('');
+const sortDirection = ref(1);
 
-          // refresh list
-          await this.getAccounts();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    getAccounts() {
-      this.loading = true;
-      this.list    = [];
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts',
-          {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }
-      ).then(async response => {
-        response     = await response.json();
-        this.list    = response.list;
-        this.loading = false;
-      });
-    },
-    setEdit(data) {
-      this.$refs.addAccount.setEdit(data);
-      this.action = 'edit';
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    async setDefault(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/default/' + data._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          this.getAccounts();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addAccount.action;
+// filter the table
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // pagination
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+
+  // sort
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', sortDirection.value);
+
+  return search;
+};
+
+// Fetch the list of accounts
+const getAccounts = async () => {
+  loading.value = true;
+  await useAPI('accounts?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set the list and stop loading
+      list.value    = response._data.list;
+      loading.value = false;
+
+      // set page count from list total
+      pageCount.value = Math.ceil((response._data.total / perPage.value));
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getAccounts();
-  },
-  computed: {}
-}
+  });
+};
+
+// Delete an account
+const deleteAccount = async (_id) => {
+  await useAPI('accounts/' + _id, {
+    method    : 'delete',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        await getAccounts();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  })
+};
+
+// Set an account as default
+const setDefault = async (data) => {
+  await useAPI('accounts/default/' + data._id, {
+    method    : 'put',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        await getAccounts();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+// Set edit mode for an account
+const setEdit = (data, addAccountRef) => {
+  addAccount.value?.setEdit(data);
+  action.value = 'edit';
+};
+
+// Confirm and delete an account
+const setDelete = (data) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    deleteAccount(data._id);
+  }
+};
+
+// Toggle between actions
+const toggleAction = (addAccountRef) => {
+  if (action.value === 'add' || action.value === 'edit') {
+    action.value = 'list';
+  } else {
+    action.value = addAccount.value?.action;
+  }
+};
+
+// watch page change for get units
+watch(page, (newValue) => {
+  getAccounts();
+});
+
+onMounted(() => {
+  nextTick(() => {
+    getAccounts();
+  });
+});
 </script>
 
 

@@ -7,21 +7,8 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class=""
-                      v-model="form.title.fa"
+                      v-model="form.title"
                       label="عنوان"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
-        </v-text-field>
-      </v-col>
-
-      <!--      Title EN      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="ltrDirection"
-                      v-model="form.title.en"
-                      label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
                       :rules="rules.notEmpty"
@@ -106,138 +93,108 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref} from 'vue';
+import {useNuxtApp}     from '#app';
 
-export default {
-  data() {
-    return {
-      user   : {},
-      form   : {
-        title      : {
-          en: '',
-          fa: ''
-        },
-        type       : 'cash',
-        balance    : '',
-        description: ''
-      },
-      rules  : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ]
-      },
-      types  : [
-        {title: 'صندوق', value: 'cash'},
-        {title: 'بانک', value: 'bank'},
-        {title: 'هزینه', value: 'expense'},
-        {title: 'درآمد', value: 'income'},
-      ],
-      action : 'add',
-      loading: false
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.addAccountForm.reset();
-      this.action    = 'add';
-      this.form.type = 'cash';
-      this.loading   = false;
-    },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              type       : this.form.type,
-              balance    : this.form.balance,
-              description: this.form.description
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+definePageMeta({
+  layout      : 'admin',
+  middleware  : 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin',
+});
 
-          // reset form
-          this.reset();
+const form = ref({
+  title      : '',
+  type       : 'cash',
+  balance    : '',
+  description: '',
+});
 
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title      : this.form.title,
-              type       : this.form.type,
-              balance    : this.form.balance,
-              description: this.form.description
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const rules = {
+  notEmpty: [value => (value ? true : 'پر کردن این فیلد اجباری است')],
+};
 
-          // reset form
-          this.reset();
+const types = [
+  {title: 'صندوق', value: 'cash'},
+  {title: 'بانک', value: 'bank'},
+  {title: 'هزینه', value: 'expense'},
+  {title: 'درآمد', value: 'income'},
+];
 
-          // refresh list
-          this.$emit('exit');
-          this.$emit('refresh');
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addAccountForm.isValid) {
-        this.loading = true;
+const action         = ref('add');
+const loading        = ref(false);
+const addAccountForm = ref(null);
+const {$notify}      = useNuxtApp();
+const emit           = defineEmits(['exit', 'refresh']);
 
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
+const reset = () => {
+  form.value    = {
+    title      : '',
+    type       : 'cash',
+    balance    : '',
+    description: '',
+  };
+  action.value  = 'add';
+  loading.value = false;
+};
 
-        this.loading = false;
+const add = async () => {
+  await useAPI('accounts', {
+    method    : 'post',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+
+        // reset the form and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
-    },
-    setEdit(data) {
-      this.form.title       = data.title;
-      this.form.type        = data.type;
-      this.form.balance     = data.balance;
-      this.form.description = data.description;
-      this.form._id         = data._id;
-      this.action           = 'edit';
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
+  });
+};
+
+const edit = async () => {
+  await useAPI('accounts/' + form.value._id, {
+    method    : 'put',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+
+        // reset the form and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const submit = async () => {
+  await addAccountForm.value?.validate();
+  if (addAccountForm.value?.isValid) {
+    loading.value = true;
+    action.value === 'add' ? await add() : await edit();
+    loading.value = false;
+  }
+};
+
+const setEdit = (data) => {
+  form.value   = {...data};
+  action.value = 'edit';
+};
+
+defineExpose({
+  action,
+  setEdit
+});
 </script>
 
 
