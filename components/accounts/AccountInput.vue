@@ -1,122 +1,126 @@
 <template>
-  <div>
-    <v-combobox class="w-100 pa-0"
-                v-if="render"
-                v-model="title"
-                label="عنوان یا کد حساب"
-                :readonly="loading"
-                :loading="loading"
-                :items="items"
-                :rules="rules.notEmptySelectable"
-                item-title="title.fa"
-                item-value="_id"
-                density="compact"
-                variant="outlined"
-                @input="searchAccount"
-                clearable hide-details>
-    </v-combobox>
-  </div>
+  <v-autocomplete
+      :items="items"
+      :loading="true"
+      :search-input="searchQuery"
+      :hide-no-data="true"
+      :hide-details="true"
+      item-value="_id"
+      item-title="title"
+      label="حساب"
+      density="compact"
+      variant="outlined"
+      @scroll:bottom="loadMoreItems"
+      @update:model-value="handleItemSelect"
+      @update:search="handleSearchUpdate">
+    <template v-slot:loader>
+      <v-progress-circular
+          v-if="isFetchingMore"
+          indeterminate
+          color="primary"
+          size="20"
+      ></v-progress-circular>
+    </template>
+  </v-autocomplete>
 </template>
 
-<script>
-import {useCookie} from "#app";
+<script setup>
+import {ref, watch, onMounted, nextTick} from 'vue'
+import {useAPI}                          from '~/composables/useAPI'
+import {debounce}                        from 'lodash'
 
-export default {
-  props: ['inputId'],
-  data() {
-    return {
-      title  : '',
-      items  : [],
-      loading: false,
-      preload: true,
-      render : true,
-      rules  : {
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ]
-      }
+// State variables
+const searchQuery    = ref('')
+const items          = ref([])
+const searchResults  = ref([])
+const isLoading      = ref(false)
+const isFetchingMore = ref(false)
+const currentPage    = ref(1)
+const totalItems     = ref(0)
+const noMoreItems    = ref(false)
+const isUserTyping   = ref(true)
+
+// Fetch items from API
+const fetchItems = async (query = '', page = 1) => {
+  try {
+    if (page === 1) {
+      isLoading.value   = true
+      noMoreItems.value = false
+    } else {
+      isFetchingMore.value = true
     }
-  },
-  methods : {
-    searchAccount() {
-      clearInterval(this.timer);
 
-      this.timer = setTimeout(() => {
-
-        let search = new URLSearchParams();
-
-        // code or title
-        if (typeof this.title === 'number') {
-          search.set('code', this.title);
+    await useAPI(`accounts?title=${query}&page=${page}&perPage=20`, {
+      method    : 'get',
+      onResponse: ({response}) => {
+        const data = response._data
+        if (page === 1) {
+          searchResults.value = data.list || []
         } else {
-          search.set('title', this.title);
+          searchResults.value = [...searchResults.value, ...(data.list || [])]
         }
 
-        // search request
-        this.loading = true;
-        fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'accounts?' + search, {
-              method: 'get',
-            }).then(
-            async (response) => {
-              response     = await response.json();
-              this.items   = response.list;
-              this.loading = false;
-            });
+        totalItems.value = data.total || 0
 
-      }, 800);
-    },
-    getAccount() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts/' + this.inputId, {
-        method : 'get',
-        headers: {
-          'Content-Type' : 'application/json',
-          'authorization': 'Bearer ' + this.user.token
+        const mergedItems = [...items.value]
+        searchResults.value.forEach((item) => {
+          if (!mergedItems.some((existingItem) => existingItem._id === item._id)) {
+            mergedItems.push(item)
+          }
+        })
+        items.value = mergedItems
+
+        if (searchResults.value.length >= totalItems.value) {
+          noMoreItems.value = true
         }
-      }).then(async (response) => {
-        response = await response.json();
-        this.items.push(response);
-        this.title   = response;
-        this.loading = false;
-      });
-    },
-  },
-  computed: {},
-  watch   : {
-    title(val, oldVal) {
-      if (val && typeof val === 'object') {
-        this.$emit('selected', val);
-
-        // prevent preload after select
-        this.preload = false;
-        setTimeout(() => {
-          this.preload = true;
-        }, 100);
-      }
-    },
-    inputId(val, oldVal) {
-      if (this.preload) {
-        this.title = '';
-        this.items = [];
-        if (val)
-          this.getAccount();
-      }
-    }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    if (this.inputId) {
-      this.getAccount();
-    }
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching items:', error)
+  } finally {
+    isLoading.value      = false
+    isFetchingMore.value = false
   }
 }
+
+// Debounced fetch function
+const debouncedFetchItems = debounce((query, page) => {
+  fetchItems(query, page)
+}, 300)
+
+// Watch search query changes
+watch(searchQuery, (newValue) => {
+  if (!isUserTyping.value || !newValue) return;
+  currentPage.value = 1
+  debouncedFetchItems(newValue, currentPage.value)
+})
+
+// Load more items on scroll
+const loadMoreItems = () => {
+  if (!noMoreItems.value && searchResults.value.length < totalItems.value && !isFetchingMore.value && !isLoading.value) {
+    currentPage.value += 1
+    fetchItems(searchQuery.value, currentPage.value)
+  }
+}
+
+// Initialize component
+onMounted(() => {
+  nextTick(() => {
+    fetchItems('', 1)
+  })
+})
+
+// Handle search input updates
+const handleSearchUpdate = (event) => {
+  searchQuery.value  = event
+}
+
+// Handle item selection
+const handleItemSelect = (selectedItem) => {
+  isUserTyping.value = false
+  setTimeout(() => {
+    isUserTyping.value = true
+  },500);
+  searchQuery.value  = ''
+}
 </script>
-
-<style scoped>
-
-</style>

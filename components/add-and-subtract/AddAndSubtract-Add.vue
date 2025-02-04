@@ -6,21 +6,8 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.fa"
+                      v-model="form.title"
                       label="عنوان"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="rules.notEmpty"
-                      density="compact"
-                      variant="outlined">
-        </v-text-field>
-      </v-col>
-
-      <!--      Title EN      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.title.en"
-                      label="Title"
                       placeholder="وارد کنید"
                       :readonly="loading"
                       :rules="rules.notEmpty"
@@ -52,7 +39,7 @@
       </v-col>
 
       <!--      Operation      -->
-      <v-col class="mt-n5 mt-md-0" cols="12" md="4">
+      <v-col class="mt-n5 mt-md-3" cols="12" md="4">
         <v-select class="ltrDirection"
                   v-model="form.operation"
                   label="نوع عملیات"
@@ -67,11 +54,11 @@
 
       <!--      _Account      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <AccountInput :input-id="form._account" @selected="(val) => form._account= val._id"/>
+        <AccountInput v-model="form._account"/>
       </v-col>
 
       <!--     Actions       -->
-      <v-col cols="12">
+      <v-col class="mt-6" cols="12">
 
         <!--       Submit       -->
         <v-btn class="border rounded-lg"
@@ -103,143 +90,115 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
-import AccountInput   from "~/components/accounts/AccountInput.vue";
+<script setup>
+import {ref, defineEmits} from 'vue';
+import {useNuxtApp}                  from '#app';
+import {useAPI}                      from '~/composables/useAPI';
+import AccountInput                  from '~/components/accounts/AccountInput.vue';
 
-export default {
-  components: {AccountInput},
-  data() {
-    return {
-      form      : {
-        title    : {
-          en: '',
-          fa: ''
-        },
-        default  : '',
-        operation: 'add',
-        _account : ''
-      },
-      rules     : {
-        notEmpty: [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-      },
-      operations: [
-        {title: 'اضافه کردن', value: 'add'},
-        {title: 'کم کردن', value: 'subtract'},
-      ],
-      action    : 'add',
-      loading   : false
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.addAndSubtractForm.reset();
-      this.loading = false;
-      this.action  = 'add';
-    },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title    : this.form.title,
-              default  : this.form.default,
-              operation: this.form.operation,
-              _account : this.form._account,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+// Define reactive state
+const form = ref({
+  title    : '',
+  default  : '',
+  operation: 'add',
+  _account : ''
+});
 
-          // reset form
-          this.reset();
+const rules = {
+  notEmpty: [
+    value => (value ? true : 'پر کردن این فیلد اجباری است')
+  ]
+};
 
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              title    : this.form.title,
-              default  : this.form.default,
-              operation: this.form.operation,
-              _account : this.form._account
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const operations = [
+  {title: 'اضافه کردن', value: 'add'},
+  {title: 'کم کردن', value: 'subtract'}
+];
 
-          // reset form
-          this.reset();
+const action             = ref('add');
+const loading            = ref(false);
+const addAndSubtractForm = ref(null);
+const {$notify}          = useNuxtApp();
+const emit               = defineEmits(['exit', 'refresh']);
 
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addAndSubtractForm.isValid) {
-        this.loading = true;
+// Reset form
+const reset = () => {
+  form.value    = {
+    title    : '',
+    default  : '',
+    operation: 'add',
+    _account : ''
+  };
+  loading.value = false;
+  action.value  = 'add';
+};
 
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
+// Add new item
+const add = async () => {
+  await useAPI('add-and-subtract', {
+    method    : 'post',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
 
-        this.loading = false;
+        //  reset and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
-    },
-    setEdit(data) {
-      this.form   = {
-        title    : data.title,
-        default  : data.default,
-        operation: data.operation,
-        _account : data._account,
-        _id      : data._id
-      };
-      this.action = 'edit';
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {}
-}
+  });
+};
+
+// Edit existing item
+const edit = async () => {
+  await useAPI('add-and-subtract/' + form.value._id, {
+    method    : 'put',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+
+        //  reset and exit
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+// Handle form submission
+const submit = async () => {
+  addAndSubtractForm.value?.validate();
+  if (addAndSubtractForm.value?.isValid) {
+    loading.value = true;
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+    loading.value = false;
+  }
+};
+
+// Set edit mode
+const setEdit = (data) => {
+  form.value   = {...data};
+  action.value = 'edit';
+};
+
+defineExpose({
+  action,
+  setEdit
+});
 </script>
+
 
 <style scoped>
 
