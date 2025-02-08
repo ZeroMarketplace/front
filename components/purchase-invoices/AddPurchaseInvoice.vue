@@ -8,7 +8,7 @@
                       :_id="settlementId"
                       type="purchase-invoices"
                       @exit="closeSettlementDialog"
-                      ref="settlementDialog"/>
+                      ref="settlementDialogRef"/>
 
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
@@ -16,17 +16,10 @@
     <v-row class="mx-5">
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
-        <v-autocomplete class="mt-3"
-                        v-model="form.customer"
-                        label="کاربر"
-                        :readonly="loading"
-                        :rules="rules.notEmptySelectable"
-                        :items="users"
-                        item-title="title"
-                        item-value="_id"
-                        density="compact"
-                        variant="outlined">
-        </v-autocomplete>
+        <UserInput v-model="form._customer"
+                   class="mt-md-3 mb-5"
+                   :insert-dialog-icon="true"
+                   :readonly="loading"/>
       </v-col>
 
       <!--   Date   -->
@@ -54,10 +47,10 @@
 
       <!--   Warehouse   -->
       <v-col class="mt-n8 mt-md-0" cols="12" md="4">
-        <warehouses-warehouse-input class="mt-3"
-                                    :input-rules="rules.notEmptySelectable"
-                                    v-model="form.warehouse">
-        </warehouses-warehouse-input>
+        <WarehouseInput class="mt-3"
+                        :rules="rules.notEmptySelectable"
+                        v-model="form._warehouse">
+        </WarehouseInput>
       </v-col>
 
       <!--   Description   -->
@@ -95,11 +88,12 @@
     </div>
 
     <!--  Products List   -->
-    <v-row class="border rounded-lg mx-5 mt-3 mb-2 pt-1 pb-2" v-for="(product,index) in form.products">
+    <v-row class="border rounded-lg mx-5 mt-3 mb-2 pt-1 pb-2"
+           v-for="(product,index) in form.products">
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput :inputId="product._id"
+        <ProductInput v-model="product._id"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -217,7 +211,7 @@
                   @click="toggleAddAndSubtract(value._id)"
                   filter>
 
-            {{ value.title.fa }}
+            {{ value.title }}
 
           </v-chip>
         </v-chip-group>
@@ -225,12 +219,12 @@
         <!--   Inputs for Add and Subtract    -->
         <v-row class="my-5 my-md-2">
           <!--      Add And Subtract     -->
-          <v-col v-for="item in form.addAndSubtract" cols="12" md="8">
+          <v-col v-for="item in form.AddAndSub" cols="12" md="8">
             <v-text-field class=""
                           v-model="item.value"
                           type="number"
                           placeholder="وارد کنید"
-                          :label="getAddAndSubtractDetail(item._reason).title.fa"
+                          :label="getAddAndSubtractDetail(item._reason).title"
                           :readonly="loading"
                           :rules="rules.notEmpty"
                           @input="calculateInvoiceTotal"
@@ -267,10 +261,10 @@
           </v-col>
 
           <!--    add and subtract      -->
-          <v-col class="my-md-2" v-for="addAndSubtract in form.addAndSubtract" cols="12">
+          <v-col class="my-md-2" v-for="addAndSubtract in form.AddAndSub" cols="12">
             <v-row class="">
               <v-col cols="5" class="">
-                {{ getAddAndSubtractDetail(addAndSubtract._reason).title.fa }}:
+                {{ getAddAndSubtractDetail(addAndSubtract._reason).title }}:
               </v-col>
               <v-col cols="7" class="text-end">
                 {{ addAndSubtract.amount }} تومان
@@ -343,366 +337,286 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
-import ProductInput   from "~/components/products/ProductInput.vue";
+<script setup>
+import {ref, onMounted, nextTick} from 'vue';
+import {useNuxtApp}               from '#app';
+import ProductInput               from '~/components/products/ProductInput.vue';
+import UserInput                  from '~/components/users/UserInput.vue';
+import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
+import SettlementDialog           from "~/components/SettlementDialog.vue";
+import {useAPI}                   from '~/composables/useAPI';
 
-export default {
-  components: {ProductInput},
-  data() {
-    return {
-      settlementDialog      : false,
-      settlementId          : '',
-      form                  : {
-        _id           : '',
-        customer      : null,
-        dateTime      : new Date(),
-        warehouse     : null,
-        description   : '',
-        products      : [],
-        addAndSubtract: [],
-        sum           : 0,
-        total         : 0
-      },
-      rules                 : {
-        notEmpty          : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-      },
-      users                 : [],
-      warehouses            : [],
-      addAndSubtract        : [],
-      selectedAddAndSubtract: [],
-      productSearchTimer    : undefined,
-      productSearchInput    : '',
-      loading               : false,
-      action                : 'add'
+const settlementDialog       = ref(false);
+const settlementId           = ref('');
+const form                   = ref({
+  _id        : '',
+  _customer  : null,
+  dateTime   : new Date(),
+  _warehouse : null,
+  description: '',
+  products   : [],
+  AddAndSub  : [],
+  sum        : 0,
+  total      : 0
+});
+const addAndSubtract         = ref([]);
+const selectedAddAndSubtract = ref([]);
+const addPurchaseInvoiceForm = ref(null);
+const loading                = ref(false);
+const action                 = ref('add');
+const {$notify}              = useNuxtApp();
+const categories             = ref({});
+
+const rules = {
+  notEmpty          : [value => (value ? true : 'پر کردن این فیلد اجباری است')],
+  notEmptySelectable: [value => (value ? true : 'لطفا انتخاب کنید')]
+};
+
+const closeSettlementDialog = () => {
+  settlementDialog.value = false;
+};
+
+const reset = () => {
+  form.value                   = {
+    _id        : '',
+    _customer  : null,
+    dateTime   : new Date(),
+    _warehouse : null,
+    description: '',
+    products   : [],
+    AddAndSub  : [],
+    sum        : 0,
+    total      : 0
+  };
+  selectedAddAndSubtract.value = [];
+  loading.value                = false;
+  action.value                 = 'add';
+};
+
+const getAddAndSubtract = async () => {
+  loading.value = true;
+  await useAPI('add-and-subtract?perPage=50', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      addAndSubtract.value = response._data.list;
+      loading.value        = false;
     }
-  },
-  methods: {
-    reset() {
-      this.$refs.addPurchaseInvoiceForm.reset();
-      this.form._id               = '';
-      this.form.sum               = 0;
-      this.form.total             = 0;
-      this.form.products          = [];
-      this.form.addAndSubtract    = [];
-      this.selectedAddAndSubtract = [];
-      this.loading                = false;
-      this.action                 = 'add';
-      this.$forceUpdate();
-    },
-    async add() {
+  });
+};
 
-      // convert numbers
-      this.form.products.forEach((product) => {
-        product.price.purchase = Number(product.price.purchase);
-        product.price.consumer = Number(product.price.consumer);
-        product.price.store    = Number(product.price.store);
-        product.count          = Number(product.count);
-      });
+const addProduct = () => {
+  form.value.products.push({
+    _id  : '',
+    count: 0,
+    price: {purchase: 0, consumer: 0, store: 0},
+    sum  : 0,
+    total: 0
+  });
+};
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              customer   : this.form.customer,
-              dateTime   : this.form.dateTime,
-              warehouse  : this.form.warehouse,
-              description: this.form.description,
-              products   : this.form.products,
-              AddAndSub  : this.form.addAndSubtract,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          response = await response.json();
-          this.setEdit(response);
-          this.setSettlement();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
+const deleteProduct = (index) => {
+  form.value.products.splice(index, 1);
+};
 
-      // convert numbers
-      this.form.products.forEach((product) => {
-        product.price.purchase = Number(product.price.purchase);
-        product.price.consumer = Number(product.price.consumer);
-        product.price.store    = Number(product.price.store);
-        product.count          = Number(product.count);
-      });
+const onProductSelected = async (val, index) => {
+  let category = await getCategory(val._categories[0]);
+  if (category.profitPercent) {
+    form.value.products[index].profitPercent = category.profitPercent;
+    calculateProductPrices(index);
+  }
+};
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              customer   : this.form.customer,
-              dateTime   : this.form.dateTime,
-              warehouse  : this.form.warehouse,
-              description: this.form.description,
-              products   : this.form.products,
-              AddAndSub  : this.form.addAndSubtract,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+const calculateProductPrices = (index) => {
+  let product                      = form.value.products[index];
+  form.value.products[index].sum   = product.count * product.price.purchase;
+  form.value.products[index].total = form.value.products[index].sum;
 
-          // reset form
-          this.reset();
+  // calc profit percentage
+  if (form.value.products[index].profitPercent) {
+    // consumer price
+    form.value.products[index].price.consumer = Number(form.value.products[index].price.purchase) +
+        (Number(form.value.products[index].price.purchase) * Number(form.value.products[index].profitPercent) / 100);
 
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addPurchaseInvoiceForm.isValid) {
-        this.loading = true;
+    // store price
+    form.value.products[index].price.store = Number(form.value.products[index].price.purchase) +
+        (Number(form.value.products[index].price.purchase) * Number(form.value.products[index].profitPercent) / 100);
+  } else {
+    // consumer price
+    form.value.products[index].price.consumer = form.value.products[index].price.purchase;
 
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
+    // store price
+    form.value.products[index].price.store = form.value.products[index].price.purchase;
+  }
 
-        this.loading = false;
-      }
-    },
-    addProduct() {
-      this.form.products.push({
-        _id  : '',
-        count: 0,
-        price: {
-          purchase: 0,
-          consumer: 0,
-          store   : 0,
-        },
-        sum  : 0,
-        total: 0
-      });
-    },
-    async onProductSelected(val, index) {
-      this.form.products[index]['_id'] = val._id;
-      this.getCategory(val._categories[0]).then(category => {
-        if (category.profitPercent)
-          this.form.products[index].profitPercent = category.profitPercent;
-      });
-    },
-    deleteProduct(index) {
-      this.form.products.splice(index, 1);
-    },
-    calculateInvoiceTotal() {
-      this.form.total = 0;
+  // form.value.products[index].total = product.sum
+  //     - (product.discount * product.sum / 100) // minus discount
+  calculateInvoiceTotal();
+};
 
-      // calc products price
-      this.form.products.forEach((product) => {
-        this.form.total += product.total;
-      });
+const getAddAndSubtractDetail = (_id) => {
+  let findItem = addAndSubtract.value.find(p => p._id === _id);
+  if (findItem) {
+    return findItem;
+  } else {
+    return '';
+  }
+};
 
-      this.form.sum = this.form.total;
+const toggleAddAndSubtract = (_id) => {
+  if (form.value.AddAndSub.find(p => p._reason === _id)) {
+    form.value.AddAndSub.splice(
+        form.value.AddAndSub.indexOf(form.value.AddAndSub.find(p => p._reason === _id)),
+        1
+    );
+  } else {
+    let addAndSubtract = getAddAndSubtractDetail(_id);
+    form.value.AddAndSub.push({
+      _reason: _id,
+      value  : addAndSubtract.default,
+      sum    : 0
+    });
+  }
 
-      // calc subtracts on total
-      this.form.addAndSubtract.forEach((addAndSubtract) => {
-        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
-        if (detailAddAndSubtract) {
-          if (detailAddAndSubtract.operation === 'subtract') {
-            let operationSum = 0;
-            if (Number(addAndSubtract.value) <= 100) {
-              operationSum = (this.form.total * addAndSubtract.value / 100)
-              this.form.sum -= operationSum;
-            } else {
-              operationSum = Number(addAndSubtract.value);
-              this.form.sum -= addAndSubtract.value;
-            }
-            addAndSubtract.amount = operationSum;
-          }
-        }
-      });
-
-      // add and subtract
-      this.form.addAndSubtract.forEach((addAndSubtract) => {
-        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
-        if (detailAddAndSubtract) {
-          if (detailAddAndSubtract.operation === 'add') {
-            let operationSum = 0;
-            if (Number(addAndSubtract.value) <= 100) {
-              operationSum = (this.form.sum * addAndSubtract.value / 100)
-              this.form.sum += operationSum;
-            } else {
-              operationSum = Number(addAndSubtract.value);
-              this.form.sum += addAndSubtract.value;
-            }
-            addAndSubtract.amount = operationSum;
-          }
-        }
-      });
-    },
-    calculateProductPrices(index) {
-      let product                     = this.form.products[index];
-      this.form.products[index].sum   = product.count * product.price.purchase;
-      this.form.products[index].total = this.form.products[index].sum;
-
-      // calc profit percentage
-      if (this.form.products[index].profitPercent) {
-        // consumer price
-        this.form.products[index].price.consumer = Number(this.form.products[index].price.purchase) +
-            (Number(this.form.products[index].price.purchase) * Number(this.form.products[index].profitPercent) / 100);
-
-        // store price
-        this.form.products[index].price.store = Number(this.form.products[index].price.purchase) +
-            (Number(this.form.products[index].price.purchase) * Number(this.form.products[index].profitPercent) / 100);
-      } else {
-        // consumer price
-        this.form.products[index].price.consumer = this.form.products[index].price.purchase;
-
-        // store price
-        this.form.products[index].price.store = this.form.products[index].price.purchase;
-      }
-
-      // this.form.products[index].total = product.sum
-      //     - (product.discount * product.sum / 100) // minus discount
-      this.calculateInvoiceTotal();
-    },
-    toggleAddAndSubtract(_id) {
-      if (this.form.addAndSubtract.find(p => p._reason === _id)) {
-        this.form.addAndSubtract.splice(
-            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p._reason === _id)),
-            1
-        );
-      } else {
-        let addAndSubtract = this.getAddAndSubtractDetail(_id);
-        this.form.addAndSubtract.push({
-          _reason: _id,
-          value  : addAndSubtract.default,
-          sum    : 0
-        });
-      }
-
-      this.calculateInvoiceTotal();
-    },
-    getAddAndSubtractDetail(_id) {
-      let findItem = this.addAndSubtract.find(p => p._id === _id);
-      if (findItem) {
-        return findItem;
-      } else {
-        return '';
-      }
-    },
-    getUsers() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'users', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response = await response.json();
-
-        // set title of users
-        response.list.forEach((user) => {
-          user.title = (user.firstName && user.lastName) ? (user.firstName + ' ' + user.lastName) : user.phone;
-        });
-
-        this.users   = response.list;
-        this.loading = false;
-      });
-    },
-    getAddAndSubtract() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response            = await response.json();
-        this.addAndSubtract = response.list;
-        this.loading        = false;
-      });
-    },
-    getCategory(_id) {
-      return new Promise((resolve, reject) => {
-        fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'categories/' + _id, {
-              method: 'get'
-            }).then(async response => {
-          response = await response.json();
-          return resolve(response);
-        });
-      });
-    },
-    setEdit(data) {
-      if (this.form._id !== data._id) {
-        this.reset();
-
-        this.form.customer       = data._customer;
-        this.form.dateTime       = data.dateTime;
-        this.form.warehouse      = data._warehouse;
-        this.form.description    = data.description;
-        this.form.products       = data.products;
-        this.form.addAndSubtract = data.AddAndSub;
-
-        // add and subtract
-        data.AddAndSub.forEach((addAndSub) => {
-          this.selectedAddAndSubtract.push(addAndSub._reason);
-        });
-
-        // _id and action
-        this.form._id = data._id;
-        this.action   = 'edit';
-        setTimeout(() => {
-          this.$forceUpdate();
-        }, 2500);
-
-        this.calculateInvoiceTotal();
-      }
-    },
-    setSettlement() {
-      this.settlementId     = this.form._id;
-      this.settlementDialog = true;
-    },
-    closeSettlementDialog() {
-      this.settlementDialog = false;
-      this.$emit('exit', true);
-      this.$emit('refresh', true);
-    }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getUsers();
-    this.getAddAndSubtract();
-  },
-  computed: {},
-  watch   : {}
+  calculateInvoiceTotal();
 }
+
+const calculateInvoiceTotal = () => {
+  form.value.total = form.value.products.reduce((sum, product) => sum + product.total, 0);
+  form.value.sum   = form.value.total;
+
+  form.value.AddAndSub.forEach((item) => {
+    let detail = addAndSubtract.value.find(p => p._id === item._reason);
+    if (detail) {
+      let operationSum = Number(item.value) <= 100 ? (form.value.total * item.value / 100) : Number(item.value);
+      form.value.sum += detail.operation === 'add' ? operationSum : -operationSum;
+      item.amount      = operationSum;
+    }
+  });
+};
+
+const getCategory = async (_id) => {
+  if (!categories.value[_id]) {
+    let category = {};
+
+    // get the category
+    await useAPI('categories/' + _id, {
+      method    : 'get',
+      onResponse: ({response}) => {
+        category = response._data;
+      }
+    });
+
+    // set the category and return
+    categories.value[_id] = category;
+    return category;
+  } else {
+    return categories.value[_id];
+  }
+}
+
+const setEdit = (data) => {
+  if (form.value._id !== data._id) {
+    reset();
+
+    form.value._customer   = data._customer;
+    form.value.dateTime    = data.dateTime;
+    form.value._warehouse  = data._warehouse;
+    form.value.description = data.description;
+    form.value.products    = data.products;
+    form.value.AddAndSub   = data.AddAndSub;
+
+    // add and subtract
+    data.AddAndSub.forEach((addAndSub) => {
+      selectedAddAndSubtract.value.push(addAndSub._reason);
+    });
+
+    // _id and action
+    form.value._id = data._id;
+    action.value   = 'edit';
+
+    calculateInvoiceTotal();
+  }
+};
+
+const setSettlement = () => {
+  settlementId.value     = form.value._id;
+  settlementDialog.value = true;
+};
+
+const add = async () => {
+  // convert numbers
+  form.value.products.forEach((product) => {
+    product.price.purchase = Number(product.price.purchase);
+    product.price.consumer = Number(product.price.consumer);
+    product.price.store    = Number(product.price.store);
+    product.count          = Number(product.count);
+  });
+
+  await useAPI('purchase-invoices', {
+    method    : 'post',
+    body      : form.value,
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        // set _id
+        setEdit(response._data);
+        setSettlement();
+      } else {
+        $notify('مشکلی پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+}
+
+const edit = async () => {
+  // convert numbers
+  form.value.products.forEach((product) => {
+    product.price.purchase = Number(product.price.purchase);
+    product.price.consumer = Number(product.price.consumer);
+    product.price.store    = Number(product.price.store);
+    product.count          = Number(product.count);
+  });
+
+  await useAPI('purchase-invoices/' + form.value._id, {
+    method    : 'put',
+    body      : form.value,
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        reset();
+        emit('exit');
+        emit('refresh');
+      } else {
+        $notify('مشکلی پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+}
+
+const submit = async () => {
+  loading.value = true;
+  await addPurchaseInvoiceForm.value?.validate();
+  if (addPurchaseInvoiceForm.value?.isValid) {
+    if (action.value === 'add') {
+      await add();
+    } else {
+      await edit();
+    }
+  }
+  loading.value = false;
+};
+
+onMounted(() => {
+  nextTick(() => {
+    getAddAndSubtract();
+  });
+});
+
+defineExpose({
+  action,
+  setEdit,
+  setSettlement
+});
 </script>
 
 <style scoped>

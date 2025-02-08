@@ -42,8 +42,8 @@
 
     <!--    Add Purchase Invoice   -->
     <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-      <purchase-invoices-add-purchase-invoice
-          ref="addPurchaseInvoices"
+      <AddPurchaseInvoice
+          ref="addPurchaseInvoice"
           @exit="toggleAction"
           @refresh="getPurchaseInvoices"/>
     </v-col>
@@ -69,7 +69,7 @@
           {{ item._customer.phone }}
         </template>
         <template v-slot:item._warehouse="{ item }">
-          {{ item._warehouse.title.fa }}
+          {{ item._warehouse.title }}
         </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
@@ -120,175 +120,172 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore}     from "~/store/user";
+<script setup>
+import {ref, onMounted, nextTick} from 'vue';
+import {useNuxtApp}               from '#app';
 import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
-import SettlementDialog   from "~/components/SettlementDialog.vue";
-import {useCookie}        from "#app";
+import Loading            from "~/components/Loading.vue";
+import EmptyList          from "~/components/EmptyList.vue";
+import {useAPI}           from '~/composables/useAPI';
 
+// Define page metadata
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : "admin",
+  middleware  : 'auth',
   requiresAuth: true,
   requiresRole: 'admin'
 });
 
-export default {
-  components: {AddPurchaseInvoice, SettlementDialog},
-  data() {
-    return {
-      user         : {},
-      action       : 'list',
-      loading      : true,
-      list         : [],
-      listHeaders  : [
-        {
-          title   : 'فروشنده',
-          align   : 'center',
-          key     : '_customer',
-          sortable: false
-        },
-        {
-          title   : 'تاریخ',
-          key     : 'dateTimeJalali',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'مبلغ',
-          key     : 'total',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'انبار',
-          key     : '_warehouse',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'عملیات',
-          align   : 'center',
-          key     : 'operation',
-          sortable: false
-        }
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: ''
-    }
+// State variables
+const action             = ref('list');
+const loading            = ref(true);
+const list               = ref([]);
+const listTotal          = ref(100);
+const page               = ref(1);
+const perPage            = ref(10);
+const pageCount          = ref(1);
+const sortColumn         = ref('');
+const sortDirection      = ref('');
+const addPurchaseInvoice = ref(null);
+const {$notify}          = useNuxtApp();
+
+const listHeaders = [
+  {
+    title   : 'فروشنده',
+    align   : 'center',
+    key     : '_customer',
+    sortable: false
   },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addPurchaseInvoices.action;
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // refresh list
-          await this.getPurchaseInvoices();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    filter() {
-      let search = new URLSearchParams();
-
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
-
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
-
-      return search;
-    },
-    getPurchaseInvoices() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    async setEdit(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'purchase-invoices/' + data._id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response = await response.json();
-        this.$refs.addPurchaseInvoices.setEdit(response);
-        this.toggleAction();
-      });
-    },
-    async setSettlement(data) {
-      await this.setEdit(data);
-      this.$refs.addPurchaseInvoices.setSettlement();
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
-
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getPurchaseInvoices();
-      }
-    }
+  {
+    title   : 'تاریخ',
+    key     : 'dateTimeJalali',
+    align   : 'center',
+    sortable: true
   },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getPurchaseInvoices();
+  {
+    title   : 'مبلغ',
+    key     : 'total',
+    align   : 'center',
+    sortable: true
   },
-  computed: {},
-  watch   : {
-    page(val, oldVal) {
-      this.getPurchaseInvoices();
-    }
+  {
+    title   : 'انبار',
+    key     : '_warehouse',
+    align   : 'center',
+    sortable: true
+  },
+  {
+    title   : 'عملیات',
+    align   : 'center',
+    key     : 'operation',
+    sortable: false
   }
-}
+];
+
+// Toggle action mode
+const toggleAction = () => {
+  if (action.value === 'add' || action.value === 'edit') {
+    action.value = 'list';
+  } else {
+    action.value = addPurchaseInvoice.value?.action;
+  }
+};
+
+// Fetch purchase invoices
+const getPurchaseInvoices = async () => {
+  loading.value = true;
+  await useAPI('purchase-invoices?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set list total and page count
+      listTotal.value = response._data.total;
+      pageCount.value = Math.ceil(response._data.total / perPage.value);
+
+      // set the list and stop loading
+      list.value = [];
+      response._data.list.forEach((item) => {
+        item.setEditLoading       = false;
+        item.setSettlementLoading = false;
+        item.deleteLoading        = false;
+        list.value.push(item);
+      })
+      loading.value = false;
+    }
+  });
+};
+
+// Filter parameters
+const filter = () => {
+  const search = new URLSearchParams();
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', Number(sortDirection.value));
+  return search;
+};
+
+// Delete an invoice
+const deleteInvoice = async (data) => {
+  data.deleteLoading = true;
+  await useAPI('purchase-invoice/' + data._id, {
+    method    : 'delete',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        // stop loading
+        data.deleteLoading = false;
+        // refresh list
+        getPurchaseInvoices();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+// Set invoice for editing
+const setEdit = async (data) => {
+  data.setEditLoading = true;
+  await addPurchaseInvoice.value?.setEdit(data);
+  data.setEditLoading = false;
+  toggleAction();
+};
+
+// Set invoice for settlement
+const setSettlement = async (data) => {
+  data.setSettlementLoading = true;
+  await setEdit(data);
+  await addPurchaseInvoice.value?.setSettlement();
+  data.setSettlementLoading = false;
+};
+
+// Confirm delete
+const setDelete = (data) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    deleteInvoice(data);
+  }
+};
+
+// Handle sorting and fetching
+const setListOptions = (val) => {
+  if (val?.sortBy?.[0]) {
+    sortColumn.value    = val.sortBy[0].key === 'dateTimeJalali' ? 'dateTime' : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === 'desc' ? -1 : 1;
+    getPurchaseInvoices();
+  }
+};
+
+// Watch page change
+watch(page, () => {
+  getPurchaseInvoices();
+});
+
+// Mounted lifecycle hook
+onMounted(() => {
+  nextTick(() => {
+    getPurchaseInvoices();
+  });
+});
 </script>
 
 
