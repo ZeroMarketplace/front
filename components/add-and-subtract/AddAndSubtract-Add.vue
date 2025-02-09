@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import {ref, defineEmits} from 'vue';
+import {ref} from 'vue';
 import {useNuxtApp}                  from '#app';
 import {useAPI}                      from '~/composables/useAPI';
 import AccountInput                  from '~/components/accounts/AccountInput.vue';
