@@ -76,6 +76,7 @@
           <v-btn class="mx-2"
                  color="red"
                  size="25"
+                 :loading="item.deleteLoading"
                  @click="setDelete({_id: item._id})"
                  icon>
             <v-icon size="15">mdi-delete-outline</v-icon>
@@ -85,15 +86,17 @@
           <v-btn class="mx-2"
                  color="secondary"
                  size="25"
+                 :loading="item.setEditLoading"
                  @click="setEdit(item)"
                  icon>
             <v-icon size="15">mdi-pencil</v-icon>
           </v-btn>
 
-          <!--  Edit   -->
+          <!--  Settlement   -->
           <v-btn class="mx-2"
                  color="blue"
                  size="25"
+                 :loading="item.setSettlementLoading"
                  @click="setSettlement(item)"
                  icon>
             <v-icon size="15">mdi-cash-fast</v-icon>

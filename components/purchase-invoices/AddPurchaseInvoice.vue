@@ -6,7 +6,7 @@
     <!--  Settlement Dialog  -->
     <SettlementDialog v-model="settlementDialog"
                       :_id="settlementId"
-                      type="purchase-invoices"
+                      type="purchase-invoice"
                       @exit="closeSettlementDialog"
                       ref="settlementDialogRef"/>
 

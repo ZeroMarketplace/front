@@ -70,7 +70,7 @@
               <v-row class="mx-2">
 
                 <!--        Loading for accounts        -->
-                <v-row v-if="!accounts.length" class="d-flex justify-center my-8">
+                <v-row v-if="loading" class="d-flex justify-center my-8">
                   <v-progress-circular indeterminate>
                   </v-progress-circular>
                 </v-row>
@@ -148,7 +148,7 @@
                    cols="12">
               <v-label class="numberInputLabel d-inline-block ml-3 mt-2">
                 {{
-                  accounts.find(i => i._id === cashAccount._account).title.fa
+                  accounts.find(i => i._id === cashAccount._account).title
                 }}:
               </v-label>
               <v-text-field class=""
@@ -168,7 +168,7 @@
                    cols="12">
               <v-label class="numberInputLabel d-inline-block ml-3 mt-2">
                 {{
-                  accounts.find(i => i._id === bankAccount._account).title.fa
+                  accounts.find(i => i._id === bankAccount._account).title
                 }}:
               </v-label>
               <v-text-field class=""
@@ -216,298 +216,252 @@
   </v-dialog>
 </template>
 
-<script>
-import {useCookie} from "#app";
+<script setup>
+import {ref, watch, onMounted, nextTick} from 'vue';
+import {useNuxtApp}                      from '#app';
+import {useAPI}                          from "~/composables/useAPI";
 
-export default {
-  props: ['_id', 'type'],
-  data() {
-    return {
-      loading : false,
-      action  : 'add',
-      accounts: [],
-      rules   : {
-        remaining: [
-          value => {
-            if (value === 0) return true;
-            return 'مقدار باقیمانده باید ۰ شود';
-          }
-        ],
-      },
-      info    : {
-        amount: 0
-      },
-      form    : {
-        _id    : '',
-        payment: {
-          cash           : 0,
-          cashAccounts   : [],
-          distributedCash: false,
-          bank           : 0,
-          bankAccounts   : [],
-          distributedBank: false,
-          credit         : 0,
-          remaining      : 0,
-        },
-        window : 1
+// Props
+const props = defineProps({
+  _id : String,
+  type: String,
+});
+
+// States
+const loading        = ref(false);
+const action         = ref('add');
+const accounts       = ref([]);
+const info           = ref({amount: 0});
+const form           = ref({
+  _id    : '',
+  payment: {
+    cash           : 0,
+    cashAccounts   : [],
+    distributedCash: false,
+    bank           : 0,
+    bankAccounts   : [],
+    distributedBank: false,
+    credit         : 0,
+    remaining      : 0,
+  },
+  window : 1,
+});
+const settlementForm = ref(null);
+const {$notify}      = useNuxtApp();
+
+// Validation rules
+const rules = {
+  remaining: [
+    (value) => (value === 0 ? true : 'مقدار باقیمانده باید ۰ شود'),
+  ],
+};
+
+// Fetch accounts list
+const getAccounts = async () => {
+  loading.value = true;
+
+  // init search
+  let search = new URLSearchParams();
+  search.set('types', ['bank', 'cash']);
+  search.set('perPage', 50);
+
+  await useAPI('accounts?' + search, {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set the list
+      accounts.value = response._data.list;
+
+      // for each account
+      accounts.value.forEach((account) => {
+        // init the temp account Info
+        let temp = {_account: account._id, amount: 0};
+        // set the default
+        if (account.defaultFor) temp.default = true;
+        // add to related category
+        if (account.type === 'bank') form.value.payment.bankAccounts.push(temp);
+        if (account.type === 'cash') form.value.payment.cashAccounts.push(temp);
+      });
+
+      // stop loading
+      loading.value = false;
+    }
+  });
+};
+
+// Fetch settlement data
+const getSettlement = async (_id) => {
+  loading.value = true;
+  // fetch the settlement data
+  await useAPI('settlements/' + _id, {
+    method    : 'get',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        // set payment data
+        form.value.payment = response._data.payment;
+        form.value._id     = response._data._id;
+
+        // calc remaining number
+        calcRemaining();
+
+        // stop loading
+        loading.value = false;
       }
     }
-  },
-  methods: {
-    async submit() {
-      if (this.$refs.settlementForm.isValid && this.form.payment.remaining === 0) {
-        this.loading = true;
+  });
+};
 
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
+// Fetch additional info
+const getInfo = async () => {
+  loading.value = true;
+
+  await useAPI(`${props.type}s/${props._id}`, {
+    method    : 'get',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        info.value.amount = response._data.total;
+        if (response._data._settlement) {
+          // get settlement
+          await getSettlement(response._data._settlement);
+          // set the action to edit
+          action.value = 'edit';
         }
+        // calc remaining number
+        calcRemaining();
 
-        this.loading = false;
+        // stop loading
+        loading.value = false;
       }
-    },
-    async add() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'settlements', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              type   : this.type,
-              _id    : this._id,
-              payment: this.form.payment
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          this.exit();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'settlements/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              type   : this.type,
-              _id    : this._id,
-              payment: this.form.payment
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          this.exit();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    reset() {
-      this.form.payment.cash            = 0;
-      this.form.payment.distributedCash = false;
-      this.form.payment.bank            = 0;
-      this.form.payment.distributedBank = false;
-      this.form.payment.credit          = 0;
-
-      // clear bank accounts
-      this.form.payment.bankAccounts.forEach((bankAccount) => {
-        bankAccount.amount = 0;
-      });
-
-      // clear cash accounts
-      this.form.payment.cashAccounts.forEach((cashAccount) => {
-        cashAccount.amount = 0;
-      });
-
-      this.calcRemaining();
-
-    },
-    getAccounts() {
-      this.loading = true;
-      this.list    = [];
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'accounts',
-          {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }
-      ).then(async response => {
-        response      = await response.json();
-        this.accounts = response.list;
-
-        // add accounts fields
-        this.accounts.forEach((account) => {
-          let temp = {
-            _account: account._id,
-            amount  : 0
-          };
-          if (account.defaultFor) {
-            temp.default = true;
-          }
-          switch (account.type) {
-            case 'bank':
-              this.form.payment.bankAccounts.push(temp);
-              break;
-            case 'cash':
-              this.form.payment.cashAccounts.push(temp);
-              break;
-          }
-        });
-
-        this.loading = false;
-      });
-    },
-    getSettlement(_id) {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + 'settlements/' + _id,
-          {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }
-      ).then(async response => {
-        response          = await response.json();
-        this.form.payment = response.payment;
-        this.calcRemaining();
-        this.loading = false;
-      });
-    },
-    getInfo() {
-      this.loading = true;
-      fetch(this.runtimeConfig.public.API_BASE_URL + this.type + '/' + this._id,
-          {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }
-      ).then(async response => {
-        response         = await response.json();
-        this.info.amount = response.total;
-
-        // check has settlement and turn to edit mode
-        if (response._settlement) {
-          this.getSettlement(response._settlement);
-          this.action   = 'edit';
-          this.form._id = response._settlement;
-        }
-
-        this.calcRemaining();
-        this.loading = false;
-      });
-    },
-    calcRemaining() {
-      let remaining               = this.info.amount;
-      remaining -= this.form.payment.cash;
-      remaining -= this.form.payment.bank;
-      remaining -= this.form.payment.credit;
-      this.form.payment.remaining = remaining;
-    },
-    exit() {
-      this.$emit('exit', true);
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getAccounts();
-  },
-  computed: {
-    cashAmount() {
-      return this.form.payment.cash;
+  });
+};
+
+// Calculate remaining amount
+const calcRemaining = () => {
+  let remaining                = info.value.amount;
+  remaining -= form.value.payment.cash;
+  remaining -= form.value.payment.bank;
+  remaining -= form.value.payment.credit;
+  form.value.payment.remaining = remaining;
+};
+
+// Submit form
+const submit = async () => {
+  settlementForm.value?.validate();
+  if (settlementForm.value?.isValid) {
+    loading.value = true;
+    action.value === 'add' ? await add() : await edit();
+    loading.value = false;
+  }
+};
+
+// Add new settlement
+const add = async () => {
+  await useAPI('settlements', {
+    method    : 'post',
+    body      : {
+      type      : props.type,
+      _reference: props._id,
+      payment   : form.value.payment
     },
-    bankAmount() {
-      return this.form.payment.bank;
-    },
-    cashAccounts() {
-      return this.form.payment.cashAccounts;
-    },
-    bankAccounts() {
-      return this.form.payment.bankAccounts;
-    },
-    creditAmount() {
-      return this.form.payment.credit;
+    onResponse: ({response}) => {
+      response.status === 200
+      ? $notify('عملیات با موفقیت انجام شد', 'success')
+      : $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
     }
-  },
-  watch   : {
-    cashAmount(val, oldVal) {
-      if (!this.form.payment.distributedCash)
-        (this.form.payment.cashAccounts.find(i => i.default === true)).amount = val;
-    },
-    bankAmount(val, oldVal) {
-      if (!this.form.payment.distributedBank)
-        (this.form.payment.bankAccounts.find(i => i.default === true)).amount = val;
-    },
-    creditAmount(val, oldVal) {
-      this.calcRemaining();
-    },
-    cashAccounts: {
-      handler(newVal, oldVal) {
-        // calc remaining
-        this.calcRemaining();
+  });
+};
 
-        // check distributed cash
-        if (!this.form.payment.distributedCash) {
-          newVal.forEach((account) => {
-            if (!account.default && account.amount !== 0) {
-              this.form.payment.distributedCash = true;
-            }
-          });
-        } else {
-          let sum = 0;
-          newVal.forEach((account) => {
-            sum += Number(account.amount);
-          });
-          this.form.payment.cash = sum;
-        }
-      },
-      deep: true
+// Edit existing settlement
+const edit = async () => {
+  await useAPI('settlements/' + form.value._id, {
+    method    : 'put',
+    body      : {
+      type      : 'props.type',
+      _reference: props._id,
+      payment   : form.value.payment
     },
-    bankAccounts: {
-      handler(newVal, oldVal) {
-        // calc remaining
-        this.calcRemaining();
+    onResponse: ({response}) => {
+      response.status === 200
+      ? $notify('عملیات با موفقیت انجام شد', 'success')
+      : $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+    }
+  });
+};
 
-        // check distributed bank
-        if (!this.form.payment.distributedBank) {
-          newVal.forEach((account) => {
-            if (!account.default && account.amount !== 0) {
-              this.form.payment.distributedBank = true;
-            }
-          });
-        } else {
-          let sum = 0;
-          newVal.forEach((account) => {
-            sum += Number(account.amount);
-          });
-          this.form.payment.bank = sum;
-        }
-      },
-      deep: true
-    },
-    _id(val, oldVal) {
-      this.getInfo();
+// Reset form
+const reset = () => {
+  form.value.payment = {
+    cash           : 0,
+    distributedCash: false,
+    bank           : 0,
+    distributedBank: false,
+    credit         : 0,
+    remaining      : 0,
+    bankAccounts   : form.value.payment.bankAccounts.map((acc) => ({...acc, amount: 0})),
+    cashAccounts   : form.value.payment.cashAccounts.map((acc) => ({...acc, amount: 0})),
+  };
+  calcRemaining();
+};
+
+// Watchers in script setup
+watch(() => form.value.payment.cash, (val) => {
+  if (!form.value.payment.distributedCash) {
+    const defaultAccount = form.value.payment.cashAccounts.find(i => i.default === true);
+    if (defaultAccount) {
+      defaultAccount.amount = val;
     }
   }
-}
+});
+
+watch(() => form.value.payment.bank, (val) => {
+  if (!form.value.payment.distributedBank) {
+    const defaultAccount = form.value.payment.bankAccounts.find(i => i.default === true);
+    if (defaultAccount) {
+      defaultAccount.amount = val;
+    }
+  }
+});
+
+watch(() => form.value.payment.credit, () => {
+  calcRemaining();
+});
+
+watch(() => form.value.payment.cashAccounts, (newVal) => {
+  calcRemaining();
+  if (!form.value.payment.distributedCash) {
+    newVal.forEach(account => {
+      if (!account.default && account.amount !== 0) {
+        form.value.payment.distributedCash = true;
+      }
+    });
+  }
+
+  form.value.payment.cash = newVal.reduce((sum, account) => sum + Number(account.amount), 0);
+}, {deep: true});
+
+watch(() => form.value.payment.bankAccounts, (newVal) => {
+  calcRemaining();
+  if (!form.value.payment.distributedBank) {
+    newVal.forEach(account => {
+      if (!account.default && account.amount !== 0) {
+        form.value.payment.distributedBank = true;
+      }
+    });
+  }
+
+  form.value.payment.bank = newVal.reduce((sum, account) => sum + Number(account.amount), 0);
+}, {deep: true});
+
+watch(() => props._id, () => {
+  getInfo();
+});
+
+// On component mount
+onMounted(() => {
+  nextTick(() => {
+    getAccounts();
+  });
+});
 </script>
 
 
