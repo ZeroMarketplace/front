@@ -248,12 +248,18 @@ const form           = ref({
 });
 const settlementForm = ref(null);
 const {$notify}      = useNuxtApp();
+const emit           = defineEmits(['exit']);
 
 // Validation rules
 const rules = {
   remaining: [
     (value) => (value === 0 ? true : 'مقدار باقیمانده باید ۰ شود'),
   ],
+};
+
+// Exit from dialog
+const exit = () => {
+  emit('exit');
 };
 
 // Fetch accounts list
@@ -364,9 +370,12 @@ const add = async () => {
       payment   : form.value.payment
     },
     onResponse: ({response}) => {
-      response.status === 200
-      ? $notify('عملیات با موفقیت انجام شد', 'success')
-      : $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        emit('exit');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
     }
   });
 };
@@ -381,9 +390,12 @@ const edit = async () => {
       payment   : form.value.payment
     },
     onResponse: ({response}) => {
-      response.status === 200
-      ? $notify('عملیات با موفقیت انجام شد', 'success')
-      : $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        emit('exit');
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
     }
   });
 };
@@ -411,6 +423,7 @@ watch(() => form.value.payment.cash, (val) => {
       defaultAccount.amount = val;
     }
   }
+  calcRemaining();
 });
 
 watch(() => form.value.payment.bank, (val) => {
@@ -420,6 +433,8 @@ watch(() => form.value.payment.bank, (val) => {
       defaultAccount.amount = val;
     }
   }
+
+  calcRemaining();
 });
 
 watch(() => form.value.payment.credit, () => {

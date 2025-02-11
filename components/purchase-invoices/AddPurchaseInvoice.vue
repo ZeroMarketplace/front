@@ -94,6 +94,7 @@
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
         <ProductInput v-model="product._id"
+                      :rules="rules.notEmptySelectable"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -366,6 +367,7 @@ const loading                = ref(false);
 const action                 = ref('add');
 const {$notify}              = useNuxtApp();
 const categories             = ref({});
+const emit                   = defineEmits(['exit', 'refresh']);
 
 const rules = {
   notEmpty          : [value => (value ? true : 'پر کردن این فیلد اجباری است')],
@@ -374,6 +376,8 @@ const rules = {
 
 const closeSettlementDialog = () => {
   settlementDialog.value = false;
+  emit('exit');
+  emit('refresh');
 };
 
 const reset = () => {
@@ -514,27 +518,34 @@ const getCategory = async (_id) => {
   }
 }
 
-const setEdit = (data) => {
+const setEdit = async (data) => {
   if (form.value._id !== data._id) {
+    // reset the form data
     reset();
 
-    form.value._customer   = data._customer;
-    form.value.dateTime    = data.dateTime;
-    form.value._warehouse  = data._warehouse;
-    form.value.description = data.description;
-    form.value.products    = data.products;
-    form.value.AddAndSub   = data.AddAndSub;
+    // get the purchase invoice data
+    await useAPI('purchase-invoices/' + data._id, {
+      method    : 'get',
+      onResponse: ({response}) => {
+        form.value._customer   = response._data._customer;
+        form.value.dateTime    = response._data.dateTime;
+        form.value._warehouse  = response._data._warehouse;
+        form.value.description = response._data.description;
+        form.value.products    = response._data.products;
+        form.value.AddAndSub   = response._data.AddAndSub;
 
-    // add and subtract
-    data.AddAndSub.forEach((addAndSub) => {
-      selectedAddAndSubtract.value.push(addAndSub._reason);
-    });
+        // add and subtract
+        response._data.AddAndSub.forEach((addAndSub) => {
+          selectedAddAndSubtract.value.push(addAndSub._reason);
+        });
 
-    // _id and action
-    form.value._id = data._id;
-    action.value   = 'edit';
+        // _id and action
+        form.value._id = data._id;
+        action.value   = 'edit';
 
-    calculateInvoiceTotal();
+        calculateInvoiceTotal();
+      }
+    })
   }
 };
 
@@ -543,23 +554,36 @@ const setSettlement = () => {
   settlementDialog.value = true;
 };
 
-const add = async () => {
-  // convert numbers
+const convertFormNumbers = () => {
   form.value.products.forEach((product) => {
     product.price.purchase = Number(product.price.purchase);
     product.price.consumer = Number(product.price.consumer);
     product.price.store    = Number(product.price.store);
     product.count          = Number(product.count);
   });
+};
+
+const add = async () => {
+  // convert numbers
+  convertFormNumbers();
 
   await useAPI('purchase-invoices', {
     method    : 'post',
-    body      : form.value,
+    body      : {
+      _customer  : form.value._customer,
+      _warehouse : form.value._warehouse,
+      dateTime   : form.value.dateTime,
+      description: form.value.description,
+      products   : form.value.products,
+      AddAndSub  : form.value.AddAndSub
+    },
     onResponse: async ({response}) => {
       if (response.status === 200) {
         $notify('عملیات با موفقیت انجام شد', 'success');
         // set _id
-        setEdit(response._data);
+        form.value._id = response._data._id;
+
+        // set settlement
         setSettlement();
       } else {
         $notify('مشکلی پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
@@ -570,12 +594,7 @@ const add = async () => {
 
 const edit = async () => {
   // convert numbers
-  form.value.products.forEach((product) => {
-    product.price.purchase = Number(product.price.purchase);
-    product.price.consumer = Number(product.price.consumer);
-    product.price.store    = Number(product.price.store);
-    product.count          = Number(product.count);
-  });
+  convertFormNumbers();
 
   await useAPI('purchase-invoices/' + form.value._id, {
     method    : 'put',
@@ -583,9 +602,9 @@ const edit = async () => {
     onResponse: ({response}) => {
       if (response.status === 200) {
         $notify('عملیات با موفقیت انجام شد', 'success');
-        reset();
-        emit('exit');
-        emit('refresh');
+
+        // set settlement
+        setSettlement();
       } else {
         $notify('مشکلی پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }

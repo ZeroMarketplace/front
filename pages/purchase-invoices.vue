@@ -66,7 +66,7 @@
                     sticky
                     show-current-page>
         <template v-slot:item._customer="{ item }">
-          {{ item._customer.phone }}
+          {{ item._customer.fullName }}
         </template>
         <template v-slot:item._warehouse="{ item }">
           {{ item._warehouse.title }}
@@ -126,10 +126,10 @@
 <script setup>
 import {ref, onMounted, nextTick} from 'vue';
 import {useNuxtApp}               from '#app';
-import AddPurchaseInvoice from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
-import Loading            from "~/components/Loading.vue";
-import EmptyList          from "~/components/EmptyList.vue";
-import {useAPI}           from '~/composables/useAPI';
+import AddPurchaseInvoice         from "~/components/purchase-invoices/AddPurchaseInvoice.vue";
+import Loading                    from "~/components/Loading.vue";
+import EmptyList                  from "~/components/EmptyList.vue";
+import {useAPI}                   from '~/composables/useAPI';
 
 // Define page metadata
 definePageMeta({
