@@ -11,40 +11,52 @@
   </v-img>
 </template>
 
-<script>
-import {useCookie} from "#app";
+<script setup>
+// Import necessary composables
+import {ref, onMounted} from 'vue';
+import {useAPI}         from "~/composables/useAPI";
 
-export default {
-  props: ['src', 'showDelete'],
-  data() {
-    return {
-      image: '',
-    }
+// Define props
+const props = defineProps({
+  src       : {
+    type    : String || Blob, // Accepts either a string URL or a Blob
+    required: true,
   },
-  methods: {
-    deleteFile() {
-      this.$emit('deleteFile');
-    }
+  showDelete: {
+    type   : Boolean,
+    default: false,
   },
-  mounted() {
-    // get user
-    this.user = useCookie('user').value;
+});
 
-    // if is blobbed
-    if (this.src instanceof Blob) {
-      this.image = this.src;
-    } else {
-      fetch(this.src, {
-        headers: {
-          'authorization': 'Bearer ' + this.user.token
-        },
-      }).then(response => response.blob())
-          .then(imageBlob => {
-            this.image = URL.createObjectURL(imageBlob);
-          });
+// Define reactive state
+const image = ref('');
+
+// Define emit events
+const emit = defineEmits(['deleteFile']);
+
+// Method to handle file deletion
+const deleteFile = () => {
+  emit('deleteFile');
+};
+
+// Lifecycle hook to fetch or set the image
+onMounted(async () => {
+  // If src is a Blob, set it directly
+  if (props.src instanceof Blob) {
+    image.value = props.src;
+  } else {
+    // Fetch the image if src is a URL
+    const {data} = await useAPI(props.src, {
+      method      : 'get',
+      responseType: 'blob',
+    });
+
+    if (data.value) {
+      const blob  = new Blob([data.value], {type: 'image/jpeg'});
+      image.value = URL.createObjectURL(blob);
     }
   }
-}
+});
 </script>
 
 <style scoped>

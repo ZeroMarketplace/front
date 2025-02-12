@@ -71,8 +71,7 @@
 
         <!--  Accounts CodeOrName    -->
         <v-col class="pa-1" cols="12" md="3">
-          <AccountInput :inputId="account._account"
-                        @selected="val => onAccountSelected(val,index)"/>
+          <AccountInput v-model="account._account"/>
         </v-col>
 
         <!--  Description    -->
@@ -224,353 +223,357 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore}    from "~/store/user";
-import {useCookie}       from "#app";
-import AccountInput      from "~/components/accounts/AccountInput.vue";
-import AttachmentPreview from "~/components/accounting-documents/AttachmentPreview.vue";
+<script setup>
+// Import necessary composables and components
+import {useNuxtApp, useRuntimeConfig} from '#app';
+import AccountInput                   from '~/components/accounts/AccountInput.vue';
+import AttachmentPreview              from '~/components/accounting-documents/AttachmentPreview.vue';
+import {ref, reactive, onMounted}     from 'vue';
+import {useAPI}                       from "~/composables/useAPI";
 
-export default {
-  components: {AttachmentPreview, AccountInput},
-  data() {
-    return {
-      form   : {
-        _id               : '',
-        dateTime          : new Date(),
-        accountsInvolved  : [],
-        description       : '',
-        amount            : 0,
-        difference        : 0,
-        sumOfDebit        : 0,
-        sumOfCredit       : 0,
-        files             : [],
-        filesPreview      : [],
-        renderFilesPreview: true,
-        filesError        : false,
-      },
-      rules  : {
-        notEmpty          : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-        filesIsValid      : [
-          value => {
-            let valid = true;
-            if (value)
-              value.forEach((file) => {
-                // Allowing file type
-                let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+// Define reactive state
+const form = reactive({
+  _id               : '',
+  dateTime          : new Date(),
+  accountsInvolved  : [],
+  description       : '',
+  amount            : 0,
+  difference        : 0,
+  sumOfDebit        : 0,
+  sumOfCredit       : 0,
+  files             : [],
+  filesPreview      : [],
+  renderFilesPreview: true,
+  filesError        : false,
+});
 
-                // check format
-                if (!allowedExtensions.exec(file.name)) {
-                  // show error
-                  const {$showMessage} = useNuxtApp();
-                  $showMessage('فرمت فایل انتخابی قابل قبول نیست', 'error');
-                  valid = false;
-                  return false;
-                }
-
-                // check size
-                if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
-                  // show error
-                  const {$showMessage} = useNuxtApp();
-                  $showMessage('اندازه فایل بیش از حد مجاز است', 'error');
-                  valid = false;
-                  return false;
-                }
-
-              });
-            if (valid) {
-              this.createImagesPreview();
-              this.form.filesError = false;
-            } else {
-              this.form.filesPreview = [];
-              this.form.filesError   = true;
-            }
-            return valid;
-
-          }
-        ]
-      },
-      loading: false,
-      action : 'add'
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.addAccountingDocumentForm.reset();
-      this.form._id              = '';
-      this.form.amount           = 0;
-      this.form.accountsInvolved = [];
-      this.loading               = false;
-      this.action                = 'add';
-      this.$forceUpdate();
+const rules = reactive({
+  notEmpty          : [
+    (value) => {
+      if (value) return true;
+      return 'پر کردن این فیلد اجباری است';
     },
-    async add() {
-
-      // convert numbers
-      this.form.accountsInvolved.forEach((account) => {
-        account.debit  = Number(account.debit);
-        account.credit = Number(account.credit);
-      });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              dateTime        : this.form.dateTime,
-              description     : this.form.description,
-              accountsInvolved: this.form.accountsInvolved,
-              amount          : this.form.amount,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          if (this.form.files && this.form.files.length) {
-            response = await response.json();
-            await this.uploadFiles(response._id)
-          } else {
-            this.reset();
-            this.$emit('exit');
-            this.$emit('refresh');
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-          }
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+  ],
+  notEmptySelectable: [
+    (value) => {
+      if (value) return true;
+      return 'لطفا انتخاب کنید';
     },
-    async edit() {
-
-      // convert numbers
-      this.form.accountsInvolved.forEach((account) => {
-        account.debit  = Number(account.debit);
-        account.credit = Number(account.credit);
-      });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              dateTime        : this.form.dateTime,
-              description     : this.form.description,
-              accountsInvolved: this.form.accountsInvolved,
-              amount          : this.form.amount,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          if (this.form.files && this.form.files.length) {
-            await this.uploadFiles(this.form._id)
-          } else {
-            this.reset();
-            this.$emit('exit');
-            this.$emit('refresh');
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-          }
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-
-      // check is valid
+  ],
+  filesIsValid      : [
+    (value) => {
       let valid = true;
-      this.form.accountsInvolved.forEach((account) => {
-        if (!account.debit && !account.credit) {
-          const {$showMessage} = useNuxtApp();
-          $showMessage('برای حساب، مقدار بدهکار یا بستانکار را وارد کنید', 'error');
-          valid = false;
-        }
-      });
+      if (value)
+        value.forEach((file) => {
+          // Allowing file type
+          let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
 
-      if (this.form.accountsInvolved.length === 0) {
-        const {$showMessage} = useNuxtApp();
-        $showMessage('حداقل یک حساب درگیر اضافه کنید', 'error');
-        valid = false;
-      }
+          // Check format
+          if (!allowedExtensions.exec(file.name)) {
+            // Show error
+            $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
+            valid = false;
+            return false;
+          }
 
-      if (valid && this.$refs.addAccountingDocumentForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
-      }
-    },
-    async onAccountSelected(val, index) {
-      this.form.accountsInvolved[index]['_account'] = val._id;
-    },
-    addAccount() {
-      this.form.accountsInvolved.push({
-        _account   : '',
-        description: '',
-        debit      : '',
-        credit     : '',
-      });
-    },
-    deleteAccount(index) {
-      this.form.accountsInvolved.splice(index, 1);
-      this.calcDocument();
-    },
-    setEdit(data) {
-      this.reset();
-
-      this.form.dateTime         = data.dateTime;
-      this.form.description      = data.description;
-      this.form.accountsInvolved = data.accountsInvolved;
-      this.form.amount           = data.amount;
-
-      // set files
-      if (data.files) {
-        data.files.forEach((filePreview) => {
-          this.form.filesPreview.push({
-            uploaded: true,
-            name    : filePreview,
-            src     : this.runtimeConfig.public.API_BASE_URL +
-                'accounting-documents/' + data._id + '/files/' + filePreview
-          });
-        });
-      }
-
-      // _id and action
-      this.form._id = data._id;
-      this.action   = 'edit';
-
-      this.calcDocument();
-    },
-    calcDocument() {
-      // reset numbers
-      this.form.sumOfDebit  = 0;
-      this.form.sumOfCredit = 0;
-      this.form.difference  = 0;
-
-      // calc sum of debit and credit
-      this.form.accountsInvolved.forEach((account) => {
-        this.form.sumOfDebit += Number(account.debit);
-        this.form.sumOfCredit += Number(account.credit);
-      });
-
-      // calc difference
-      this.form.difference = this.form.sumOfCredit - this.form.sumOfDebit;
-
-      // set amount
-      this.form.amount = this.form.sumOfCredit;
-
-    },
-    openFileDialog() {
-      this.$refs.filesInput.click();
-    },
-    createImagesPreview() {
-
-      let previews           = this.form.filesPreview;
-      this.form.filesPreview = [];
-
-      // add uploaded preview
-      previews.forEach((filePreview, index) => {
-        if (filePreview.uploaded) {
-          this.form.filesPreview.push(filePreview);
-        }
-      });
-
-      // create new previews
-      if (this.form.files)
-        this.form.files.forEach((file) => {
-          let fileReader = new FileReader();
-          fileReader.readAsDataURL(file);
-          fileReader.onload = (e) => {
-            this.form.filesPreview.push({src: e.target.result});
-          };
-        });
-
-    },
-    async deleteFile(fileName, index) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        await fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + this.form._id + '/files/' + fileName, {
-              method : 'delete',
-              headers: {
-                'authorization': 'Bearer ' + this.user.token
-              }
-            }).then(async response => {
-          const {$showMessage} = useNuxtApp();
-          if (response.status === 200) {
-            // remove item from files preview
-            this.form.filesPreview.splice(index, 1);
-
-            // exception for reRender files preview after delete file
-            // must AttachmentPreview Component reRendered
-            this.form.renderFilesPreview = false;
-            setTimeout(() => {
-              this.form.renderFilesPreview = true;
-            }, 200);
-
-            $showMessage('عملیات با موفقت انجام شد', 'success');
-          } else {
-            // show error
-            $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+          // Check size
+          if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
+            // Show error
+            $notify('اندازه فایل بیش از حد مجاز است', 'error');
+            valid = false;
+            return false;
           }
         });
+      if (valid) {
+        createImagesPreview();
+        form.filesError = false;
+      } else {
+        form.filesPreview = [];
+        form.filesError   = true;
       }
+      return valid;
     },
-    async uploadFiles(_id) {
-      // add files to form data
-      let filesForm = new FormData();
-      this.form.files.forEach((file) => {
-        filesForm.append('files', file);
-      });
+  ],
+});
 
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + _id + '/files', {
-            method : 'post',
-            headers: {
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : filesForm
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          this.reset();
-          this.$emit('exit');
-          this.$emit('refresh');
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-        } else {
-          // show error
-          $showMessage('مشکلی در بارگذاری فایل‌ها پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
+const loading                   = ref(false);
+const action                    = ref('add');
+const {$notify, $axios}         = useNuxtApp();
+const addAccountingDocumentForm = ref(null);
+const runtimeConfig             = useRuntimeConfig();
+const filesInput                = ref(null);
+const showUploadProgress        = ref(false);
+const uploadProgress            = ref(0);
+const emit                      = defineEmits(['exit', 'refresh']);
+
+// Define methods
+const reset = () => {
+  form._id                = '';
+  form.dateTime           = new Date();
+  form.accountsInvolved   = [];
+  form.description        = '';
+  form.amount             = 0;
+  form.difference         = 0;
+  form.sumOfDebit         = 0;
+  form.sumOfCredit        = 0;
+  form.files              = [];
+  form.filesPreview       = [];
+  form.renderFilesPreview = true;
+  form.filesError         = false;
+  loading.value           = false;
+  action.value            = 'add';
+};
+
+const convertFormNumbers = () => {
+  form.accountsInvolved.forEach((account) => {
+    account.debit  = Number(account.debit);
+    account.credit = Number(account.credit);
+  });
+};
+
+const add = async () => {
+  // Convert numbers
+  convertFormNumbers();
+
+  await useAPI('accounting-documents', {
+    method    : 'post',
+    body      : {
+      dateTime        : form.dateTime,
+      description     : form.description,
+      accountsInvolved: form.accountsInvolved,
+      amount          : form.amount,
     },
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-  },
-  computed: {},
-  watch   : {}
-}
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        if (form.files && form.files.length) {
+          // upload files of document
+          $notify('در حال بارگذاری فایل‌ها...', 'warning');
+          await uploadFiles(response._data._id);
+        } else {
+          // reset and exit
+          reset();
+          emit('exit');
+          emit('refresh');
+        }
+      } else {
+        // Show error
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const edit = async () => {
+  // Convert numbers
+  convertFormNumbers();
+
+  await useAPI('accounting-documents/' + form._id, {
+    method    : 'put',
+    body      : {
+      dateTime        : form.dateTime,
+      description     : form.description,
+      accountsInvolved: form.accountsInvolved,
+      amount          : form.amount,
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
+        if (form.files && form.files.length) {
+          // upload files of document
+          $notify('در حال بارگذاری فایل‌ها...', 'warning');
+          await uploadFiles(response._data._id);
+        } else {
+          // reset and exit
+          reset();
+          emit('exit');
+          emit('refresh');
+        }
+      } else {
+        // Show error
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+};
+
+const submit = async () => {
+  // Check if valid
+  let valid = true;
+  form.accountsInvolved.forEach((account) => {
+    if (!account.debit && !account.credit) {
+      $notify('برای حساب، مقدار بدهکار یا بستانکار را وارد کنید', 'error');
+      valid = false;
+    }
+  });
+
+  if (form.accountsInvolved.length === 0) {
+    $notify('حداقل یک حساب درگیر اضافه کنید', 'error');
+    valid = false;
+  }
+
+  if (valid && addAccountingDocumentForm.value?.isValid) {
+    loading.value = true;
+
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+
+    loading.value = false;
+  }
+};
+
+const addAccount = () => {
+  form.accountsInvolved.push({
+    _account   : '',
+    description: '',
+    debit      : '',
+    credit     : '',
+  });
+};
+
+const deleteAccount = (index) => {
+  form.accountsInvolved.splice(index, 1);
+  calcDocument();
+};
+
+const setEdit = async (data) => {
+  await useAPI('accounting-documents/' + data._id, {
+    method    : 'get',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        form.dateTime         = response._data.dateTime;
+        form.description      = response._data.description;
+        form.accountsInvolved = response._data.accountsInvolved;
+        form.amount           = response._data.amount;
+
+        // Set files
+        if (response._data.files) {
+          response._data.files.forEach((filePreview) => {
+            form.filesPreview.push({
+              uploaded: true,
+              name    : filePreview,
+              src     : runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + data._id + '/files/' + filePreview,
+            });
+          });
+        }
+
+        // _id and action
+        form._id     = data._id;
+        action.value = 'edit';
+
+        calcDocument();
+      }
+    }
+  });
+};
+
+const calcDocument = () => {
+  // Reset numbers
+  form.sumOfDebit  = 0;
+  form.sumOfCredit = 0;
+  form.difference  = 0;
+
+  // Calculate sum of debit and credit
+  form.accountsInvolved.forEach((account) => {
+    form.sumOfDebit += Number(account.debit);
+    form.sumOfCredit += Number(account.credit);
+  });
+
+  // Calculate difference
+  form.difference = form.sumOfCredit - form.sumOfDebit;
+
+  // Set amount
+  form.amount = form.sumOfCredit;
+};
+
+const openFileDialog = () => {
+  filesInput.value?.click();
+};
+
+const createImagesPreview = () => {
+  let previews      = form.filesPreview;
+  form.filesPreview = [];
+
+  // Add uploaded preview
+  previews.forEach((filePreview) => {
+    if (filePreview.uploaded) {
+      form.filesPreview.push(filePreview);
+    }
+  });
+
+  // Create new previews
+  if (form.files)
+    form.files.forEach((file) => {
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = (e) => {
+        form.filesPreview.push({src: e.target.result});
+      };
+    });
+};
+
+const deleteFile = async (fileName, index) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    await useAPI('accounting-documents/' + form._id + '/files/' + fileName, {
+      method    : 'delete',
+      onResponse: async ({response}) => {
+        if (response.status === 200) {
+          // Remove item from files preview
+          form.filesPreview.splice(index, 1);
+
+          // Exception for reRender files preview after delete file
+          // Must AttachmentPreview Component reRendered
+          form.renderFilesPreview = false;
+          setTimeout(() => {
+            form.renderFilesPreview = true;
+          }, 200);
+
+          $notify('عملیات با موفقیت انجام شد', 'success');
+        } else {
+          // Show error
+          $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+        }
+      }
+    });
+  }
+};
+
+const uploadFiles = async (_id) => {
+  // Add files to form data
+  const filesForm = new FormData();
+  form.files.forEach((file) => filesForm.append('files', file));
+
+  // enable upload progress show
+  showUploadProgress.value = true;
+
+  // upload with axios
+  const response           = await $axios.post('accounting-documents/' + _id + '/files', filesForm, {
+    onUploadProgress: (progressEvent) => {
+      // fill upload progress
+      uploadProgress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+    }
+  });
+  // disable upload progress show
+  showUploadProgress.value = false;
+
+  if (response.status === 200) {
+    $notify('بارگذاری فایل‌ها با موفقت انجام شد', 'success');
+    reset();
+    emit('exit');
+    emit('refresh');
+  } else {
+    $notify('مشکلی در بارگذاری فایل‌ها پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+  }
+};
+
+
+defineExpose({
+  action,
+  setEdit
+});
 </script>
 
 <style scoped>

@@ -42,7 +42,7 @@
 
     <!--    Add Accounting Documents   -->
     <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-      <add-accounting-document
+      <AddAccountingDocument
           ref="addAccountingDocument"
           @exit="toggleAction"
           @refresh="getAccountingDocuments"/>
@@ -55,12 +55,12 @@
       <Loading :loading="loading"/>
 
       <!--    List      -->
-      <v-data-table v-if="list.length" class="mt-n5"
+      <v-data-table v-if="list.length && !loading" class="mt-n5"
                     :loading="loading"
                     :headers="listHeaders"
                     :items="list"
                     :items-per-page="perPage"
-                    :pageCount="listTotal"
+                    :pageCount="pageCount"
                     @update:options="setListOptions"
                     sticky
                     show-current-page>
@@ -104,163 +104,138 @@
   </v-row>
 </template>
 
-<script>
-import {useCookie}           from "#app";
-import AddAccountingDocument from "~/components/accounting-documents/AddAccountingDocument.vue";
+<script setup>
+import {ref, watch, onMounted, nextTick} from 'vue';
+import {useNuxtApp}                      from '#app';
+import AddAccountingDocument             from '~/components/accounting-documents/AddAccountingDocument.vue';
+import {useAPI}                          from "~/composables/useAPI";
+import Loading                           from '~/components/Loading.vue';
+import EmptyList                         from '~/components/EmptyList.vue';
 
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : 'admin',
+  middleware  : 'auth',
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: 'admin',
 });
 
-export default {
-  components: {AddAccountingDocument},
-  data() {
-    return {
-      user         : {},
-      action       : 'list',
-      loading      : true,
-      list         : [],
-      listHeaders  : [
-        {
-          title   : 'تاریخ',
-          key     : 'dateTimeJalali',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'توضیحات',
-          key     : 'description',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'مبلغ',
-          key     : 'amount',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'عملیات',
-          align   : 'center',
-          key     : 'operation',
-          sortable: false
-        }
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: ''
-    }
-  },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addAccountingDocument.action;
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+// State variables
+const action                = ref('list');
+const loading               = ref(true);
+const list                  = ref([]);
+const listHeaders           = ref([
+  {title: 'تاریخ', key: 'dateTimeJalali', align: 'center', sortable: true},
+  {title: 'توضیحات', key: 'description', align: 'center', sortable: true},
+  {title: 'مبلغ', key: 'amount', align: 'center', sortable: true},
+  {title: 'عملیات', key: 'operation', align: 'center', sortable: false},
+]);
+const listTotal             = ref(0);
+const page                  = ref(1);
+const perPage               = ref(10);
+const pageCount             = ref(1);
+const sortColumn            = ref('');
+const sortDirection         = ref('');
+const addAccountingDocument = ref(null);
+const {$notify}             = useNuxtApp();
 
-          // refresh list
-          await this.getAccountingDocuments();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    filter() {
-      let search = new URLSearchParams();
+// Toggle between list and add/edit actions
+const toggleAction = () => {
+  if (action.value === 'add' || action.value === 'edit')
+    action.value = 'list';
+  else
+    action.value = addAccountingDocument.value?.action;
+};
 
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
+// Delete an accounting document
+const deleteDocument = async (data) => {
+  data.deleteLoading = true;
+  await useAPI('accounting-documents/' + data._id, {
+    method    : 'delete',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقیت انجام شد', 'success');
 
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
+        data.deleteLoading = false;
 
-      return search;
-    },
-    getAccountingDocuments() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    async setEdit(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'accounting-documents/' + data._id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response = await response.json();
-        this.$refs.addAccountingDocument.setEdit(response);
-        this.toggleAction();
-      });
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
-
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getAccountingDocuments();
+        // refresh list
+        await getAccountingDocuments();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getAccountingDocuments();
-  },
-  computed: {},
-  watch   : {
-    page(val, oldVal) {
-      this.getAccountingDocuments();
+  })
+};
+
+// Generate query parameters for filtering
+const filter = () => {
+  let search = new URLSearchParams();
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', Number(sortDirection.value));
+  return search;
+};
+
+// Fetch accounting documents list
+const getAccountingDocuments = async () => {
+  loading.value = true;
+  await useAPI('accounting-documents?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set the list and total
+      listTotal.value = response._data.total;
+
+      list.value      = [];
+      response._data.list.forEach((item) => {
+        item.setEditLoading = false;
+        item.deleteLoading  = false;
+        list.value.push(item);
+      });
+
+      // set page Count
+      pageCount.value = Math.ceil(response._data.total / perPage.value);
+      // stop loading
+      loading.value   = false;
     }
+  });
+};
+
+// Fetch and set document for editing
+const setEdit = async (data) => {
+  data.setEditLoading = true;
+  // Call child component method to set edit data
+  await addAccountingDocument.value?.setEdit(data);
+  toggleAction();
+  data.setEditLoading = false;
+};
+
+// Confirm and delete document
+const setDelete = (data) => {
+  if (confirm('آیا مطمئن هستید؟')) {
+    deleteDocument(data);
   }
-}
+};
+
+// Handle sorting and update list
+const setListOptions = (val) => {
+  if (val && val.sortBy[0]) {
+    sortColumn.value    = val.sortBy[0].key === 'dateTimeJalali' ? 'dateTime' : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === 'desc' ? -1 : 1;
+    getAccountingDocuments();
+  }
+};
+
+// Fetch user and initialize data on mount
+onMounted(() => {
+  nextTick(() => {
+    getAccountingDocuments();
+  });
+});
+
+// Watch for page change and fetch new data
+watch(page, () => {
+  getAccountingDocuments();
+});
 </script>
 
 
