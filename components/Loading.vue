@@ -6,7 +6,11 @@
 </template>
 
 <script setup>
-
+const props = defineProps({
+  loading: {
+    type: Boolean
+  }
+})
 </script>
 
 <style scoped>
