@@ -230,7 +230,7 @@ const filter = () => {
 // Delete an invoice
 const deleteInvoice = async (data) => {
   data.deleteLoading = true;
-  await useAPI('purchase-invoice/' + data._id, {
+  await useAPI('purchase-invoices/' + data._id, {
     method    : 'delete',
     onResponse: ({response}) => {
       if (response.status === 200) {
