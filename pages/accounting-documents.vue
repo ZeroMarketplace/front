@@ -124,6 +124,7 @@ const action                = ref('list');
 const loading               = ref(true);
 const list                  = ref([]);
 const listHeaders           = ref([
+  {title: 'کد سند', key: 'code', align: 'center', sortable: true},
   {title: 'تاریخ', key: 'dateTimeJalali', align: 'center', sortable: true},
   {title: 'توضیحات', key: 'description', align: 'center', sortable: true},
   {title: 'مبلغ', key: 'amount', align: 'center', sortable: true},
@@ -185,7 +186,7 @@ const getAccountingDocuments = async () => {
       // set the list and total
       listTotal.value = response._data.total;
 
-      list.value      = [];
+      list.value = [];
       response._data.list.forEach((item) => {
         item.setEditLoading = false;
         item.deleteLoading  = false;
@@ -237,7 +238,6 @@ watch(page, () => {
   getAccountingDocuments();
 });
 </script>
-
 
 <style scoped>
 
