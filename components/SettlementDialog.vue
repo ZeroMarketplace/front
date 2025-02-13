@@ -83,12 +83,24 @@
                   <v-text-field class=""
                                 v-model="form.payment.cash"
                                 :readonly="form.payment.distributedCash"
+                                :disabled="!validCashAccounts"
                                 @click:append="form.window = 2"
                                 append-icon="mdi-cash-multiple"
                                 type="number"
                                 density="compact"
                                 variant="outlined">
                   </v-text-field>
+                </v-col>
+
+                <!--      Invalid Cash Accounts          -->
+                <v-col v-if="!validCashAccounts"
+                       class="text-red text-caption mx-10 mt-n9 mb-5"
+                       cols="12">
+                  <label>پرداخت نقدی غیر فعال است. زیرا:</label>
+                  <ul class="mr-10">
+                    <li v-if="!cashAccountsCount">حساب صندوق ایجاد نشده است.</li>
+                    <li v-if="!hasDefaultCashAccount">حساب پیش فرضی برای پردخت نقدی انتخاب نشده است.</li>
+                  </ul>
                 </v-col>
 
                 <!--   Bank Amount   -->
@@ -99,12 +111,24 @@
                   <v-text-field class=""
                                 v-model="form.payment.bank"
                                 :readonly="form.payment.distributedBank"
+                                :disabled="!validBankAccounts"
                                 @click:append="form.window = 3"
                                 append-icon="mdi-credit-card-multiple-outline"
                                 type="number"
                                 density="compact"
                                 variant="outlined">
                   </v-text-field>
+                </v-col>
+
+                <!--      Invalid Bank Accounts          -->
+                <v-col v-if="!validBankAccounts"
+                       class="text-red text-caption mx-10 mt-n9 mb-5"
+                       cols="12">
+                  <label>پرداخت بانکی غیر فعال است. زیرا:</label>
+                  <ul class="mr-10">
+                    <li v-if="!bankAccountsCount">حساب بانکی ایجاد نشده است.</li>
+                    <li v-if="!hasDefaultBankAccount">حساب پیش فرضی برای پرداخت بانکی انتخاب نشده است.</li>
+                  </ul>
                 </v-col>
 
                 <!--   Credit Amount   -->
@@ -228,11 +252,11 @@ const props = defineProps({
 });
 
 // States
-const loading        = ref(false);
-const action         = ref('add');
-const accounts       = ref([]);
-const info           = ref({amount: 0});
-const form           = ref({
+const loading               = ref(false);
+const action                = ref('add');
+const accounts              = ref([]);
+const info                  = ref({amount: 0});
+const form                  = ref({
   _id    : '',
   payment: {
     cash           : 0,
@@ -246,9 +270,15 @@ const form           = ref({
   },
   window : 1,
 });
-const settlementForm = ref(null);
-const {$notify}      = useNuxtApp();
-const emit           = defineEmits(['exit']);
+const settlementForm        = ref(null);
+const {$notify}             = useNuxtApp();
+const emit                  = defineEmits(['exit']);
+const validCashAccounts     = ref(true);
+const validBankAccounts     = ref(true);
+const hasDefaultBankAccount = ref(false);
+const hasDefaultCashAccount = ref(false);
+const bankAccountsCount     = ref(0);
+const cashAccountsCount     = ref(0);
 
 // Validation rules
 const rules = {
@@ -269,7 +299,7 @@ const getAccounts = async () => {
   // init search
   let search = new URLSearchParams();
   search.set('types', ['bank', 'cash']);
-  search.set('perPage', 50);
+  search.set('perPage', 100);
 
   await useAPI('accounts?' + search, {
     method    : 'get',
@@ -283,10 +313,41 @@ const getAccounts = async () => {
         let temp = {_account: account._id, amount: 0};
         // set the default
         if (account.defaultFor) temp.default = true;
+
         // add to related category
-        if (account.type === 'bank') form.value.payment.bankAccounts.push(temp);
-        if (account.type === 'cash') form.value.payment.cashAccounts.push(temp);
+        if (account.type === 'bank') {
+          // add to payment
+          form.value.payment.bankAccounts.push(temp);
+
+          // add the bank Accounts Count
+          bankAccountsCount.value += 1;
+
+          // set has default bank account
+          if (account.defaultFor) hasDefaultBankAccount.value = true;
+        }
+
+        if (account.type === 'cash') {
+          // add to payment
+          form.value.payment.cashAccounts.push(temp);
+
+          // add the cash Accounts Count
+          cashAccountsCount.value += 1;
+
+          // set has default cash account
+          if (account.defaultFor) hasDefaultCashAccount.value = true;
+        }
+
       });
+
+      // check the cash Account count is valid
+      if (cashAccountsCount === 0 || !hasDefaultCashAccount.value) {
+        validCashAccounts.value = false;
+      }
+
+      // check the bank Account count is valid
+      if (bankAccountsCount === 0 || !hasDefaultBankAccount.value) {
+        validBankAccounts.value = false;
+      }
 
       // stop loading
       loading.value = false;
@@ -362,6 +423,9 @@ const submit = async () => {
 
 // Add new settlement
 const add = async () => {
+  // convert credit number
+  form.value.payment.credit = Number(form.value.payment.credit);
+
   await useAPI('settlements', {
     method    : 'post',
     body      : {
@@ -373,6 +437,10 @@ const add = async () => {
       if (response.status === 200) {
         $notify('عملیات با موفقیت انجام شد', 'success');
         emit('exit');
+      } else if (response.status === 400) {
+        if (response._data.message.startsWith('Invalid Payment')) {
+          $notify('پرداخت نامعتبر؛ لطفا مقادیر پرداختی را بازنگری کنید', 'error');
+        }
       } else {
         $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
@@ -382,6 +450,9 @@ const add = async () => {
 
 // Edit existing settlement
 const edit = async () => {
+  // convert credit number
+  form.value.payment.credit = Number(form.value.payment.credit);
+
   await useAPI('settlements/' + form.value._id, {
     method    : 'put',
     body      : {
@@ -478,7 +549,6 @@ onMounted(() => {
   });
 });
 </script>
-
 
 <style scoped>
 .numberInputLabel {
