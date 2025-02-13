@@ -65,8 +65,8 @@
                     @update:options="setListOptions"
                     sticky
                     show-current-page>
-        <template v-slot:item._customer="{ item }">
-          {{ item._customer.fullName }}
+        <template v-slot:item._supplier="{ item }">
+          {{ item._supplier.fullName }}
         </template>
         <template v-slot:item._warehouse="{ item }">
           {{ item._warehouse.title }}
@@ -151,12 +151,17 @@ const sortColumn         = ref('');
 const sortDirection      = ref('');
 const addPurchaseInvoice = ref(null);
 const {$notify}          = useNuxtApp();
-
-const listHeaders = [
+const listHeaders        = [
   {
-    title   : 'فروشنده',
+    title   : 'کد فاکتور',
     align   : 'center',
-    key     : '_customer',
+    key     : 'code',
+    sortable: true
+  },
+  {
+    title   : 'تامین کننده',
+    align   : 'center',
+    key     : '_supplier',
     sortable: false
   },
   {
@@ -290,7 +295,6 @@ onMounted(() => {
   });
 });
 </script>
-
 
 <style scoped>
 

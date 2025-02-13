@@ -16,7 +16,8 @@
     <v-row class="mx-5">
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
-        <UserInput v-model="form._customer"
+        <UserInput v-model="form._supplier"
+                   label="تامین کننده"
                    class="mt-md-3 mb-5"
                    :insert-dialog-icon="true"
                    :readonly="loading"/>
@@ -46,16 +47,17 @@
       </v-col>
 
       <!--   Warehouse   -->
-      <v-col class="mt-n8 mt-md-0" cols="12" md="4">
-        <WarehouseInput class="mt-3"
+      <v-col class="mt-n8 mt-md-3" cols="12" md="4">
+        <WarehouseInput class=""
+                        label="وارد می‌شود به انبار"
                         :rules="rules.notEmptySelectable"
                         v-model="form._warehouse">
         </WarehouseInput>
       </v-col>
 
       <!--   Description   -->
-      <v-col class="mt-n8" cols="12" md="12">
-        <v-text-field class="mt-3"
+      <v-col class="mt-n2 mt-md-n8" cols="12" md="12">
+        <v-text-field class=""
                       v-model="form.description"
                       :readonly="loading"
                       label="توضیحات"
@@ -351,7 +353,7 @@ const settlementDialog       = ref(false);
 const settlementId           = ref('');
 const form                   = ref({
   _id        : '',
-  _customer  : null,
+  _supplier  : null,
   dateTime   : new Date(),
   _warehouse : null,
   description: '',
@@ -383,7 +385,7 @@ const closeSettlementDialog = () => {
 const reset = () => {
   form.value                   = {
     _id        : '',
-    _customer  : null,
+    _supplier  : null,
     dateTime   : new Date(),
     _warehouse : null,
     description: '',
@@ -527,7 +529,7 @@ const setEdit = async (data) => {
     await useAPI('purchase-invoices/' + data._id, {
       method    : 'get',
       onResponse: ({response}) => {
-        form.value._customer   = response._data._customer;
+        form.value._supplier   = response._data._supplier;
         form.value.dateTime    = response._data.dateTime;
         form.value._warehouse  = response._data._warehouse;
         form.value.description = response._data.description;
@@ -570,7 +572,7 @@ const add = async () => {
   await useAPI('purchase-invoices', {
     method    : 'post',
     body      : {
-      _customer  : form.value._customer,
+      _supplier  : form.value._supplier,
       _warehouse : form.value._warehouse,
       dateTime   : form.value.dateTime,
       description: form.value.description,
