@@ -132,6 +132,11 @@ export default {
           icon : 'mdi-cog',
           items: [
             {
+              text: 'تنظیمات سیستم',
+              link: '/settings',
+              icon: 'mdi-cog-outline'
+            },
+            {
               text: 'دسته بندی‌ها',
               link: '/categories',
               icon: 'mdi-file-tree'
