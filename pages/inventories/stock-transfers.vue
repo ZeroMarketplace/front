@@ -43,7 +43,7 @@
 
     <!--    Inventories Stock Transfer   -->
     <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-      <inventories-add-stock-transfer
+      <AddStockTransfer
           ref="addStockTransfers"
           @exit="toggleAction"
           @refresh="getStockTransfers"/>
@@ -69,14 +69,14 @@
 
         <!--     Items       -->
         <template v-slot:item._sourceWarehouse="{ item }">
-          {{ item._sourceWarehouse.title.fa }}
+          {{ item._sourceWarehouse.title }}
         </template>
         <template v-slot:item._destinationWarehouse="{ item }">
-          {{ item._destinationWarehouse.title.fa }}
+          {{ item._destinationWarehouse.title }}
         </template>
         <template v-slot:item.count="{ item }">
           {{ item.count + ' ' }}
-          {{ item.productDetails._unit.title.fa }}
+          {{ item.productDetails._unit.title }}
         </template>
         <template v-slot:item.code="{ item }">
           {{ item.productDetails.code }}
@@ -84,13 +84,23 @@
         <template v-slot:item.productDetails="{ item }">
           {{ item.productDetails.title }}
         </template>
+        <template v-slot:item.status="{ item }">
+          <span class="text-red" v-if="item.status === 'Draft'">پیش نویس</span>
+          <span class="text-orange" v-if="item.status === 'Pending Approval'">در انتظار تایید</span>
+          <span class="text-green" v-if="item.status === 'Approved'">تایید شده</span>
+          <span class="text-orange" v-if="item.status === 'Dispatched'">خروج از انبار مبدا</span>
+          <span class="text-blue" v-if="item.status === 'In Transit'">در مسیر</span>
+          <span class="text-green" v-if="item.status === 'Received'">دریافت شده</span>
+          <span class="text-green" v-if="item.status === 'Completed'">تکمیل شده</span>
+          <span class="text-red" v-if="item.status === 'Completed'">لغو شده</span>
+        </template>
 
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
           <v-btn class="mx-2"
                  color="red"
                  size="25"
-                 @click="setDelete(item._id)"
+                 @click="setDelete(item)"
                  icon>
             <v-icon size="15">mdi-delete-outline</v-icon>
           </v-btn>
@@ -98,7 +108,8 @@
 
         <!--      Pagination      -->
         <template v-slot:bottom>
-          <v-pagination class="mt-5"
+          <v-pagination v-if="pageCount > 1"
+                        class="mt-5"
                         active-color="secondary"
                         v-model="page"
                         :length="pageCount"
@@ -115,168 +126,141 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, watch, onMounted, nextTick} from "vue";
+import {useNuxtApp}                      from "#app";
+import AddStockTransfer                  from "~/components/inventories/AddStockTransfer.vue";
+import {useAPI}                          from "~/composables/useAPI";
+import Loading                           from "~/components/Loading.vue";
+import EmptyList                         from "~/components/EmptyList.vue";
 
+// Define page metadata
 definePageMeta({
-  layout: "admin"
+  layout      : 'admin',
+  middleware  : 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin',
 });
 
-export default {
-  data() {
-    return {
-      user         : {},
-      list         : [],
-      loading      : true,
-      _warehouse   : undefined,
-      listHeaders  : [
-        {
-          title   : 'کد',
-          key     : 'code',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'محصول',
-          key     : 'productDetails',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'تعداد',
-          key     : 'count',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'انبار مبدا',
-          key     : '_sourceWarehouse',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'انبار مقصد',
-          key     : '_destinationWarehouse',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'تاریخ',
-          key     : 'updatedAtJalali',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'عملیات',
-          key     : 'operation',
-          align   : 'center',
-          sortable: false
-        },
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: '',
-      action       : 'list'
-    }
-  },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addStockTransfers.action;
-    },
-    filter() {
-      let search = new URLSearchParams();
+// Reactive state variables
+const list              = ref([]);
+const loading           = ref(true);
+const listTotal         = ref(0);
+const page              = ref(1);
+const perPage           = ref(10);
+const pageCount         = ref(1);
+const sortColumn        = ref("");
+const sortDirection     = ref("");
+const action            = ref("list");
+const addStockTransfers = ref(null);
+const {$notify}         = useNuxtApp();
 
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
+// Table headers
+const listHeaders = [
+  {title: "کد", key: "code", align: "center", sortable: false},
+  {title: "محصول", key: "productDetails", align: "center", sortable: false},
+  {title: "تعداد", key: "count", align: "center", sortable: false},
+  {title: "انبار مبدا", key: "_sourceWarehouse", align: "center", sortable: false},
+  {title: "انبار مقصد", key: "_destinationWarehouse", align: "center", sortable: false},
+  {title: "تاریخ", key: "updatedAtJalali", align: "center", sortable: false},
+  {title: "وضعیت", key: "status", align: "center", sortable: false},
+  {title: "عملیات", key: "operation", align: "center", sortable: false},
+];
 
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
-
-
-      return search;
-    },
-    getStockTransfers() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
-
-        if (val.sortBy[0].key === '_warehouse')
-          return;
-
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getStockTransfers();
-      }
-    },
-    setDelete(_id) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(_id);
-      }
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // refresh list
-          this.getStockTransfers();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getStockTransfers();
-  },
-  computed: {},
-  watch: {
-    page(val, oldVal) {
-      this.getStockTransfers();
-    }
+// Toggle action mode
+const toggleAction = () => {
+  if (action.value === "add" || action.value === "edit") {
+    action.value = "list";
+  } else {
+    action.value = addStockTransfers.value?.action; // Adjust this based on actual ref
   }
-}
+};
+
+// Create filter query
+const filter = () => {
+  let search = new URLSearchParams();
+  search.set("perPage", perPage.value);
+  search.set("page", page.value);
+  search.set("sortColumn", sortColumn.value);
+  search.set("sortDirection", Number(sortDirection.value));
+  return search;
+};
+
+// Fetch stock transfers
+const getStockTransfers = async () => {
+  loading.value = true;
+
+  await useAPI('stock-transfers?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      // set total and list
+      listTotal.value = response._data.total;
+      list.value      = [];
+
+      // set the loading properties for each item of the list and add them to the list
+      response._data.list.forEach(item => {
+        item.setEditLoading = false;
+        item.deleteLoading  = false;
+        list.value.push(item);
+      })
+
+      // calc and set the pageCount
+      pageCount.value = Math.ceil(listTotal.value / perPage.value);
+    }
+  });
+
+  loading.value = false;
+};
+
+// Handle sorting
+const setListOptions = (val) => {
+  if (val && val.sortBy[0]) {
+    if (val.sortBy[0].key === "_warehouse") return;
+    sortColumn.value    = val.sortBy[0].key === "dateTimeJalali" ? "dateTime" : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === "desc" ? -1 : 1;
+    getStockTransfers();
+  }
+};
+
+// Confirm delete action
+const setDelete = (item) => {
+  if (confirm("آیا مطمئن هستید؟")) {
+    deleteStockTransfer(item);
+  }
+};
+
+// Delete stock transfer
+const deleteStockTransfer = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  await useAPI('stock-transfers/' + item._id, {
+    method    : 'delete',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقیت انجام شد", "success");
+
+        // refresh list
+        getStockTransfers();
+      } else {
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+      }
+    }
+  });
+
+};
+
+// Watch page changes to refresh data
+watch(page, () => {
+  getStockTransfers();
+});
+
+// Fetch data on mount
+onMounted(() => {
+  nextTick(() => {
+    getStockTransfers();
+  });
+});
 </script>
 
 

@@ -10,20 +10,20 @@
 
       <!--   Warehouse   -->
       <v-col class="" cols="12" md="4">
-        <warehouses-warehouse-input class="mt-3"
-                                    label="انبار مبدا"
-                                    :input-rules="rules.notEmptySelectable"
-                                    v-model="form.sourceWarehouse">
-        </warehouses-warehouse-input>
+        <WarehouseInput class="mt-3"
+                        label="انبار مبدا"
+                        :rules="rules.notEmptySelectable"
+                        v-model="form._sourceWarehouse">
+        </WarehouseInput>
       </v-col>
 
       <!--   Warehouse   -->
       <v-col class="mt-n8 mt-md-0" cols="12" md="4" offset-md="1">
-        <warehouses-warehouse-input class="mt-3"
-                                    label="انبار مقصد"
-                                    :input-rules="rules.notEmptySelectable"
-                                    v-model="form.destinationWarehouse">
-        </warehouses-warehouse-input>
+        <WarehouseInput class="mt-3"
+                        label="انبار مقصد"
+                        :input-rules="rules.notEmptySelectable"
+                        v-model="form._destinationWarehouse">
+        </WarehouseInput>
       </v-col>
 
     </v-row>
@@ -57,7 +57,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
-        <ProductInput :inputId="product._id"
+        <ProductInput v-model="product._id"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -69,12 +69,12 @@
                       label="تعداد"
                       type="number"
                       :readonly="loading"
-                      :rules="[rules.notEmpty, maxCountRule(product.totalCount)]"
+                      :rules="[rules.notEmpty, rules.maxCountRule(product.totalCount)]"
                       density="compact"
                       variant="outlined"
                       hide-details>
           <template v-slot:append-inner>
-            <v-label v-if="!product.loading" class="mx-2 text-caption">از {{ product.totalCount }}</v-label>
+            <v-label v-if="!product.totalCountLoading" class="mx-2 text-caption">از {{ product.totalCount }}</v-label>
             <v-progress-circular indeterminate v-else></v-progress-circular>
           </template>
         </v-text-field>
@@ -99,7 +99,6 @@
         {{ product.total }}
       </v-col>
 
-
       <!--  Actions  -->
       <v-col class="pt-4" cols="12" md="1">
         <!--  Delete Product   -->
@@ -112,7 +111,7 @@
                icon>
           <v-icon>mdi-delete</v-icon>
         </v-btn>
-        <v-progress-circular indeterminate v-if="product.loading"></v-progress-circular>
+        <v-progress-circular indeterminate v-if="product.submitLoading"></v-progress-circular>
         <v-icon v-if="product.done" color="green">
           mdi-check-circle
         </v-icon>
@@ -184,19 +183,6 @@
           بازنگری
         </v-btn>
 
-        <!--       Settlement       -->
-        <v-btn class="border mx-2 rounded-lg"
-               v-if="action === 'edit'"
-               color="blue"
-               prepend-icon="mdi-cash-fast"
-               height="40"
-               width="100"
-               variant="text"
-               @click="setSettlement"
-               density="compact">
-          تسویه
-        </v-btn>
-
       </v-col>
     </v-row>
 
@@ -204,264 +190,240 @@
   </v-form>
 </template>
 
-<script>
-import {useCookie}  from "#app";
-import ProductInput from "~/components/products/ProductInput.vue";
+<script setup>
+import {nextTick, ref, watch} from 'vue';
+import {useNuxtApp}           from '#app';
+import ProductInput           from '~/components/products/ProductInput.vue';
+import WarehouseInput         from '~/components/warehouses/WarehouseInput.vue';
+import {useAPI}               from "~/composables/useAPI";
 
-export default {
-  components: {ProductInput},
-  data() {
-    return {
-      form       : {
-        _id                 : '',
-        sourceWarehouse     : null,
-        destinationWarehouse: null,
-        products            : [],
-        totalCount          : 0,
-        total               : 0
-      },
-      rules      : {
-        notEmpty          : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-      },
-      inventories: {},
-      loading    : false,
-      action     : 'add'
-    }
-  },
-  methods: {
-    reset() {
-      this.$refs.stockTransfersForm.reset();
-      this.form._id        = '';
-      this.form.totalCount = 0;
-      this.form.total      = 0;
-      this.form.products   = [];
-      this.loading         = false;
-      this.action          = 'add';
-      this.$forceUpdate();
-    },
-    async add() {
-      // convert numbers and create products array
-      for (const product of this.form.products) {
-        const index = this.form.products.indexOf(product);
-        await this.stockTransferProduct(index);
-      }
+// Define reactive form data
+const form = ref({
+  _id                  : '',
+  _sourceWarehouse     : null,
+  _destinationWarehouse: null,
+  products             : [],
+  totalCount           : 0,
+  total                : 0
+});
 
-      let countOfSuccess = 0;
-      for (const product of this.form.products) {
-        if(product.done)
-          countOfSuccess++;
-      }
-      if(countOfSuccess === this.form.products.length) {
-        this.notify('عملیات با موفقیت انجام شد','success');
-        this.$emit('exit');
-        this.$emit('refresh');
-      }
-    },
-    async edit() {
-
-      // convert numbers and create products array
-      let products = [];
-      this.form.products.forEach((product) => {
-        products.push({
-          _id  : product._id,
-          count: Number(product.count)
-        });
-      });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              customer   : this.form.customer,
-              dateTime   : this.form.dateTime,
-              warehouse  : this.form.warehouse,
-              description: this.form.description,
-              products   : this.form.products,
-              AddAndSub  : this.form.addAndSubtract,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.stockTransfersForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
-      }
-    },
-    async stockTransferProduct(index) {
-      this.form.products[index].loading = true;
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'stock-transfers', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              _sourceWarehouse     : this.form.sourceWarehouse,
-              _destinationWarehouse: this.form.destinationWarehouse,
-              _product             : this.form.products[index]._id,
-              count                : Number(this.form.products[index].count)
-            })
-          }).then(async response => {
-        if (response.status === 200) {
-          response                          = await response.json();
-          this.form.products[index].loading = false;
-          this.form.products[index].done    = true;
-        } else {
-          this.form.products[index].loading = false;
-          this.form.products[index].error   = true;
-          // show error
-          this.notify('مشکلی در انتقال به وجود آمد', 'error');
-        }
-      });
-    },
-    addProduct() {
-      this.form.products.push({
-        _id       : '',
-        count     : 0,
-        totalCount: 0,
-        price     : 0,
-        total     : 0,
-        loading   : false,
-        error     : false,
-        done      : false,
-      });
-    },
-    async onProductSelected(val, index) {
-      this.form.products[index]['_id'] = val._id;
-      // set product price
-      if (val.price)
-        this.form.products[index]['price'] = val.price.consumer;
-      else
-        this.form.products[index]['price'] = 0;
-
-      if (val._id) {
-        this.form.products[index]['loading'] = true;
-        await this.setProductTotalCount(index);
-        this.form.products[index]['loading'] = false;
-      }
-
-      this.calculateProductTotal(index);
-    },
-    async setProductTotalCount(index) {
-      let _id       = this.form.products[index]._id;
-      let inventory = this.inventories[_id];
-      if (inventory) {
-        if (this.form.sourceWarehouse) {
-          // find total count of warehouse (source)
-          let warehouse = inventory.warehouses.find(warehouse => warehouse._id === this.form.sourceWarehouse);
-          if (warehouse)
-            this.form.products[index].totalCount = warehouse.count;
-          else
-            this.form.products[index].totalCount = 0;
-        } else {
-          this.notify('انبار مبدا را انتخاب کنید', 'warning');
-        }
+// Validation rules
+const rules = {
+  notEmpty          : [(value) => (value ? true : 'پر کردن این فیلد اجباری است')],
+  notEmptySelectable: [(value) => (value ? true : 'لطفا انتخاب کنید')],
+  maxCountRule(count) {
+    return value => {
+      if (value > count) {
+        return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
       } else {
-        await this.getInventoryByProductId(_id);
-        await this.setProductTotalCount(index);
+        return true;
       }
-    },
-    async getInventoryByProductId(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response              = await response.json();
-        this.inventories[_id] = response;
-      });
-    },
-    deleteProduct(index) {
-      this.form.products.splice(index, 1);
-    },
-    calculateInvoiceTotal() {
-      this.form.total      = 0;
-      this.form.totalCount = 0;
+    };
+  }
+};
 
-      // calc products price
-      this.form.products.forEach((product) => {
-        this.form.total += product.total;
-        this.form.totalCount += Number(product.count);
-      });
+const inventories        = ref({});
+const loading            = ref(false);
+const action             = ref('add');
+const stockTransfersForm = ref(null);
+const {$notify}          = useNuxtApp();
+const emit               = defineEmits(['exit', 'refresh']);
 
+// Function to reset form
+const reset = () => {
+  form.value    = {
+    _id                  : '',
+    _sourceWarehouse     : null,
+    _destinationWarehouse: null,
+    products             : [],
+    totalCount           : 0,
+    total                : 0
+  };
+  loading.value = false;
+  action.value  = 'add';
+};
+
+// Function to add product
+const addProduct = () => {
+  form.value.products.push({
+    _id              : '',
+    count            : 0,
+    totalCount       : 0,
+    price            : 0,
+    total            : 0,
+    totalCountLoading: false,
+    submitLoading    : false,
+    error            : false,
+    done             : false
+  });
+};
+
+// Function to delete product
+const deleteProduct = (index) => {
+  form.value.products.splice(index, 1);
+};
+
+// Calculate total for invoice
+const calculateInvoiceTotal = () => {
+  form.value.total      = 0;
+  form.value.totalCount = 0;
+  form.value.products.forEach((product) => {
+    form.value.total += product.total;
+    form.value.totalCount += Number(product.count);
+  });
+};
+
+// Calculate total price for a single product
+const calculateProductTotal = (index) => {
+  let product                      = form.value.products[index];
+  form.value.products[index].total = product.count * product.price;
+  calculateInvoiceTotal();
+};
+
+const onProductSelected = async (val, index) => {
+
+  // set product price
+  if (val.price)
+    form.value.products[index]['price'] = val.price.consumer;
+  else
+    form.value.products[index]['price'] = 0;
+
+  // calculate the product total price
+  calculateProductTotal(index);
+
+  // get the product total count
+  await nextTick(async () => {
+    await setProductTotalCount(index);
+  });
+
+};
+
+// Fetch inventory by product ID
+const getInventoryOfProduct = async (index) => {
+  // start total count loading
+  form.value.products[index]['totalCountLoading'] = true;
+
+  await useAPI('products/' + form.value.products[index]._id + '/inventory', {
+    method    : 'get',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        // set the inventory to local variable
+        inventories.value[form.value.products[index]._id] = response._data;
+        // stop the loading
+        form.value.products[index]['totalCountLoading']   = false;
+        // set the product total count
+        await setProductTotalCount(index);
+      } else {
+        $notify('مشکلی در دریافت اطلاعات پیش آمد', 'error');
+      }
+    }
+  });
+};
+
+// Set product total count based on inventory
+const setProductTotalCount = async (index) => {
+
+  // get the inventory from local variable
+  let inventory = inventories.value[form.value.products[index]._id];
+
+  // check the inventory exist
+  if (inventory) {
+    if (form.value._sourceWarehouse) {
+      let warehouse                         = inventory.warehouses.find((w) => w._id === form.value._sourceWarehouse);
+      form.value.products[index].totalCount = warehouse ? warehouse.count : 0;
+    } else {
+      $notify('انبار مبدا را انتخاب کنید', 'warning');
+    }
+  } else {
+    // get the inventory of product
+    await getInventoryOfProduct(index);
+  }
+};
+
+const stockTransferProduct = async (index) => {
+  // start loading of product item
+  form.value.products[index].submitLoading = true;
+
+  // start the fetch
+  await useAPI('stock-transfers', {
+    method    : 'post',
+    body      : {
+      _sourceWarehouse     : form.value._sourceWarehouse,
+      _destinationWarehouse: form.value._destinationWarehouse,
+      _product             : form.value.products[index]._id,
+      count                : Number(form.value.products[index].count)
     },
-    calculateProductTotal(index) {
-      let product                     = this.form.products[index];
-      this.form.products[index].total = product.count * product.price;
-      this.calculateInvoiceTotal();
-    },
-    maxCountRule(count) {
-      return value => {
-        if (value > count) {
-          return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
-        } else {
-          return true;
-        }
-      };
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        // stop loading and set done
+        form.value.products[index].submitLoading = false;
+        form.value.products[index].done          = true;
+      } else {
+        // stop loading and set the error
+        form.value.products[index].submitLoading = false;
+        form.value.products[index].error         = true;
+
+        // show error
+        this.notify('مشکلی در انتقال به وجود آمد', 'error');
+      }
     }
-  },
-  mounted() {
-    this.user            = useCookie('user').value;
-    this.runtimeConfig   = useRuntimeConfig();
-    const {$showMessage} = useNuxtApp();
-    this.notify          = $showMessage;
-  },
-  computed: {
-    sourceWarehouse() {
-      return this.form.sourceWarehouse;
+  });
+}
+
+const add = async () => {
+  for (const product of form.value.products) {
+    const index = form.value.products.indexOf(product);
+
+    // remove the done product
+    if (product.done)
+      form.value.products.splice(index, 1);
+
+    await stockTransferProduct(index);
+  }
+
+  let countOfSuccess = 0;
+  for (const product of form.value.products) {
+    if (product.done)
+      countOfSuccess++;
+  }
+
+  if (countOfSuccess === form.value.products.length) {
+    $notify('عملیات با موفقیت انجام شد', 'success');
+    reset();
+    emit('exit');
+    emit('refresh');
+  }
+};
+
+const submit = async () => {
+  stockTransfersForm.value?.validate();
+  if (stockTransfersForm.value?.isValid) {
+    loading.value = true;
+
+    if (action.value === 'add') {
+      await add();
+    } else if (this.action === 'edit') {
+      await edit();
     }
-  },
-  watch   : {
-    sourceWarehouse(val, oldVal) {
-      this.form.products.forEach((product, index) => {
-        this.setProductTotalCount(index);
-      });
-    }
+
+    loading.value = false;
   }
 }
+
+// Watch _sourceWarehouse changes
+watch(
+    () => form.value._sourceWarehouse,
+    (val, oldVal) => {
+      form.value.products.forEach((_, index) => {
+        setProductTotalCount(index);
+      });
+    }
+);
+
+
+defineExpose({
+  action
+});
 </script>
 
 <style scoped>
