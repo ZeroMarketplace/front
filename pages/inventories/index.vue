@@ -44,7 +44,7 @@
                     :headers="listHeaders"
                     :items="list"
                     :items-per-page="perPage"
-                    :pageCount="listTotal"
+                    :pageCount="pageCount"
                     @update:options="setListOptions"
                     sticky
                     show-current-page>
@@ -61,10 +61,11 @@
         </template>
         <template v-slot:item.total="{ item }">
           {{ item.total + ' ' }}
-          {{ item.productDetails._unit.title.fa }}
+          {{ item.productDetails._unit.title }}
         </template>
         <template v-slot:item._warehouse="{ item, column }">
           {{ getCountInWarehouse(item, column._id) }}
+          {{ item.productDetails._unit.title }}
         </template>
 
         <!--      Pagination      -->
@@ -86,172 +87,121 @@
   </v-row>
 </template>
 
-<script>
-import {useUserStore} from "~/store/user";
-import {useCookie}    from "#app";
+<script setup>
+import {ref, onMounted, watch, nextTick} from "vue";
+import {useAPI}                          from "~/composables/useAPI";
 
 definePageMeta({
-  layout: "admin"
+  layout      : 'admin',
+  middleware  : 'auth',
+  requiresAuth: true,
+  requiresRole: 'admin',
 });
 
-export default {
-  data() {
-    return {
-      user         : {},
-      list         : [],
-      loading      : true,
-      _warehouse   : undefined,
-      listHeaders  : [
-        {
-          title   : 'کد',
-          key     : 'code',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'بارکد',
-          key     : 'barcode',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'محصول',
-          key     : 'productDetails',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'تعداد کل',
-          key     : 'total',
-          align   : 'center',
-          sortable: false
-        },
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: '',
-      action       : 'list'
-    }
-  },
-  methods: {
-    toggleAction() {
-        this.action = 'list';
-    },
-    filter() {
-      let search = new URLSearchParams();
+// Reactive state variables
+const list          = ref([]);
+const loading       = ref(true);
+const listHeaders   = ref([
+  {title: "کد", key: "code", align: "center", sortable: false},
+  {title: "بارکد", key: "barcode", align: "center", sortable: false},
+  {title: "محصول", key: "productDetails", align: "center", sortable: false},
+  {title: "تعداد کل", key: "total", align: "center", sortable: false},
+]);
+const listTotal     = ref(0);
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref("");
+const sortDirection = ref("");
+const action        = ref("list");
 
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
+// Create search parameters for filtering
+const filter = () => {
+  let search = new URLSearchParams();
 
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
+  search.set("perPage", perPage.value);
+  search.set("page", page.value);
+  search.set("sortColumn", sortColumn.value);
+  search.set("sortDirection", Number(sortDirection.value));
 
+  return search;
+};
 
-      return search;
-    },
-    getInventories() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
+// Fetch inventory data
+const getInventories = async () => {
+  loading.value = true;
 
-        if (val.sortBy[0].key === '_warehouse')
-          return;
+  await useAPI('inventories?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        // set the list and total
+        listTotal.value = response._data.total;
+        list.value      = response._data.list;
 
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getInventories();
+        // calc and set page count
+        pageCount.value = Math.ceil(listTotal.value / perPage.value);
       }
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
+    }
+  });
 
-          // refresh list
-          this.getInventories();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    getWarehouses() {
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response     = await response.json();
-        response.list.forEach((warehouse) => {
-          this.listHeaders.push({
-            title   : warehouse.title.fa,
-            key     : '_warehouse',
-            align   : 'center',
-            sortable: false,
-            _id: warehouse._id,
-          });
+  loading.value = false;
+};
+
+// Set list options based on sorting
+const setListOptions = (val) => {
+  if (val && val.sortBy[0]) {
+    if (val.sortBy[0].key === "_warehouse") return;
+
+    sortColumn.value    = val.sortBy[0].key === "dateTimeJalali" ? "dateTime" : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === "desc" ? -1 : 1;
+
+    getInventories();
+  }
+};
+
+// Fetch warehouses and update headers
+const getWarehouses = async () => {
+  await useAPI('warehouses', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      response._data.list.forEach((warehouse) => {
+        listHeaders.value.push({
+          title   : warehouse.title,
+          key     : "_warehouse",
+          align   : "center",
+          sortable: false,
+          _id     : warehouse._id,
         });
       });
-    },
-    getCountInWarehouse(item,_warehouse) {
-      let warehouse = item.warehouses.find(warehouse => warehouse._id === _warehouse);
-      if(warehouse) {
-        return warehouse.count;
-      } else {
-        return '-';
-      }
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getInventories();
-    this.getWarehouses();
-  },
-  computed: {},
-  watch: {
-    filters: {
-      handler(newVal, oldVal) {
-        this.getInventories();
-      },
-      deep: true
+  });
+};
+
+// Get count of inventory in a specific warehouse
+const getCountInWarehouse = (item, _warehouse) => {
+  let warehouse = item.warehouses.find((w) => w._id === _warehouse);
+  return warehouse ? warehouse.count : "-";
+};
+
+// Fetch initial data on component mount
+onMounted(() => {
+  nextTick(async () => {
+    await getWarehouses();
+    await getInventories();
+  });
+});
+
+// Watch for changes in filters and refresh inventory
+watch(
+    () => ({
+      perPage: perPage.value, page: page.value, sortColumn: sortColumn.value, sortDirection: sortDirection.value
+    }),
+    () => {
+      getInventories();
     },
-  }
-}
+    {deep: true}
+);
 </script>
 
 
