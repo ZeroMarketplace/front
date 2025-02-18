@@ -76,13 +76,13 @@
         </template>
         <template v-slot:item.count="{ item }">
           {{ item.count + ' ' }}
-          {{ item.productDetails._unit.title }}
+          {{ item._product._unit.title }}
         </template>
         <template v-slot:item.code="{ item }">
-          {{ item.productDetails.code }}
+          {{ item._product.code }}
         </template>
-        <template v-slot:item.productDetails="{ item }">
-          {{ item.productDetails.title }}
+        <template v-slot:item._product="{ item }">
+          {{ item._product.title }}
         </template>
         <template v-slot:item.status="{ item }">
           <span class="text-red" v-if="item.status === 'Draft'">پیش نویس</span>
@@ -92,7 +92,7 @@
           <span class="text-blue" v-if="item.status === 'In Transit'">در مسیر</span>
           <span class="text-green" v-if="item.status === 'Received'">دریافت شده</span>
           <span class="text-green" v-if="item.status === 'Completed'">تکمیل شده</span>
-          <span class="text-red" v-if="item.status === 'Completed'">لغو شده</span>
+          <span class="text-red" v-if="item.status === 'Canceled'">لغو شده</span>
         </template>
 
         <template v-slot:item.operation="{ item }">
@@ -158,7 +158,7 @@ const {$notify}         = useNuxtApp();
 // Table headers
 const listHeaders = [
   {title: "کد", key: "code", align: "center", sortable: false},
-  {title: "محصول", key: "productDetails", align: "center", sortable: false},
+  {title: "محصول", key: "_product", align: "center", sortable: false},
   {title: "تعداد", key: "count", align: "center", sortable: false},
   {title: "انبار مبدا", key: "_sourceWarehouse", align: "center", sortable: false},
   {title: "انبار مقصد", key: "_destinationWarehouse", align: "center", sortable: false},
