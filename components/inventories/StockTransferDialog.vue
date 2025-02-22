@@ -19,6 +19,9 @@
 
           <!--     Action       -->
           <v-col class="text-end" cols="3">
+            <v-btn @click="closeTheDialog" size="small" icon>
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </v-col>
         </v-row>
         <v-divider class="mt-3"></v-divider>
@@ -32,34 +35,30 @@
 
             <!--   source Warehouse   -->
             <v-col class="" cols="12">
-              <warehouses-warehouse-input class=""
-                                          label="انبار مبدا"
-                                          :input-rules="rules.notEmptySelectable"
-                                          :items="inventory.warehouses ?? []"
-                                          :preload="false"
-                                          v-model="form._sourceWarehouse">
-              </warehouses-warehouse-input>
+              <WarehouseInput class=""
+                              label="انبار مبدا"
+                              :rules="rules.notEmptySelectable"
+                              v-model="form._sourceWarehouse">
+              </WarehouseInput>
             </v-col>
 
             <!--   destination Warehouse   -->
-            <v-col class="mt-n8 mt-md-n5" cols="12">
-              <warehouses-warehouse-input class=""
-                                          label="انبار مقصد"
-                                          :input-rules="rules.notEmptySelectable"
-                                          :items="inventory.warehouses ?? []"
-                                          :preload="false"
-                                          v-model="form._destinationWarehouse">
-              </warehouses-warehouse-input>
+            <v-col class="" cols="12">
+              <WarehouseInput class=""
+                              label="انبار مقصد"
+                              :rules="rules.notEmptySelectable"
+                              v-model="form._destinationWarehouse">
+              </WarehouseInput>
             </v-col>
 
             <!--   product   -->
-            <v-col class="mt-n8 mt-md-n5" cols="12">
-              <ProductInput :inputId="form._product"
+            <v-col class="" cols="12">
+              <ProductInput v-model="form._product"
                             @selected="val => onProductSelected(val)"/>
             </v-col>
 
             <!--   Count    -->
-            <v-col class="mt-n3 mt-md-0" cols="12">
+            <v-col class="" cols="12">
               <v-text-field class=""
                             v-model="form.count"
                             label="تعداد"
@@ -111,141 +110,142 @@
   </v-dialog>
 </template>
 
-<script>
-import ProductInput from "~/components/products/ProductInput.vue";
-import {useCookie}  from "#app";
+<script setup>
+import {ref, watch} from 'vue';
+import {useNuxtApp}            from '#app';
+import ProductInput            from "~/components/products/ProductInput.vue";
+import WarehouseInput          from "~/components/warehouses/WarehouseInput.vue";
+import {useAPI}                from "~/composables/useAPI";
 
-export default {
-  components: {ProductInput},
-  data() {
-    return {
-      form     : {
-        _sourceWarehouse     : undefined,
-        _destinationWarehouse: undefined,
-        totalCount           : 0,
-        count                : 0,
-        _product             : '',
-      },
-      inventory: {},
-      rules    : {
-        notEmpty          : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-      },
-      loading  : false
-    }
-  },
-  methods : {
-    reset() {
-      this.$refs.stockTransferForm.reset();
-      this.loading = false;
-      this.$forceUpdate();
-    },
-    async submit() {
-      await this.$refs.stockTransferForm.validate();
-      if (this.$refs.stockTransferForm.isValid) {
-        this.loading = true;
-        await fetch(
-            this.runtimeConfig.public.API_BASE_URL + 'stock-transfers', {
-              method : 'post',
-              headers: {
-                'Content-Type' : 'application/json',
-                'authorization': 'Bearer ' + this.user.token
-              },
-              body   : JSON.stringify({
-                _sourceWarehouse     : this.form._sourceWarehouse,
-                _destinationWarehouse: this.form._destinationWarehouse,
-                _product             : this.form._product,
-                count                : Number(this.form.count)
-              })
-            }).then(async response => {
-          if (response.status === 200) {
-            response                          = await response.json();
-            this.notify('عملیات با موفقیت انجام شد','success');
-            this.$emit('refresh');
-            this.$emit('exit');
-            this.loading = false;
-          } else {
-            this.loading = false;
-            // show error
-            this.notify('مشکلی در انتقال به وجود آمد', 'error');
-          }
-        });
-      }
-    },
-    onProductSelected(val) {
-      this.form._product = val._id;
-      this.getInventoryByProductId(val._id);
-    },
-    maxCountRule(count) {
-      return value => {
-        if (value > count) {
-          return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
-        } else {
-          return true;
-        }
-      };
-    },
-    async getInventoryByProductId(_id) {
-      this.loading = true;
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id + '?typeOfSales=retail', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(
-          async (response) => {
-            response       = await response.json();
-            this.inventory = response;
-            this.setProductTotalCount();
-            this.loading = false;
-          }
-      );
-    },
-    setTransfer(data) {
-      this.form._product              = data._product;
-      this.form._sourceWarehouse      = data._sourceWarehouse;
-      this.form._destinationWarehouse = data._destinationWarehouse;
-      this.form.count                 = data.count;
-    },
-    setProductTotalCount() {
-      if (this.form._sourceWarehouse && this.inventory && this.inventory.warehouses) {
-        let warehouse = this.inventory.warehouses.find(warehouse => warehouse._id === this.form._sourceWarehouse);
-        if (warehouse) {
-          this.form.totalCount = warehouse.count;
-        }
-      }
-    }
-  },
-  computed: {
-    _sourceWarehouse() {
-      return this.form._sourceWarehouse;
-    }
-  },
-  watch   : {
-    _sourceWarehouse(val, oldVal) {
-      this.setProductTotalCount();
-    }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    const {$showMessage} = useNuxtApp();
-    this.notify          = $showMessage;
-  }
+// Define reactive form state
+const form = ref({
+  _sourceWarehouse     : undefined,
+  _destinationWarehouse: undefined,
+  totalCount           : 0,
+  count                : 0,
+  _product             : ''
+});
+
+const inventory         = ref({});
+const loading           = ref(false);
+const {$notify}         = useNuxtApp();
+const stockTransferForm = ref(null);
+
+// Define Emits
+const emit = defineEmits(['exti', 'refresh']);
+
+// Define validation rules
+const rules = {
+  notEmpty          : [(value) => (value ? true : 'پر کردن این فیلد اجباری است')],
+  notEmptySelectable: [(value) => (value ? true : 'لطفا انتخاب کنید')]
+};
+
+// Function for close the dialog
+const closeTheDialog = () => {
+  emit('exit');
 }
+
+// Function to reset form
+const reset = (formRef) => {
+  form.value    = {
+    _sourceWarehouse     : undefined,
+    _destinationWarehouse: undefined,
+    totalCount           : 0,
+    count                : 0,
+    _product             : ''
+  };
+  loading.value = false;
+};
+
+// Function to handle form submission
+const submit = async (formRef) => {
+  await stockTransferForm.value?.validate();
+  if (stockTransferForm.value?.isValid) {
+    // start loading
+    loading.value = true;
+
+    // set the request
+    await useAPI('stock-transfers', {
+      method    : 'post',
+      body      : {
+        _sourceWarehouse     : form.value._sourceWarehouse,
+        _destinationWarehouse: form.value._destinationWarehouse,
+        _product             : form.value._product,
+        count                : Number(form.value.count)
+      },
+      onResponse: ({response}) => {
+        if (response.status === 200) {
+          $notify('عملیات با موفقیت انجام شد', 'success');
+          emit('exit');
+          emit('refresh', {
+            _product: form.value._product
+          });
+        } else {
+          $notify('مشکلی در انتقال به وجود آمد', 'error');
+        }
+      }
+    });
+
+    loading.value = false;
+  }
+};
+
+// Validation rule for max count
+const maxCountRule = (count) => {
+  return (value) => (value > count ? `بیشترین تعداد قابل انتقال ${count}` : true);
+};
+
+// Fetch inventory data for a product
+const getInventoryByProductId = async (_id) => {
+  loading.value = true;
+  await useAPI(`products/${_id}/inventory?typeOfSales=retail`, {
+    method    : 'GET',
+    onResponse: ({response}) => {
+      if(response.status === 200) {
+        inventory.value = response._data;
+        setProductTotalCount();
+      }
+    },
+  });
+  loading.value = false;
+};
+
+// Set transfer data
+const setTransfer = (data) => {
+  form.value._product              = data._product;
+  form.value._sourceWarehouse      = data._sourceWarehouse;
+  form.value._destinationWarehouse = data._destinationWarehouse;
+  form.value.count                 = data.count;
+};
+
+// Calculate total product count in source warehouse
+const setProductTotalCount = () => {
+  if (form.value._sourceWarehouse && inventory.value?.warehouses) {
+    const warehouse = inventory.value.warehouses.find(
+        (warehouse) => warehouse._id === form.value._sourceWarehouse
+    );
+    if (warehouse) {
+      form.value.totalCount = warehouse.count;
+    }
+  }
+};
+
+// Watch for changes in source warehouse
+watch(() => form.value._sourceWarehouse, () => {
+  setProductTotalCount();
+});
+
+// Function triggered when a product is selected
+watch(() => form.value._product, (value, oldValue, onCleanup) => {
+  getInventoryByProductId(value)
+})
+
+// Define Expose
+defineExpose({
+  setTransfer
+});
 </script>
+
 
 <style scoped>
 
