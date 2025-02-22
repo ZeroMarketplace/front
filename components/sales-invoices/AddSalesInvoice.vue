@@ -4,9 +4,9 @@
           ref="addSalesInvoiceForm">
 
     <!--  Settlement Dialog  -->
-    <SettlementDialog v-model="settlementDialog"
+    <SettlementDialog v-model="settlementDialogFlag"
                       :_id="settlementId"
-                      type="sales-invoices"
+                      type="sales-invoice"
                       @exit="closeSettlementDialog"
                       ref="settlementDialog"/>
 
@@ -18,7 +18,7 @@
       <v-col class="mt-md-0" cols="12" md="4">
         <UserInput class="mt-3"
                    label="کاربر"
-                   @selected="val => onUserSelected(val)"
+                   v-model="form._customer"
                    :readonly="loading"
                    :insert-dialog-icon="true"
                    :rules="rules.notEmptySelectable">
@@ -68,9 +68,9 @@
     <v-label class="text-black font-weight-bold mx-3">اقلام فاکتور</v-label>
 
     <!--  Stock Transfer Dialog (product)   -->
-    <StockTransferDialog ref="stockTransferDialog"
-                         v-model="stockTransferDialog.show"
-                         @refresh="getInventoryByProductId(this.stockTransferDialog._product, true)"
+    <StockTransferDialog ref="stockTransferDialogRef"
+                         v-model="stockTransferDialog"
+                         @refresh="(val) => getInventoryByProductId(val._product, true)"
                          @exit="hideStockTransferDialog"/>
 
     <!--  Add Product   -->
@@ -87,7 +87,7 @@
     <v-row class="mt-2 mb-2">
       <!--      Product      -->
       <v-col cols="12" md="6" offset-md="3">
-        <ProductInput :inputId="form.productSelector._product"
+        <ProductInput v-model="form.productSelector._id"
                       @selected="val => onProductSelector(val)"/>
       </v-col>
       <v-col class="text-caption" cols="12" md="6" offset-md="3">
@@ -100,23 +100,23 @@
             </v-row>
             <!--    Inventory    -->
             <v-row class="text-caption mx-5"
-                   v-if="form.productSelector._product && form.inventories[form.productSelector._product]">
+                   v-if="form.productSelector._id && inventories[form.productSelector._id]">
               موجودی کل:
-              {{ form.inventories[form.productSelector._product].total }}
-              {{ this.form.productSelector.unit.title.fa }}
+              {{ inventories[form.productSelector._id].total }}
+              {{ form.productSelector._unit.title }}
             </v-row>
           </v-col>
-          <v-col v-if="form.productSelector._product && form.inventories[form.productSelector._product]"
+          <v-col v-if="form.productSelector._id && inventories[form.productSelector._id]"
                  cols="5">
-            <v-row v-for="warehouse in form.inventories[form.productSelector._product].warehouses">
-              {{ warehouse.title.fa }}:
+            <v-row v-for="warehouse in inventories[form.productSelector._id].warehouses">
+              {{ warehouse.title }}:
               {{ warehouse.count }}
-              {{ this.form.productSelector.unit.title.fa }}
+              {{ form.productSelector._unit.title }}
             </v-row>
           </v-col>
           <v-col class="text-center" cols="2">
             <v-btn
-                v-if="form.productSelector._product && form.inventories[form.productSelector._product] && form.inventories[form.productSelector._product].total"
+                v-if="form.productSelector._id && inventories[form.productSelector._id] && inventories[form.productSelector._id].total"
                 class="mt-n2"
                 @click="addProductSelectorItem"
                 size="small"
@@ -141,7 +141,7 @@
 
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="4">
-        <ProductInput :inputId="product._product"
+        <ProductInput v-model="product._id"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -157,10 +157,9 @@
                       density="compact"
                       variant="outlined">
           <template v-slot:details>
-            <a class="ml-n4 mb-n1 text-caption font-weight-bold text-blue link"
+            <a class="ml-n4 mt-n5 text-caption font-weight-bold text-blue cursor-pointer"
                v-if="product.stockTransferError"
-               @click="showStockTransferDialog(index)"
-               icon>
+               @click="showStockTransferDialog(index)">
               انتقال
             </a>
           </template>
@@ -173,17 +172,12 @@
 
       <!--   Warehouse    -->
       <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-select label="انبار"
-                  v-model="product._warehouse"
-                  @update:modelValue="setProductTotalCount(index)"
-                  :readonly="loading"
-                  :rules="rules.notEmptySelectable"
-                  :items="form.inventories[product._product] ? form.inventories[product._product].warehouses : []"
-                  item-title="title.fa"
-                  item-value="_id"
-                  density="compact"
-                  variant="outlined">
-        </v-select>
+        <WarehouseInput label="انبار"
+                        v-model="product._warehouse"
+                        @update:modelValue="setProductTotalCount(index)"
+                        :readonly="loading"
+                        :rules="rules.notEmptySelectable">
+        </WarehouseInput>
       </v-col>
 
       <!--   Sales Price    -->
@@ -255,7 +249,7 @@
                   @click="toggleAddAndSubtract(value._id)"
                   filter>
 
-            {{ value.title.fa }}
+            {{ value.title }}
 
           </v-chip>
         </v-chip-group>
@@ -268,7 +262,7 @@
                           v-model="item.value"
                           type="number"
                           placeholder="وارد کنید"
-                          :label="getAddAndSubtractDetail(item._reason).title.fa"
+                          :label="getAddAndSubtractDetail(item._reason).title"
                           :readonly="loading"
                           :rules="rules.notEmpty"
                           @input="calculateInvoiceTotal"
@@ -308,7 +302,7 @@
           <v-col class="my-md-2" v-for="addAndSubtract in form.addAndSubtract" cols="12">
             <v-row class="">
               <v-col cols="5" class="">
-                {{ getAddAndSubtractDetail(addAndSubtract._reason).title.fa }}:
+                {{ getAddAndSubtractDetail(addAndSubtract._reason).title }}:
               </v-col>
               <v-col cols="7" class="text-end">
                 {{ addAndSubtract.amount }} تومان
@@ -381,518 +375,464 @@
   </v-form>
 </template>
 
-<script>
-import {useUserStore}      from "~/store/user";
-import {useCookie}         from "#app";
-import ProductInput        from "~/components/products/ProductInput.vue";
-import StockTransferDialog from "~/components/inventories/StockTransferDialog.vue";
-import UserInput           from "~/components/users/UserInput.vue";
+<script setup>
+// Import necessary composables and components
+import {useAPI}                   from '~/composables/useAPI';
+import {ref, onMounted, nextTick} from 'vue';
+import ProductInput               from '~/components/products/ProductInput.vue';
+import StockTransferDialog        from '~/components/inventories/StockTransferDialog.vue';
+import UserInput                  from '~/components/users/UserInput.vue';
+import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
+import SettlementDialog           from "~/components/SettlementDialog.vue";
 
-export default {
-  components: {UserInput, StockTransferDialog, ProductInput},
-  data() {
-    return {
-      settlementDialog      : false,
-      settlementId          : '',
-      form                  : {
-        _id            : '',
-        customer       : null,
-        dateTime       : new Date(),
-        description    : '',
-        productSelector: {
-          _product : '',
-          price    : '',
-          unit     : '',
-          inventory: undefined,
-          loading  : false
-        },
-        inventories    : {},
-        products       : [],
-        addAndSubtract : [],
-        sum            : 0,
-        total          : 0
-      },
-      rules                 : {
-        notEmpty          : [
-          value => {
-            if (value) return true;
-            return 'پر کردن این فیلد اجباری است';
-          }
-        ],
-        notEmptySelectable: [
-          value => {
-            if (value) return true;
-            return 'لطفا انتخاب کنید';
-          }
-        ],
-      },
-      users                 : [],
-      addAndSubtract        : [],
-      selectedAddAndSubtract: [],
-      defaultRetailWarehouse: '',
-      stockTransferDialog   : {
-        show                 : false,
-        _product             : undefined,
-        _sourceWarehouse     : undefined,
-        _destinationWarehouse: undefined,
-        count                : 0
-      },
-      loading               : false,
-      tooltip               : true,
-      action                : 'add'
+// Define reactive state
+const settlementDialogFlag   = ref(false);
+const settlementId           = ref('');
+const form                   = ref({
+  _id            : '',
+  _customer      : null,
+  dateTime       : new Date(),
+  description    : '',
+  productSelector: {
+    _id    : '',
+    price  : '',
+    _unit  : '',
+    loading: false,
+  },
+  products       : [],
+  addAndSubtract : [],
+  sum            : 0,
+  total          : 0,
+});
+const inventories            = ref({});
+const rules                  = ref({
+  notEmpty          : [
+    (value) => {
+      if (value) return true;
+      return 'پر کردن این فیلد اجباری است';
+    },
+  ],
+  notEmptySelectable: [
+    (value) => {
+      if (value) return true;
+      return 'لطفا انتخاب کنید';
+    },
+  ],
+});
+const addAndSubtract         = ref([]);
+const selectedAddAndSubtract = ref([]);
+const defaultRetailWarehouse = ref('');
+const stockTransferDialog    = ref(false);
+const stockTransferDialogRef = ref(null);
+const loading                = ref(false);
+const action                 = ref('add');
+const {$notify}              = useNuxtApp();
+const addSalesInvoiceForm    = ref(null);
+const emit                   = defineEmits(['exit', 'refresh']);
+// Define methods
+const reset                  = () => {
+  form.value._id               = '';
+  form.value.sum               = 0;
+  form.value.total             = 0;
+  form.value.products          = [];
+  form.value.addAndSubtract    = [];
+  selectedAddAndSubtract.value = [];
+  loading.value                = false;
+  action.value                 = 'add';
+};
+
+const convertFormNumbers = () => {
+  // convert products numbers
+  form.value.products.forEach((product) => {
+    product.count = Number(product.count);
+    product.price = Number(product.price);
+  });
+
+  // convert addAndSub numbers
+  form.value.addAndSubtract.forEach((addAndSubItem) => {
+    addAndSubItem.value = Number(addAndSubItem.value);
+  });
+};
+
+const add = async () => {
+  // Convert numbers
+  convertFormNumbers();
+
+  // send the request
+  await useAPI('sales-invoices', {
+    method    : 'post',
+    body      : {
+      _customer  : form.value._customer,
+      dateTime   : form.value.dateTime,
+      description: form.value.description,
+      products   : form.value.products,
+      AddAndSub  : form.value.addAndSubtract,
+    },
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+
+        // set the _id
+        form.value._id = response._data._id;
+
+        // set the settlement
+        setSettlement();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
     }
-  },
-  methods: {
-    reset() {
-      this.$refs.addSalesInvoiceForm.reset();
-      this.form._id               = '';
-      this.form.sum               = 0;
-      this.form.total             = 0;
-      this.form.products          = [];
-      this.form.addAndSubtract    = [];
-      this.selectedAddAndSubtract = [];
-      this.loading                = false;
-      this.action                 = 'add';
-      this.$forceUpdate();
+  });
+};
+
+const edit = async () => {
+  // Convert numbers
+  convertFormNumbers();
+
+  // send the request
+  await useAPI('sales-invoices/' + form.value._id, {
+    method    : 'put',
+    body      : {
+      _customer  : form.value._customer,
+      dateTime   : form.value.dateTime,
+      description: form.value.description,
+      products   : form.value.products,
+      AddAndSub  : form.value.addAndSubtract,
     },
-    async add() {
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
 
-      // convert numbers
-      let products = [];
-      this.form.products.forEach((product) => {
-        products.push({
-          _product  : product._product,
-          count     : Number(product.count),
-          price     : Number(product.price),
-          _warehouse: product._warehouse
-        });
-      });
-
-      let addAndSub = [];
-      this.form.addAndSubtract.forEach((addAndSubItem) => {
-        addAndSub.push({
-          _reason: addAndSubItem._reason,
-          value  : Number(addAndSubItem.value)
-        });
-      });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices', {
-            method : 'post',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              customer   : this.form.customer,
-              dateTime   : this.form.dateTime,
-              description: this.form.description,
-              products   : products,
-              AddAndSub  : addAndSub,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-          response = await response.json();
-          this.setEdit(response);
-          this.setSettlement();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async edit() {
-
-      // convert numbers
-      this.form.products.forEach((product) => {
-        product.price.purchase = Number(product.price.purchase);
-        product.price.consumer = Number(product.price.consumer);
-        product.price.store    = Number(product.price.store);
-        product.count          = Number(product.count);
-      });
-
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices/' + this.form._id, {
-            method : 'put',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            },
-            body   : JSON.stringify({
-              customer   : this.form.customer,
-              dateTime   : this.form.dateTime,
-              warehouse  : this.form.warehouse,
-              description: this.form.description,
-              products   : this.form.products,
-              AddAndSub  : this.form.addAndSubtract,
-            })
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // reset form
-          this.reset();
-
-          // refresh list
-          this.$emit('exit');
-          setTimeout(() => {
-            this.$emit('refresh');
-          }, 500)
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    async submit() {
-      if (this.$refs.addSalesInvoiceForm.isValid) {
-        this.loading = true;
-
-        if (this.action === 'add') {
-          await this.add();
-        } else if (this.action === 'edit') {
-          await this.edit();
-        }
-
-        this.loading = false;
-      }
-    },
-    addProduct() {
-      this.form.products.push({
-        _product          : '',
-        count             : 0,
-        price             : 0,
-        totalCount        : 0,
-        _warehouse        : undefined,
-        loading           : false,
-        stockTransferError: true,
-        total             : 0
-      });
-    },
-    addProductSelectorItem() {
-      // find default warehouse in inventory warehouses
-      let warehouse = undefined;
-      if (this.form.inventories[this.form.productSelector._product].warehouses.length > 1) {
-        if (this.defaultRetailWarehouse)
-          warehouse = this.form.inventories[this.form.productSelector._product].warehouses.find(
-              warehouse => warehouse._id === this.defaultRetailWarehouse._id
-          );
+        // set the settlement
+        setSettlement();
       } else {
-        warehouse = this.form.inventories[this.form.productSelector._product].warehouses[0];
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
-
-      let totalCount = 0;
-      // product has inventory warehouse
-      if (warehouse) {
-        totalCount = warehouse.count;
-      }
-
-      // add product
-      this.form.products.push({
-        _product          : this.form.productSelector._product,
-        count             : 0,
-        price             : this.form.productSelector.price,
-        totalCount        : totalCount,
-        _warehouse        : warehouse ? warehouse._id : undefined,
-        loading           : false,
-        stockTransferError: false,
-        total             : 0
-      });
-    },
-    onUserSelected(val) {
-      this.form.customer = val._id;
-    },
-    async onProductSelected(val, index) {
-      this.form.products[index]['_product'] = val._id;
-      // set product price
-      if (val.price)
-        this.form.products[index]['price'] = val.price.consumer;
-      else
-        this.form.products[index]['price'] = 0;
-
-      this.form.products[index]['loading'] = true;
-      await this.getInventoryByProductId(val._id);
-      this.form.products[index]['loading'] = false;
-
-      if (this.form.inventories[val._id].total) {
-        let warehouse = undefined;
-        if (this.form.inventories[val._id].warehouses.length > 1) {
-          if (this.defaultRetailWarehouse)
-            warehouse = this.form.inventories[val._id].warehouses.find(
-                warehouse => warehouse._id === this.defaultRetailWarehouse._id
-            );
-          this.form.products[index]['_warehouse'] = warehouse._id;
-        } else {
-          warehouse                               = this.form.inventories[val._id].warehouses[0];
-          this.form.products[index]['_warehouse'] = warehouse._id;
-        }
-
-        // set total count
-        if (warehouse) {
-          this.form.products[index]['totalCount'] = warehouse.count;
-        }
-
-      }
-
-      this.calculateProductTotal(index);
-    },
-    async onProductSelector(val, index) {
-      this.form.productSelector._product = val._id;
-      // set product price
-      if (val.price)
-        this.form.productSelector.price = val.price.consumer;
-      else
-        this.form.productSelector.price = 0;
-
-      this.form.productSelector.unit = val._unit;
-
-      this.form.productSelector.loading = true;
-      await this.getInventoryByProductId(val._id);
-      this.form.productSelector.loading = false;
-    },
-    deleteProduct(index) {
-      this.form.products.splice(index, 1);
-    },
-    calculateInvoiceTotal() {
-      this.form.total = 0;
-
-      // calc products price
-      this.form.products.forEach((product) => {
-        this.form.total += product.total;
-      });
-
-      this.form.sum = this.form.total;
-
-      // calc subtracts on total
-      this.form.addAndSubtract.forEach((addAndSubtract) => {
-        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
-        if (detailAddAndSubtract) {
-          if (detailAddAndSubtract.operation === 'subtract') {
-            let operationSum = 0;
-            if (Number(addAndSubtract.value) <= 100) {
-              operationSum = (this.form.total * addAndSubtract.value / 100)
-              this.form.sum -= operationSum;
-            } else {
-              operationSum = Number(addAndSubtract.value);
-              this.form.sum -= addAndSubtract.value;
-            }
-            addAndSubtract.amount = operationSum;
-          }
-        }
-      });
-
-      // add and subtract
-      this.form.addAndSubtract.forEach((addAndSubtract) => {
-        let detailAddAndSubtract = this.getAddAndSubtractDetail(addAndSubtract._reason);
-        if (detailAddAndSubtract) {
-          if (detailAddAndSubtract.operation === 'add') {
-            let operationSum = 0;
-            if (Number(addAndSubtract.value) <= 100) {
-              operationSum = (this.form.sum * addAndSubtract.value / 100)
-              this.form.sum += operationSum;
-            } else {
-              operationSum = Number(addAndSubtract.value);
-              this.form.sum += addAndSubtract.value;
-            }
-            addAndSubtract.amount = operationSum;
-          }
-        }
-      });
-    },
-    calculateProductTotal(index) {
-      let product                     = this.form.products[index];
-      this.form.products[index].total = product.count * product.price;
-      this.calculateInvoiceTotal();
-    },
-    toggleAddAndSubtract(_id) {
-      if (this.form.addAndSubtract.find(p => p._reason === _id)) {
-        this.form.addAndSubtract.splice(
-            this.form.addAndSubtract.indexOf(this.form.addAndSubtract.find(p => p._reason === _id)),
-            1
-        );
-      } else {
-        let addAndSubtract = this.getAddAndSubtractDetail(_id);
-        this.form.addAndSubtract.push({
-          _reason: _id,
-          value  : addAndSubtract.default,
-          amount : 0
-        });
-      }
-
-      this.calculateInvoiceTotal();
-    },
-    getAddAndSubtractDetail(_id) {
-      let findItem = this.addAndSubtract.find(p => p._id === _id);
-      if (findItem) {
-        return findItem;
-      } else {
-        return '';
-      }
-    },
-    getUsers() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'users', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response = await response.json();
-
-        // set title of users
-        response.list.forEach((user) => {
-          user.title = (user.firstName && user.lastName) ? (user.firstName + ' ' + user.lastName) : user.phone;
-        });
-
-        this.users   = response.list;
-        this.loading = false;
-      });
-    },
-    getAddAndSubtract() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'add-and-subtract', {
-            method : 'get',
-            headers: {'authorization': 'Bearer ' + this.user.token}
-          }).then(async response => {
-        response            = await response.json();
-        this.addAndSubtract = response.list;
-        this.loading        = false;
-      });
-    },
-    setEdit(data) {
-      if (this.form._id !== data._id) {
-        this.reset();
-
-        this.form.customer       = data._customer;
-        this.form.dateTime       = data.dateTime;
-        this.form.warehouse      = data._warehouse;
-        this.form.description    = data.description;
-        this.form.products       = data.products;
-        this.form.addAndSubtract = data.AddAndSub;
-
-        // add and subtract
-        data.AddAndSub.forEach((addAndSub) => {
-          this.selectedAddAndSubtract.push(addAndSub._reason);
-        });
-
-        // _id and action
-        this.form._id = data._id;
-        this.action   = 'edit';
-        setTimeout(() => {
-          this.$forceUpdate();
-        }, 2500);
-
-        this.calculateInvoiceTotal();
-      }
-    },
-    setSettlement() {
-      this.settlementId     = this.form._id;
-      this.settlementDialog = true;
-    },
-    closeSettlementDialog() {
-      this.settlementDialog = false;
-      this.$emit('exit', true);
-      this.$emit('refresh', true);
-    },
-    async getInventoryByProductId(_id, updateTotalCount = false) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'inventories/' + _id + '?typeOfSales=retail', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(
-          async (response) => {
-            response                   = await response.json();
-            this.form.inventories[_id] = response;
-
-            // update product totalCount
-            if (updateTotalCount) {
-              let product = this.form.products.find(p => p._product === _id);
-              let index   = this.form.products.indexOf(product);
-              this.setProductTotalCount(index);
-            }
-          }
-      );
-    },
-    maxCountRule(count, index) {
-      return value => {
-        if (value > count) {
-          this.checkProductStockTransferError(index, count);
-          return value <= count || `بیشترین تعداد قابل فروش ${count}`;
-        } else {
-          this.form.products[index]['stockTransferError'] = false;
-          return true;
-        }
-      };
-    },
-    async getRetailDefaultWarehouse() {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'warehouses/default/retail', {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(
-          async (response) => {
-            response                    = await response.json();
-            this.defaultRetailWarehouse = response;
-          }
-      );
-    },
-    setProductTotalCount(index) {
-      // set total count
-      if (this.form.products[index]['_warehouse']) {
-        let warehouse                           = this.form.inventories[this.form.products[index]['_product']].warehouses.find(
-            warehouse => warehouse._id === this.form.products[index]['_warehouse']
-        );
-        this.form.products[index]['totalCount'] = warehouse.count;
-      } else {
-        this.form.products[index]['totalCount'] = 0;
-      }
-      this.$refs.addSalesInvoiceForm.validate();
-    },
-    checkProductStockTransferError(index, count) {
-      let inventory = this.form.inventories[this.form.products[index]['_product']];
-      // check has multiple warehouse
-      if (inventory.total > count) {
-        this.form.products[index]['stockTransferError'] = true;
-      }
-    },
-    showStockTransferDialog(index) {
-      let inventory                                  = this.form.inventories[this.form.products[index]['_product']];
-      let warehouse                                  = inventory.warehouses.find(warehouse => warehouse._id === this.form.products[index]['_warehouse']);
-      this.stockTransferDialog.count                 = this.form.products[index]['count'] - warehouse.count;
-      this.stockTransferDialog._product              = this.form.products[index]['_product'];
-      this.stockTransferDialog._destinationWarehouse = this.form.products[index]['_warehouse'];
-      this.stockTransferDialog.show                  = true;
-      // set transfer data
-      this.$refs.stockTransferDialog.setTransfer({
-        _product             : this.stockTransferDialog._product,
-        _sourceWarehouse     : this.stockTransferDialog._sourceWarehouse,
-        _destinationWarehouse: this.stockTransferDialog._destinationWarehouse,
-        count                : this.stockTransferDialog.count
-      });
-    },
-    hideStockTransferDialog() {
-      this.stockTransferDialog.show = false;
     }
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getUsers();
-    this.getAddAndSubtract();
-    this.getRetailDefaultWarehouse();
-  },
-  computed: {},
-  watch   : {}
-}
+  });
+};
+
+const submit = async () => {
+  addSalesInvoiceForm.value?.validate();
+  if (addSalesInvoiceForm.value?.isValid) {
+    loading.value = true;
+    if (action.value === 'add') {
+      await add();
+    } else if (action.value === 'edit') {
+      await edit();
+    }
+    loading.value = false;
+  }
+};
+
+const addProduct = () => {
+  form.value.products.push({
+    _id               : '',
+    count             : 0,
+    price             : 0,
+    totalCount        : 0,
+    _warehouse        : undefined,
+    loading           : false,
+    stockTransferError: false,
+    total             : 0,
+  });
+};
+
+const addProductSelectorItem = () => {
+  let warehouse = undefined;
+  if (inventories.value[form.value.productSelector._id].warehouses.length > 1) {
+    if (defaultRetailWarehouse.value) {
+      warehouse = inventories.value[form.value.productSelector._id].warehouses.find(
+          (w) => w._id === defaultRetailWarehouse.value._id
+      );
+    }
+  } else {
+    warehouse = inventories.value[form.value.productSelector._id].warehouses[0];
+  }
+
+  let totalCount = 0;
+  if (warehouse) {
+    totalCount = warehouse.count;
+  }
+
+  form.value.products.push({
+    _id               : form.value.productSelector._id,
+    count             : 0,
+    price             : form.value.productSelector.price,
+    totalCount        : totalCount,
+    _warehouse        : warehouse ? warehouse._id : undefined,
+    loading           : false,
+    stockTransferError: false,
+    total             : 0,
+  });
+};
+
+const onProductSelected = async (val, index) => {
+  form.value.products[index].price   = val.price ? val.price.consumer : 0;
+  form.value.products[index].loading = true;
+  await getInventoryByProductId(val._id);
+  form.value.products[index].loading = false;
+
+  if (inventories.value[val._id].total) {
+    let warehouse = undefined;
+    if (inventories.value[val._id].warehouses.length > 1) {
+      if (defaultRetailWarehouse.value) {
+        warehouse = inventories.value[val._id].warehouses.find(
+            (w) => w._id === defaultRetailWarehouse.value._id
+        );
+      }
+      form.value.products[index]._warehouse = warehouse._id;
+    } else {
+      warehouse                             = inventories.value[val._id].warehouses[0];
+      form.value.products[index]._warehouse = warehouse._id;
+    }
+
+    if (warehouse) {
+      form.value.products[index].totalCount = warehouse.count;
+    }
+  }
+
+  calculateProductTotal(index);
+};
+
+const onProductSelector = async (val, index) => {
+  form.value.productSelector.price   = val.price ? val.price.consumer : 0;
+  form.value.productSelector._unit   = val._unit;
+  form.value.productSelector.loading = true;
+  await getInventoryByProductId(val._id);
+  form.value.productSelector.loading = false;
+};
+
+const deleteProduct = (index) => {
+  form.value.products.splice(index, 1);
+};
+
+const calculateInvoiceTotal = () => {
+  form.value.total = 0;
+  form.value.products.forEach((product) => {
+    form.value.total += product.total;
+  });
+
+  form.value.sum = form.value.total;
+
+  form.value.addAndSubtract.forEach((addAndSubtract) => {
+    const detailAddAndSubtract = getAddAndSubtractDetail(addAndSubtract._reason);
+    if (detailAddAndSubtract) {
+      if (detailAddAndSubtract.operation === 'subtract') {
+        let operationSum = 0;
+        if (Number(addAndSubtract.value) <= 100) {
+          operationSum = (form.value.total * addAndSubtract.value) / 100;
+          form.value.sum -= operationSum;
+        } else {
+          operationSum = Number(addAndSubtract.value);
+          form.value.sum -= addAndSubtract.value;
+        }
+        addAndSubtract.amount = operationSum;
+      }
+    }
+  });
+
+  form.value.addAndSubtract.forEach((addAndSubtract) => {
+    const detailAddAndSubtract = getAddAndSubtractDetail(addAndSubtract._reason);
+    if (detailAddAndSubtract) {
+      if (detailAddAndSubtract.operation === 'add') {
+        let operationSum = 0;
+        if (Number(addAndSubtract.value) <= 100) {
+          operationSum = (form.value.sum * addAndSubtract.value) / 100;
+          form.value.sum += operationSum;
+        } else {
+          operationSum = Number(addAndSubtract.value);
+          form.value.sum += addAndSubtract.value;
+        }
+        addAndSubtract.amount = operationSum;
+      }
+    }
+  });
+};
+
+const calculateProductTotal = (index) => {
+  form.value.products[index].total = form.value.products[index].count * form.value.products[index].price;
+  calculateInvoiceTotal();
+};
+
+const toggleAddAndSubtract = (_id) => {
+  const index = form.value.addAndSubtract.findIndex((p) => p._reason === _id);
+  if (index !== -1) {
+    form.value.addAndSubtract.splice(index, 1);
+  } else {
+    const addAndSubtractDetail = getAddAndSubtractDetail(_id);
+    form.value.addAndSubtract.push({
+      _reason: _id,
+      value  : addAndSubtractDetail.default,
+      amount : 0,
+    });
+  }
+  calculateInvoiceTotal();
+};
+
+const getAddAndSubtractDetail = (_id) => {
+  return addAndSubtract.value.find((p) => p._id === _id) || undefined;
+};
+
+const getAddAndSubtract = async () => {
+  loading.value = true;
+  await useAPI('add-and-subtract?perPage=50', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      if (response.status === 200) {
+        // set the list
+        addAndSubtract.value = response._data.list;
+        // stop loading
+        loading.value        = false;
+      }
+    }
+  });
+};
+
+const setEdit = async (data) => {
+  if (form.value._id !== data._id) {
+    // reset the data
+    reset();
+
+    // fetch the data
+    await useAPI('sales-invoices/' + data._id, {
+      method    : 'get',
+      onResponse: ({response}) => {
+        form.value._customer      = response._data._customer;
+        form.value.dateTime       = response._data.dateTime;
+        form.value.warehouse      = response._data._warehouse;
+        form.value.description    = response._data.description;
+        form.value.products       = response._data.products;
+        form.value.addAndSubtract = response._data.AddAndSub;
+
+        response._data.AddAndSub.forEach((addAndSub) => {
+          selectedAddAndSubtract.value.push(addAndSub._reason);
+        });
+
+        // set the form _id
+        form.value._id = data._id;
+
+        // set the action
+        action.value = 'edit';
+
+        nextTick(() => {
+          calculateInvoiceTotal();
+        });
+      }
+    });
+  }
+};
+
+const setSettlement = () => {
+  settlementId.value         = form.value._id;
+  settlementDialogFlag.value = true;
+};
+
+const closeSettlementDialog = () => {
+  settlementDialogFlag.value = false;
+  emit('exit', true);
+  emit('refresh', true);
+};
+
+const getInventoryByProductId = async (_id, updateTotalCount = false) => {
+  await useAPI(`products/${_id}/inventory?typeOfSales=retail`, {
+    method    : 'GET',
+    onResponse: ({response}) => {
+      inventories.value[_id] = response._data;
+      if (updateTotalCount) {
+        // find the product
+        const product = form.value.products.find((p) => p._id === _id);
+        // find index of the product
+        const index   = form.value.products.indexOf(product);
+
+        // validate the form (when we back from stockTransferDialog form must be validated)
+        addSalesInvoiceForm.value?.validate();
+
+        // set total count of the product
+        setProductTotalCount(index);
+      }
+    },
+  });
+};
+
+const maxCountRule = (count, index) => {
+  return (value) => {
+    if (value > count) {
+      checkProductStockTransferError(index, count);
+      return value <= count || ` تعداد قابل فروش ${count}`;
+    } else {
+      form.value.products[index].stockTransferError = false;
+      return true;
+    }
+  };
+};
+
+const getRetailDefaultWarehouse = async () => {
+  await useAPI('warehouses/default/retail', {
+    method    : 'get',
+    onResponse: ({response}) => {
+      defaultRetailWarehouse.value = response._data;
+    }
+  });
+};
+
+const setProductTotalCount = (index) => {
+  if (form.value.products[index]._warehouse) {
+    // find the warehouse
+    const warehouse                       = inventories.value[form.value.products[index]._id].warehouses.find(
+        (w) => w._id === form.value.products[index]._warehouse
+    );
+    // set the count of the product in related warehouse
+    form.value.products[index].totalCount = warehouse.count;
+  } else {
+    form.value.products[index].totalCount = 0;
+  }
+};
+
+const checkProductStockTransferError = (index, count) => {
+  const inventory = inventories.value[form.value.products[index]._id];
+  if (inventory.total > count) {
+    form.value.products[index].stockTransferError = true;
+  }
+};
+
+const showStockTransferDialog = (index) => {
+  // find the inventory of product in local variable
+  const inventory = inventories.value[form.value.products[index]._id];
+
+  // find the related warehouse in inventory
+  const warehouse = inventory.warehouses.find(
+      (w) => w._id === form.value.products[index]._warehouse
+  );
+
+  // set the data in stock transfer dialog
+  stockTransferDialog.value = true;
+
+
+  // send the data to Stock Transfer Dialog
+  stockTransferDialogRef.value?.setTransfer({
+    _product             : form.value.products[index]._id,
+    _destinationWarehouse: form.value.products[index]._warehouse,
+    count                : form.value.products[index].count - warehouse.count
+  });
+};
+
+const hideStockTransferDialog = () => {
+  stockTransferDialog.value = false;
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  nextTick(() => {
+    getAddAndSubtract();
+    getRetailDefaultWarehouse();
+  })
+});
+
+defineExpose({
+  action,
+  setEdit,
+  setSettlement
+});
 </script>
 
 <style scoped>

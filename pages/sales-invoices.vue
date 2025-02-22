@@ -42,8 +42,8 @@
 
     <!--    Add Sales Invoice   -->
     <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
-      <sales-invoices-add-sales-invoice
-          ref="addSalesInvoices"
+      <AddSalesInvoice
+          ref="addSalesInvoice"
           @exit="toggleAction"
           @refresh="getSalesInvoices"/>
     </v-col>
@@ -61,19 +61,19 @@
                     :headers="listHeaders"
                     :items="list"
                     :items-per-page="perPage"
-                    :pageCount="listTotal"
+                    :pageCount="pageCount"
                     @update:options="setListOptions"
                     sticky
                     show-current-page>
         <template v-slot:item._customer="{ item }">
-          {{ item._customer.phone }}
+          {{ item._customer.fullName }}
         </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
           <v-btn class="mx-2"
                  color="red"
                  size="25"
-                 @click="setDelete({_id: item._id})"
+                 @click="setDelete(item)"
                  icon>
             <v-icon size="15">mdi-delete-outline</v-icon>
           </v-btn>
@@ -117,168 +117,194 @@
   </v-row>
 </template>
 
-<script>
-import AddSalesInvoice from "~/components/sales-invoices/AddSalesInvoice.vue";
-import SettlementDialog   from "~/components/SettlementDialog.vue";
-import {useCookie}        from "#app";
+<script setup>
+// Importing components
+import AddSalesInvoice                   from "~/components/sales-invoices/AddSalesInvoice.vue";
+import {ref, onMounted, watch, nextTick} from "vue";
+import {useNuxtApp}                      from "#app";
+import {useAPI}                          from '~/composables/useAPI';
+import Loading                           from "~/components/Loading.vue";
+import EmptyList                         from "~/components/EmptyList.vue";
 
+// Define page metadata
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : "admin",
+  middleware  : "auth",
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: "admin",
 });
 
-export default {
-  components: {AddSalesInvoice, SettlementDialog},
-  data() {
-    return {
-      user         : {},
-      action       : 'list',
-      loading      : true,
-      list         : [],
-      listHeaders  : [
-        {
-          title   : 'خریدار',
-          align   : 'center',
-          key     : '_customer',
-          sortable: false
-        },
-        {
-          title   : 'تاریخ',
-          key     : 'dateTimeJalali',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'مبلغ',
-          key     : 'total',
-          align   : 'center',
-          sortable: true
-        },
-        {
-          title   : 'عملیات',
-          align   : 'center',
-          key     : 'operation',
-          sortable: false
-        }
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: ''
-    }
+// Reactive state
+const action          = ref("list");
+const loading         = ref(true);
+const list            = ref([]);
+const listHeaders     = ref([
+  {
+    title   : "کد فاکتور",
+    align   : "center",
+    key     : "code",
+    sortable: true,
   },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addSalesInvoices.action;
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // refresh list
-          await this.getSalesInvoices();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-    filter() {
-      let search = new URLSearchParams();
-
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
-
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
-
-      return search;
-    },
-    getSalesInvoices() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    async setEdit(data) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'sales-invoices/' + data._id, {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response = await response.json();
-        this.$refs.addSalesInvoices.setEdit(response);
-        this.toggleAction();
-      });
-    },
-    async setSettlement(data) {
-      await this.setEdit(data);
-      this.$refs.addSalesInvoices.setSettlement();
-    },
-    setDelete(data) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(data._id);
-      }
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
-
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getSalesInvoices();
-      }
-    }
+  {
+    title   : "مشتری",
+    align   : "center",
+    key     : "_customer",
+    sortable: false,
   },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getSalesInvoices();
+  {
+    title   : "تاریخ",
+    key     : "dateTimeJalali",
+    align   : "center",
+    sortable: true,
   },
-  computed: {},
-  watch   : {
-    page(val, oldVal) {
-      this.getSalesInvoices();
-    }
+  {
+    title   : "مبلغ",
+    key     : "total",
+    align   : "center",
+    sortable: true,
+  },
+  {
+    title   : "عملیات",
+    align   : "center",
+    key     : "operation",
+    sortable: false,
+  },
+]);
+const listTotal       = ref(0);
+const page            = ref(1);
+const perPage         = ref(10);
+const pageCount       = ref(1);
+const sortColumn      = ref("");
+const sortDirection   = ref("");
+const addSalesInvoice = ref(null);
+const {$notify}       = useNuxtApp();
+
+// Methods
+// Toggle between page actions
+const toggleAction = () => {
+  if (action.value === "add" || action.value === "edit") {
+    action.value = "list";
+  } else {
+    action.value = addSalesInvoice.value?.action;
   }
-}
+};
+
+// delete a sales invoice
+const deleteInvoice = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  // send the request
+  await useAPI('sales-invoices/' + item._id, {
+    method    : 'delete',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify("عملیات با موفقت انجام شد", "success");
+
+        // Refresh list
+        await getSalesInvoices();
+      } else {
+        // Show error
+        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+      }
+    }
+  });
+
+  // stop loading
+  item.deleteLoading = false;
+
+};
+
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // Pagination
+  search.set("perPage", perPage.value);
+  search.set("page", page.value);
+
+  // Sort
+  search.set("sortColumn", sortColumn.value);
+  search.set("sortDirection", Number(sortDirection.value));
+
+  return search;
+};
+
+const getSalesInvoices = async () => {
+  // start loading
+  loading.value = true;
+
+  await useAPI('sales-invoices?' + filter(), {
+    method    : 'get',
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        // set the list
+        list.value = [];
+        response._data.list.forEach((item) => {
+          item.setEditLoading       = false;
+          item.setSettlementLoading = false;
+          item.deleteLoading        = false;
+          list.value.push(item);
+        });
+
+        // set list total
+        listTotal.value = response._data.total;
+        // calc and set page count
+        pageCount.value = Math.ceil(listTotal.value / perPage.value);
+      }
+    }
+  });
+
+  // stop loading
+  loading.value = false;
+};
+
+const setEdit = async (item) => {
+  item.setEditLoading = true;
+  await addSalesInvoice.value?.setEdit(item);
+  toggleAction();
+  item.setEditLoading = false;
+};
+
+const setSettlement = async (item) => {
+  item.setSettlementLoading = true;
+  await addSalesInvoice.value?.setEdit(item);
+  await addSalesInvoice.value?.setSettlement();
+  item.setSettlementLoading = false;
+  toggleAction();
+};
+
+const setDelete = (item) => {
+  if (confirm("آیا مطمئن هستید؟")) {
+    deleteInvoice(item);
+  }
+};
+
+const setListOptions = (val) => {
+  // Handle dateTime
+  if (val && val.sortBy[0]) {
+    if (val.sortBy[0].key === "dateTimeJalali") {
+      sortColumn.value = "dateTime";
+    } else {
+      sortColumn.value = val.sortBy[0].key;
+    }
+
+    sortDirection.value = val.sortBy[0].order === "desc" ? -1 : 1;
+
+    getSalesInvoices();
+  }
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  nextTick(() => {
+    getSalesInvoices();
+  })
+});
+
+// Watchers
+watch(page, (val, oldVal) => {
+  getSalesInvoices();
+});
 </script>
 
 
