@@ -10,18 +10,18 @@
             mdi-clipboard-list-outline
           </v-icon>
 
-          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">
-            mdi-human-dolly
-          </v-icon>
+          <!--          <v-icon v-if="action === 'add'" class="mt-1 mr-2" color="green">-->
+          <!--            mdi-human-dolly-->
+          <!--          </v-icon>-->
 
-          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">
-            mdi-human-dolly
-          </v-icon>
+          <!--          <v-icon v-if="action === 'edit'" class="mt-1 mr-2" color="warning">-->
+          <!--            mdi-human-dolly-->
+          <!--          </v-icon>-->
 
           <v-label class="font-weight-bold mr-2">
             <span v-if="action === 'list'">سود فروش کالا‌ها</span>
-            <span v-if="action === 'add'">افزودن انتقال</span>
-            <span v-if="action === 'edit'">ویرایش انتقال</span>
+            <!--            <span v-if="action === 'add'">افزودن سود</span>-->
+            <!--            <span v-if="action === 'edit'">ویرایش سود</span>-->
           </v-label>
         </v-col>
 
@@ -61,29 +61,18 @@
         <!--     Items       -->
         <template v-slot:item.count="{ item }">
           {{ item.count + ' ' }}
-          {{ item.productDetails._unit.title.fa }}
+          {{ item._product._unit.title }}
         </template>
-        <template v-slot:item.code="{ item }">
-          {{ item.productDetails.code }}
+        <template v-slot:item.referenceCode="{ item }">
+          {{ item._product.code }}
         </template>
-        <template v-slot:item.productDetails="{ item }">
-          {{ item.productDetails.title }}
+        <template v-slot:item.productTitle="{ item }">
+          {{ item._product.title }}
         </template>
         <template v-slot:item.description="{ item }">
               <span v-if="item.referenceType === 'sales-invoices'">
                 فاکتور فروش ({{ item._reference.code }})
               </span>
-        </template>
-
-        <template v-slot:item.operation="{ item }">
-          <!--  Delete   -->
-          <!--              <v-btn class="mx-2"-->
-          <!--                     color="red"-->
-          <!--                     size="25"-->
-          <!--                     @click="setDelete(item._id)"-->
-          <!--                     icon>-->
-          <!--                <v-icon size="15">mdi-delete-outline</v-icon>-->
-          <!--              </v-btn>-->
         </template>
 
         <!--      Pagination      -->
@@ -105,170 +94,119 @@
   </v-row>
 </template>
 
-<script>
-import {useCookie}    from "#app";
+<script setup>
+import {ref, watch, onMounted, nextTick} from 'vue';
+import {useAPI}                          from "~/composables/useAPI";
+import Loading                           from "~/components/Loading.vue";
+import EmptyList                         from "~/components/EmptyList.vue";
 
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
+  layout      : 'admin',
+  middleware  : 'auth',
   requiresAuth: true,
   requiresRole: 'admin'
 });
 
-export default {
-  data() {
-    return {
-      user         : {},
-      list         : [],
-      loading      : true,
-      _warehouse   : undefined,
-      listHeaders  : [
-        {
-          title   : 'کد',
-          key     : 'code',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'محصول',
-          key     : 'productDetails',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'تعداد',
-          key     : 'count',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'سود',
-          key     : 'amount',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'شرح',
-          key     : 'description',
-          align   : 'center',
-          sortable: false
-        },
-        {
-          title   : 'تاریخ',
-          key     : 'updatedAtJalali',
-          align   : 'center',
-          sortable: false
-        },
-        // {
-        //   title   : 'عملیات',
-        //   key     : 'operation',
-        //   align   : 'center',
-        //   sortable: false
-        // },
-      ],
-      listTotal    : 100,
-      page         : 1,
-      perPage      : 10,
-      pageCount    : 1,
-      sortColumn   : '',
-      sortDirection: '',
-      action       : 'list'
+// Define reactive variables
+const list          = ref([]);
+const loading       = ref(true);
+const listTotal     = ref(0);
+const page          = ref(1);
+const perPage       = ref(10);
+const pageCount     = ref(1);
+const sortColumn    = ref('');
+const sortDirection = ref('');
+const action        = ref('list');
+
+// Define headers for the table
+const listHeaders = [
+  {title: 'کد محصول', key: 'referenceCode', align: 'center', sortable: false},
+  {title: 'نام محصول', key: 'productTitle', align: 'center', sortable: false},
+  {title: 'تعداد', key: 'count', align: 'center', sortable: false},
+  {title: 'سود', key: 'amount', align: 'center', sortable: false},
+  {title: 'شرح', key: 'description', align: 'center', sortable: false},
+  {title: 'تاریخ', key: 'updatedAtJalali', align: 'center', sortable: false}
+];
+
+// Function to toggle action mode
+// const toggleAction = () => {
+//   if (action.value === 'add' || action.value === 'edit') {
+//     action.value = 'list';
+//   } else {
+//     action.value = 'list'; // Placeholder, since $refs is not available in script setup
+//   }
+// };
+
+// Function to filter data
+const filter = () => {
+  let search = new URLSearchParams();
+  search.set('perPage', perPage.value);
+  search.set('page', page.value);
+  search.set('sortColumn', sortColumn.value);
+  search.set('sortDirection', Number(sortDirection.value));
+  return search;
+};
+
+// Function to fetch commodity profits
+const getCommodityProfits = async () => {
+  loading.value = true;
+  await useAPI('commodity-profits?' + filter(), {
+    method    : 'get',
+    onResponse: ({response}) => {
+      listTotal.value = response._data.total;
+      pageCount.value = Math.ceil(listTotal.value / perPage.value);
+      list.value      = response._data.list;
     }
-  },
-  methods: {
-    toggleAction() {
-      if (this.action === 'add' || this.action === 'edit')
-        this.action = 'list';
-      else
-        this.action = this.$refs.addStockTransfers.action;
-    },
-    filter() {
-      let search = new URLSearchParams();
+  });
+  loading.value = false;
+};
 
-      // pagination
-      search.set('perPage', this.perPage);
-      search.set('page', this.page);
-
-      // sort
-      search.set('sortColumn', this.sortColumn);
-      search.set('sortDirection', Number(this.sortDirection));
-
-
-      return search;
-    },
-    getCommodityProfits() {
-      this.loading = true;
-      fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'commodity-profits?' + this.filter(), {
-            method : 'get',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        response       = await response.json();
-        this.listTotal = response.total;
-        this.pageCount = Math.ceil((this.listTotal / this.perPage));
-        this.list      = response.list;
-      });
-      this.loading = false;
-    },
-    setListOptions(val) {
-      // handle dateTime
-      if (val && val.sortBy[0]) {
-
-        if (val.sortBy[0].key === '_warehouse')
-          return;
-
-        if (val.sortBy[0].key === 'dateTimeJalali')
-          this.sortColumn = 'dateTime';
-        else
-          this.sortColumn = val.sortBy[0].key;
-
-        this.sortDirection = val.sortBy[0].order === 'desc' ? -1 : 1;
-
-        this.getCommodityProfits();
-      }
-    },
-    setDelete(_id) {
-      if (confirm('آیا مطمئن هستید؟')) {
-        this.delete(_id);
-      }
-    },
-    async delete(_id) {
-      await fetch(
-          this.runtimeConfig.public.API_BASE_URL + 'commodity-profits/' + _id, {
-            method : 'delete',
-            headers: {
-              'Content-Type' : 'application/json',
-              'authorization': 'Bearer ' + this.user.token
-            }
-          }).then(async response => {
-        const {$showMessage} = useNuxtApp();
-        if (response.status === 200) {
-          $showMessage('عملیات با موفقت انجام شد', 'success');
-
-          // refresh list
-          this.getCommodityProfits();
-        } else {
-          // show error
-          $showMessage('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-        }
-      });
-    },
-  },
-  mounted() {
-    this.user          = useCookie('user').value;
-    this.runtimeConfig = useRuntimeConfig();
-    this.getCommodityProfits();
-  },
-  computed: {},
-  watch: {
-    page(val, oldVal) {
-      this.getCommodityProfits();
-    }
+// Function to handle sorting
+const setListOptions = (val) => {
+  if (val && val.sortBy[0]) {
+    if (val.sortBy[0].key === '_warehouse') return;
+    sortColumn.value    = val.sortBy[0].key === 'dateTimeJalali' ? 'dateTime' : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === 'desc' ? -1 : 1;
+    getCommodityProfits();
   }
-}
+};
+
+// Function to confirm delete
+// const setDelete = (_id) => {
+//   if (confirm('آیا مطمئن هستید؟')) {
+//     deleteItem(_id);
+//   }
+// };
+
+// const deleteItem = async (_id) => {
+//
+//   await useAPI('commodity-profits/' + _id, {
+//     method    : 'delete',
+//     onResponse: ({response}) => {
+//       if (response.status === 200) {
+//         $notify("عملیات با موفقت انجام شد", "success");
+//
+//         // Refresh the list of units
+//         getCommodityProfits();
+//       } else {
+//         // Show error message
+//         $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+//       }
+//     }
+//   });
+// };
+
+// Watch for page changes
+watch(page, () => {
+  getCommodityProfits();
+});
+
+// On component mount
+onMounted(() => {
+  nextTick(() => {
+    getCommodityProfits();
+  });
+});
 </script>
 
 
