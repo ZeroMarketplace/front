@@ -120,6 +120,11 @@ export default {
           icon: 'mdi-card-account-details-outline'
         },
         {
+          text: 'پیام رسان',
+          icon: 'mdi-facebook-messenger',
+          link: '/messenger'
+        },
+        {
           text: 'اعلانات',
           icon: 'mdi-bell-outline'
         },
