@@ -614,7 +614,7 @@ const setContact = (userId) => {
 
   // find for conversation
   const conversationFound = Object.values(messengerStore.conversations).find(
-      cn => cn.type === 'private' && cn.members.includes(userId)
+      cn => cn.type === 'private' && cn.members.find(user => user._id === userId)
   );
 
   if (conversationFound)
@@ -630,9 +630,9 @@ const setConversation = (conversationId) => {
     // private chats need contact
     switch (conversation.value.type) {
       case 'private':
-        let contactId = conversation.value.members.find(userId => userId !== user.value._id);
-        if (contactId) {
-          contact.value = messengerStore.users[contactId];
+        let contactFound = conversation.value.members.find(member => member._id !== user.value._id);
+        if (contactFound) {
+          contact.value = messengerStore.users[contactFound._id];
         }
         break;
     }
@@ -964,7 +964,7 @@ defineExpose({
 
 <style lang="scss" scoped>
 .chatContainer {
-  height: 100vh;
+  height: 90vh;
 
   .chatBg {
     z-index: 0;
