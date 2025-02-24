@@ -10,9 +10,9 @@
         </v-col>
 
         <!--  Page   -->
-        <v-col cols="12" md="10">
+        <v-col class="ma-0 pa-0" cols="12" md="10">
 
-          <AdminHeaderBar class="mb-3"/>
+          <AdminHeaderBar />
 
           <slot/>
 
