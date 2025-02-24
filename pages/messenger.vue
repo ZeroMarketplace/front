@@ -160,8 +160,8 @@ onMounted(() => {
   // Conversations Events
   socketConnection.value.on('conversations:insert', (conversation) => {
     // add users of conversation
-    if (conversation.memberDetails) {
-      conversation.memberDetails.forEach((user) => {
+    if (conversation.members) {
+      conversation.members.forEach((user) => {
         messengerStore.addUser(user);
       });
     }
