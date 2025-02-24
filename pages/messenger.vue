@@ -38,27 +38,27 @@
 </template>
 
 <script setup>
-import {ref, onBeforeMount, onMounted} from "vue";
-import {useDisplay}                    from "vuetify";
-import Chat                            from "~/components/messenger/Chat.vue";
-import Contacts                        from "~/components/messenger/Contacts.vue";
-import Conversations                   from "~/components/messenger/Conversations.vue";
-import {useCookie, useNuxtApp}         from "#app";
-import {useMessengerStore}             from "~/store/messenger";
+import {ref, onBeforeMount, onMounted, watch} from "vue";
+import {useDisplay}                           from "vuetify";
+import Chat                                   from "~/components/messenger/Chat.vue";
+import Contacts                               from "~/components/messenger/Contacts.vue";
+import Conversations                          from "~/components/messenger/Conversations.vue";
+import {useCookie, useNuxtApp}                from "#app";
+import {useMessengerStore}                    from "~/store/messenger";
+
+
+// get user from Cookie
+const user = useCookie('user');
 
 definePageMeta({
-  layout      : 'default',
+  layout      : (route) => route.meta.layout,
   middleware  : ['auth'],
-  requiresAuth: true,
-  // requiresRole: 'admin'
+  requiresAuth: true
 });
 
 // get Nuxt App Functions
 const {$socketConnection} = useNuxtApp();
 const socketConnection    = ref(null);
-
-// get user from Cookie
-const user = useCookie('user');
 
 // get messenger store
 const messengerStore = useMessengerStore();
@@ -188,7 +188,7 @@ watch(smAndDown, (newValue) => {
 
 <style scoped>
 .messengerContainer {
-  height: 100vh;
+  height: 90vh;
   box-sizing: border-box;
   overflow: hidden;
 }
