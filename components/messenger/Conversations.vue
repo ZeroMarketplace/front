@@ -224,9 +224,9 @@ const listOfConversations = computed(() => {
 const getConversationContact = (conversation) => {
   switch (conversation.type) {
     case 'private':
-      let contactId = conversation.members.find(userId => userId !== user.value._id);
-      if (contactId) {
-        return messengerStore.users[contactId];
+      let contact = conversation.members.find(member => member._id !== user.value._id);
+      if (contact) {
+        return messengerStore.users[contact._id];
       }
       break;
   }
@@ -318,8 +318,8 @@ const getConversations = () => {
         response._data.list.forEach((conversation) => {
 
           // add users of conversation
-          if (conversation.memberDetails) {
-            conversation.memberDetails.forEach((user) => {
+          if (conversation.members) {
+            conversation.members.forEach((user) => {
               messengerStore.addUser(user);
             });
           }
