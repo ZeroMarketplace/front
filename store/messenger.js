@@ -17,8 +17,8 @@ export const useMessengerStore = defineStore('messenger', {
                 this.users[user._id] = {};
 
             this.users[user._id]['_id']       = user._id;
-            this.users[user._id]['firstName'] = user.name.first;
-            this.users[user._id]['lastName']  = user.name.last;
+            this.users[user._id]['firstName'] = user.firstName;
+            this.users[user._id]['lastName']  = user.lastName;
             this.users[user._id]['avatars']   = user.avatars;
             this.users[user._id]['color']     = user.color;
 
