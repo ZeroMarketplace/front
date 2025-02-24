@@ -137,9 +137,7 @@ const add = async () => {
         emit('exit');
       } else if (response.status === 400) {
         if (response._data && response._data.message) {
-          if (response._data.message === 'User Not Found') {
-            $notify('کاربر پیدا نشد. از کاربر دعوت کنید در پیام رسان عضو شود', 'error');
-          } else if (response._data.message === 'This contact has already been added') {
+          if (response._data.message === 'This contact has already been added') {
             $notify('این مخاطب قبلا اضافه شده است', 'error');
           }else if (response._data.message === 'You cannot add yourself as a contact') {
             $notify('شما نمی‌توانید خودتان را به عنوان مخاطب اضافه کنید', 'error');
@@ -147,6 +145,8 @@ const add = async () => {
             $notify('مشکلی در ذخیره کردن مخاطب پیش آمد. لطفا دوباره تلاش کنید', 'error');
           }
         }
+      } else if (response.status === 404) {
+        $notify('کاربر پیدا نشد. از کاربر دعوت کنید در پیام رسان عضو شود', 'error');
       }
     }
   });
