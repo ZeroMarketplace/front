@@ -64,7 +64,7 @@ export const useMessengerStore = defineStore('messenger', {
             this.conversations[conversation._id]['_id']         = conversation._id;
             this.conversations[conversation._id]['type']        = conversation.type;
             this.conversations[conversation._id]['members']     = conversation.members;
-            this.conversations[conversation._id]['unreadCount'] = conversation.unreadCount;
+            this.conversations[conversation._id]['unreadCount'] = conversation.unreadCount ?? 0;
             this.conversations[conversation._id]['updatedAt']   = conversation.updatedAt;
 
             // create messages field if not exists
