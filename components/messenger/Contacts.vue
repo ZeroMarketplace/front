@@ -76,13 +76,13 @@
           <UserAvatar class=""
                       :color="contact.color"
                       :online="messengerStore.users[contact._id].online"
-                      :firstName="contact.name.first"
-                      :lastName="contact.name.last"
+                      :firstName="contact.firstName"
+                      :lastName="contact.lastName"
                       :avatars="contact.avatars"/>
         </template>
 
         <v-list-item-title>
-          {{ contact.name.first + ' ' + contact.name.last }}
+          {{ contact.firstName + ' ' + contact.lastName }}
         </v-list-item-title>
 
 
@@ -135,8 +135,8 @@ const list = computed(() => {
     return contacts.value.filter(user => {
       // Check for different search conditions similar to server-side logic
       const fullName  = `${user.firstName} ${user.lastName}`.toLowerCase();
-      const firstName = user.name.first.toLowerCase();
-      const lastName  = user.name.last.toLowerCase();
+      const firstName = user.firstName.toLowerCase();
+      const lastName  = user.lastName.toLowerCase();
 
       return (
           // Search assuming all words are in `first`
@@ -154,10 +154,10 @@ const list = computed(() => {
   }
 });
 
-const getContacts = () => {
+const getContacts = async () => {
   loading.value = true;
 
-  useAPI('contacts', {
+  await useAPI('contacts', {
     method: 'get',
     onResponse({response}) {
       if (response.status === 200) {
