@@ -1,5 +1,5 @@
 <template>
-  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
+  <v-row class="bg-white mr-4 mr-md-2 ml-md-5 mt-2 ml-6 rounded-lg pb-16">
 
     <!--    Title And Action    -->
     <v-col cols="12">
