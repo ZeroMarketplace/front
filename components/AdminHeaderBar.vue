@@ -1,5 +1,5 @@
 <template>
-  <v-row class="border-b bg-white px-2 py-0 bg-grey-darken-3 border-dotted">
+  <v-row class="border-b bg-white my-0 mr-0 px-2 bg-grey-darken-3 border-dotted">
 
     <v-col class="d-flex flex-grow-1 mr-n2 mr-md-0">
 
@@ -29,7 +29,7 @@
     </v-col>
 
     <v-col>
-      <v-avatar class="float-left mt-2" size="large" color="red">
+      <v-avatar class="float-left mt-2 ml-2" size="large" color="red">
         A
       </v-avatar>
     </v-col>
