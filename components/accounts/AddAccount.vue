@@ -11,7 +11,7 @@
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -25,7 +25,7 @@
                   placeholder="انتخاب کنید"
                   :items="types"
                   :readonly="loading"
-                  :rules="rules.notEmpty"
+                  :rules="[rules.required]"
                   density="compact"
                   variant="outlined">
         </v-select>
@@ -38,7 +38,7 @@
                       label="مانده حساب"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       type="number"
                       density="compact"
                       variant="outlined">
@@ -94,8 +94,9 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
-import {useNuxtApp}     from '#app';
+import {ref}        from 'vue';
+import {useNuxtApp} from '#app';
+import {rules}      from "~/utils/validationRules";
 
 definePageMeta({
   layout      : 'admin',
@@ -110,10 +111,6 @@ const form = ref({
   balance    : '',
   description: '',
 });
-
-const rules = {
-  notEmpty: [value => (value ? true : 'پر کردن این فیلد اجباری است')],
-};
 
 const types = [
   {title: 'صندوق', value: 'cash'},

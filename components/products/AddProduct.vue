@@ -15,7 +15,7 @@
                       label="نام کالا"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -25,7 +25,7 @@
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <CategoryInput class="mt-3"
                        v-model="form._categories"
-                       :rules="rules.notEmptySelectableMultiple"
+                       :rules="[rules.requiredMultipleSelect]"
                        :readonly="loading"
                        multiple
                        chips/>
@@ -35,7 +35,7 @@
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
         <BrandInput class="mt-3"
                     v-model="form._brand"
-                    :rules="rules.notEmptySelectable"
+                    :rules="[rules.requiredSelect]"
                     :readonly="loading"/>
       </v-col>
 
@@ -43,7 +43,7 @@
       <v-col class="mt-n5 mt-md-n2" cols="12" md="4">
         <UnitInput class=""
                    v-model="form._unit"
-                   :rules="rules.notEmptySelectable"
+                   :rules="[rules.requiredSelect]"
                    :readonly="loading"/>
       </v-col>
 
@@ -54,7 +54,7 @@
                       label="بارکد"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
 
@@ -94,7 +94,7 @@
       <!--   File Input    -->
       <v-col cols="12" md="3">
         <v-file-input v-model="form.files"
-                      :rules="rules.filesIsValid"
+                      :rules="[filesIsValid]"
                       validate-on="input"
                       type="file"
                       class="d-none"
@@ -377,7 +377,7 @@
                           label="عنوان"
                           placeholder="وارد کنید"
                           :readonly="loading || property._id"
-                          :rules="rules.notEmpty"
+                          :rules="[rules.required]"
                           density="compact"
                           variant="outlined"
                           hide-details>
@@ -393,7 +393,7 @@
                 label="مقدار"
                 placeholder="وارد کنید"
                 :readonly="loading"
-                :rules="rules.notEmpty"
+                :rules="[rules.required]"
                 density="compact"
                 variant="outlined"
                 hide-details>
@@ -404,7 +404,7 @@
                             v-model="property.value"
                             label="مقدار"
                             :readonly="loading"
-                            :rules="rules.notEmptySelectable"
+                            :rules="[rules.requiredSelect]"
                             :items="getPropertyValues(property._id)"
                             item-title="title"
                             item-value="code"
@@ -449,7 +449,7 @@
                       label="عنوان کالا"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -517,6 +517,7 @@ import {useAPI}                       from '~/composables/useAPI';
 import CategoryInput                  from "~/components/categories/CategoryInput.vue";
 import BrandInput                     from "~/components/brands/BrandInput.vue";
 import UnitInput                      from "~/components/units/UnitInput.vue";
+import {rules}                        from "~/utils/validationRules";
 
 // Reactive variables using ref
 const {$notify, $axios}  = useNuxtApp();
@@ -532,8 +533,8 @@ const emit               = defineEmits(['exit', 'refresh']);
 const form = ref({
   name             : '',
   _categories      : [],
-  _brand           : null,
-  _unit            : null,
+  _brand           : undefined,
+  _unit            : undefined,
   barcode          : '',
   iranCode         : '',
   variants         : [],
@@ -559,63 +560,41 @@ const form = ref({
 const category           = ref({});
 const categoryProperties = ref([]);
 
-const rules = ref({
-  notEmpty                  : [
-    (value) => {
-      if (value) return true;
-      return 'پر کردن این فیلد اجباری است';
-    },
-  ],
-  notEmptySelectable        : [
-    (value) => {
-      if (value) return true;
-      return 'لطفا انتخاب کنید';
-    },
-  ],
-  notEmptySelectableMultiple: [
-    (value) => {
-      if (value.length) return true;
-      return 'لطفا انتخاب کنید';
-    },
-  ],
-  filesIsValid              : [
-    (value) => {
-      let valid = true;
-      value.forEach((file) => {
-        const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-
-        if (!allowedExtensions.exec(file.name)) {
-          $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
-          valid = false;
-          return false;
-        }
-
-        if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
-          $notify('اندازه فایل بیش از حد مجاز است', 'error');
-          valid = false;
-          return false;
-        }
-      });
-
-      if (valid) {
-        createImagesPreview();
-        form.value.filesError = false;
-      } else {
-        form.value.filesPreview = [];
-        form.value.filesError   = true;
-      }
-      return valid;
-    },
-  ],
-});
-
 // Methods
+const filesIsValid = (value) => {
+  let valid = true;
+  value.forEach((file) => {
+    const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+    if (!allowedExtensions.exec(file.name)) {
+      $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
+      valid = false;
+      return false;
+    }
+
+    if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
+      $notify('اندازه فایل بیش از حد مجاز است', 'error');
+      valid = false;
+      return false;
+    }
+  });
+
+  if (valid) {
+    createImagesPreview();
+    form.value.filesError = false;
+  } else {
+    form.value.filesPreview = [];
+    form.value.filesError   = true;
+  }
+  return valid;
+};
+
 const reset = () => {
-  form.value = {
+  form.value               = {
     name             : '',
     _categories      : [],
-    _brand           : null,
-    _unit            : null,
+    _brand           : undefined,
+    _unit            : undefined,
     barcode          : '',
     iranCode         : '',
     variants         : [],
@@ -636,9 +615,9 @@ const reset = () => {
     title            : '',
     content          : '',
   };
-  categoryProperties.value     = [];
-  action.value                 = 'add';
-  loading.value                = false;
+  categoryProperties.value = [];
+  action.value             = 'add';
+  loading.value            = false;
 };
 
 const add = async () => {

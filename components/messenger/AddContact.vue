@@ -57,7 +57,7 @@
           <v-text-field class=""
                         v-model="form.phone"
                         label="شماره تلفن"
-                        :rules="[rules.notEmpty,rules.phone]"
+                        :rules="[rules.required, rules.phone]"
                         variant="outlined"
                         density="compact">
 
@@ -83,21 +83,10 @@
 
 import {useAPI}     from "~/composables/useAPI";
 import {useNuxtApp} from "#app";
+import {rules}      from "~/utils/validationRules";
 
 const {$notify} = useNuxtApp();
 const emit = defineEmits(['refresh','exit']);
-
-const rules = {
-  notEmpty: (value) => (value ? true : 'پر کردن این فیلد اجباری است'),
-  phone   : (value) =>  {
-    const phoneRegex = /^0\d{10}$/;
-    if(phoneRegex.test(value)) {
-      return true;
-    } else {
-      return 'فرمت شماره تلفن وارد شده اشتباه است';
-    }
-  },
-};
 
 const action  = ref('add');
 const loading = ref(false);

@@ -14,7 +14,7 @@
                       class="mt-3"
                       v-model="form.dateTime"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       label="تاریخ و ساعت"
                       density="compact"
                       variant="outlined">
@@ -153,7 +153,7 @@
       <!--   File Input    -->
       <v-col cols="12" md="3">
         <v-file-input v-model="form.files"
-                      :rules="rules.filesIsValid"
+                      :rules="[filesIsValid]"
                       validate-on="input"
                       type="file"
                       class="d-none"
@@ -230,6 +230,7 @@ import AccountInput                   from '~/components/accounts/AccountInput.v
 import AttachmentPreview              from '~/components/accounting-documents/AttachmentPreview.vue';
 import {ref, reactive, onMounted}     from 'vue';
 import {useAPI}                       from "~/composables/useAPI";
+import {rules}                        from "~/utils/validationRules";
 
 // Define reactive state
 const form = reactive({
@@ -247,55 +248,6 @@ const form = reactive({
   filesError        : false,
 });
 
-const rules = reactive({
-  notEmpty          : [
-    (value) => {
-      if (value) return true;
-      return 'پر کردن این فیلد اجباری است';
-    },
-  ],
-  notEmptySelectable: [
-    (value) => {
-      if (value) return true;
-      return 'لطفا انتخاب کنید';
-    },
-  ],
-  filesIsValid      : [
-    (value) => {
-      let valid = true;
-      if (value)
-        value.forEach((file) => {
-          // Allowing file type
-          let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-
-          // Check format
-          if (!allowedExtensions.exec(file.name)) {
-            // Show error
-            $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
-            valid = false;
-            return false;
-          }
-
-          // Check size
-          if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
-            // Show error
-            $notify('اندازه فایل بیش از حد مجاز است', 'error');
-            valid = false;
-            return false;
-          }
-        });
-      if (valid) {
-        createImagesPreview();
-        form.filesError = false;
-      } else {
-        form.filesPreview = [];
-        form.filesError   = true;
-      }
-      return valid;
-    },
-  ],
-});
-
 const loading                   = ref(false);
 const action                    = ref('add');
 const {$notify, $axios}         = useNuxtApp();
@@ -307,6 +259,39 @@ const uploadProgress            = ref(0);
 const emit                      = defineEmits(['exit', 'refresh']);
 
 // Define methods
+const filesIsValid = (value) => {
+  let valid = true;
+  if (value)
+    value.forEach((file) => {
+      // Allowing file type
+      let allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+      // Check format
+      if (!allowedExtensions.exec(file.name)) {
+        // Show error
+        $notify('فرمت فایل انتخابی قابل قبول نیست', 'error');
+        valid = false;
+        return false;
+      }
+
+      // Check size
+      if ((file.size / 1024 / 1024).toFixed(2) > 4.7) {
+        // Show error
+        $notify('اندازه فایل بیش از حد مجاز است', 'error');
+        valid = false;
+        return false;
+      }
+    });
+  if (valid) {
+    createImagesPreview();
+    form.filesError = false;
+  } else {
+    form.filesPreview = [];
+    form.filesError   = true;
+  }
+  return valid;
+};
+
 const reset = () => {
   form._id                = '';
   form.dateTime           = new Date();

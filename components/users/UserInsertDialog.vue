@@ -45,7 +45,7 @@
                             v-model="form.name"
                             label="نام و نام خانوادگی"
                             placeholder="وارد کنید"
-                            :rules="[rules.notEmpty]"
+                            :rules="[rules.required]"
                             density="compact"
                             variant="outlined">
               </v-text-field>
@@ -57,7 +57,7 @@
                             v-model="form.phone"
                             label="شماره تلفن"
                             placeholder="وارد کنید"
-                            :rules="[rules.phone,rules.notEmpty]"
+                            :rules="[rules.required, rules.phone]"
                             density="compact"
                             variant="outlined">
               </v-text-field>
@@ -102,20 +102,10 @@
 <script setup lang="ts">
 
 import {useNuxtApp} from "#app";
+import {rules} from "~/utils/validationRules";
 
 const {$notify} = useNuxtApp();
 const loading = ref(false);
-const rules = {
-  notEmpty: (value) => (value ? true : 'پر کردن این فیلد اجباری است'),
-  phone: (value) => {
-    const mobileRegex = /^(\+98|0)?9\d{9}$/;
-    if (mobileRegex.test(value)) {
-      return true;
-    } else {
-      return 'فرمت شماره موبایل اشتباه است';
-    }
-  },
-};
 
 const form = ref({
   name: '',

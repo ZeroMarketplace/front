@@ -5,7 +5,6 @@
       :loading="true"
       :search-input.sync="searchQuery"
       :hide-no-data="true"
-      :hide-details="true"
       auto-select-first="exact"
       item-value="_id"
       item-title="fullName"

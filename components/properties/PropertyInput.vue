@@ -4,7 +4,6 @@
       :loading="true"
       :search-input.sync="searchQuery"
       :hide-no-data="true"
-      :hide-details="true"
       item-value="_id"
       item-title="title"
       label="ویژگی‌ها"

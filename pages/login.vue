@@ -21,7 +21,7 @@
 
                 <!-- Phone Number -->
                 <v-text-field class="mt-2" v-model="form.phoneNumber" label="شماره موبایل" placeholder="وارد کنید"
-                              :readonly="loading" :rules="[rules.notEmpty, rules.phone]" density="compact"
+                              :readonly="loading" :rules="[rules.required, rules.phone]" density="compact"
                               variant="outlined"></v-text-field>
               </v-window-item>
 
@@ -53,7 +53,7 @@
                               v-model="form.firstName"
                               label="نام"
                               placeholder="وارد کنید"
-                              :rules="[rules.notEmpty]"
+                              :rules="[rules.required]"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -64,7 +64,7 @@
                               v-model="form.lastName"
                               label="نام خانوادگی"
                               placeholder="وارد کنید"
-                              :rules="[rules.notEmpty]"
+                              :rules="[rules.required]"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -77,7 +77,7 @@
                               :append-inner-icon="form.showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                               :type="form.showPassword ? 'text' : 'password'"
                               @click:append-inner="togglePasswordVisible"
-                              :rules="[rules.notEmpty, rules.password]"
+                              :rules="[rules.required, rules.password]"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -91,7 +91,7 @@
                               :append-inner-icon="form.showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                               :type="form.showPassword ? 'text' : 'password'"
                               @click:append-inner="togglePasswordVisible"
-                              :rules="[rules.notEmpty, rules.confirmPassword]"
+                              :rules="[rules.required, confirmPassword]"
                               density="compact"
                               variant="outlined">
                 </v-text-field>
@@ -131,9 +131,10 @@ definePageMeta({
   layout: "blank"
 });
 
-import {ref, computed}                     from 'vue';
+import {ref}                               from 'vue';
 import {useCookie, useNuxtApp, navigateTo} from '#app';
 import {useAPI}                            from '~/composables/useAPI';
+import {rules}                             from "~/utils/validationRules";
 
 const user = useCookie('user');
 if (user.value) {
@@ -169,30 +170,13 @@ const form            = ref({
   firstName      : '',
   lastName       : ''
 });
-const rules           = {
-  notEmpty       : (value) => (value ? true : 'پر کردن این فیلد اجباری است'),
-  phone          : (value) => {
-    const mobileRegex = /^(\+98|0)?9\d{9}$/;
-    if (mobileRegex.test(value)) {
-      return true;
-    } else {
-      return 'فرمت شماره موبایل اشتباه است';
-    }
-  },
-  password       : (value) => {
-    const hasUpperCase = /[A-Z]/.test(value);
-    const hasLowerCase = /[a-z]/.test(value);
-    const hasNumber    = /[0-9]/.test(value);
-    const hasSymbol    = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-    const minLength    = value.length >= 8;
 
-    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSymbol || !minLength) {
-      return 'رمز عبور ضعیف است';
-    } else {
-      return true;
-    }
-  },
-  confirmPassword: (value) => (value === form.value.password ? true : 'رمز عبور یکسان نیست'),
+const confirmPassword = (value) => {
+  if (value === form.value.password) {
+    return true
+  } else {
+    return 'تکرار رمز عبور صحیح نیست'
+  }
 };
 
 const togglePasswordVisible = () => {

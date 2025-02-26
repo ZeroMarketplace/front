@@ -10,7 +10,7 @@
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -53,21 +53,13 @@
 import {ref}        from "vue"; // Vue composition API functions
 import {useNuxtApp} from "#app"; // Nuxt composables
 import {useAPI}     from '~/composables/useAPI';
+import {rules}      from "~/utils/validationRules";
 
 // Reactive state
 const form = ref({
   title: '',
   _id  : null,
 });
-
-const rules = {
-  notEmpty: [
-    (value) => {
-      if (value) return true;
-      return "پر کردن این فیلد اجباری است";
-    },
-  ],
-};
 
 const action      = ref("add");
 const loading     = ref(false);

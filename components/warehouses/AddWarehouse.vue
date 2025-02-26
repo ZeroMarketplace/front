@@ -10,7 +10,7 @@
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -71,8 +71,9 @@
 
 <script setup>
 import {ref, onMounted} from 'vue';
-import {useNuxtApp}                  from '#app';
-import {useAPI}                      from '~/composables/useAPI';
+import {useNuxtApp}     from '#app';
+import {useAPI}         from '~/composables/useAPI';
+import {rules}          from "~/utils/validationRules";
 
 // Define reactive variables
 const form             = ref({
@@ -86,11 +87,6 @@ const loading          = ref(false);
 const addWarehouseForm = ref(null);
 const {$notify}        = useNuxtApp();
 const emit             = defineEmits(['exit', 'refresh']);
-
-// Validation rules
-const rules = {
-  notEmpty: [(value) => (value ? true : 'پر کردن این فیلد اجباری است')]
-};
 
 // Reset form
 const reset = () => {

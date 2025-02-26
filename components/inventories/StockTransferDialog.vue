@@ -37,7 +37,7 @@
             <v-col class="" cols="12">
               <WarehouseInput class=""
                               label="انبار مبدا"
-                              :rules="rules.notEmptySelectable"
+                              :rules="[rules.requiredSelect]"
                               v-model="form._sourceWarehouse">
               </WarehouseInput>
             </v-col>
@@ -46,7 +46,7 @@
             <v-col class="" cols="12">
               <WarehouseInput class=""
                               label="انبار مقصد"
-                              :rules="rules.notEmptySelectable"
+                              :rules="[rules.requiredSelect]"
                               v-model="form._destinationWarehouse">
               </WarehouseInput>
             </v-col>
@@ -64,7 +64,7 @@
                             label="تعداد"
                             type="number"
                             :readonly="loading"
-                            :rules="[rules.notEmpty, maxCountRule(form.totalCount)]"
+                            :rules="[rules.required, maxCountRule(form.totalCount)]"
                             density="compact"
                             variant="outlined">
                 <template v-slot:append-inner>
@@ -133,12 +133,6 @@ const stockTransferForm = ref(null);
 
 // Define Emits
 const emit = defineEmits(['exti', 'refresh']);
-
-// Define validation rules
-const rules = {
-  notEmpty          : [(value) => (value ? true : 'پر کردن این فیلد اجباری است')],
-  notEmptySelectable: [(value) => (value ? true : 'لطفا انتخاب کنید')]
-};
 
 // Function for close the dialog
 const closeTheDialog = () => {

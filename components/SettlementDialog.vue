@@ -155,7 +155,7 @@
                   <v-label class="d-inline-block mx-2 mt-4">باقیمانده:</v-label>
                   <v-text-field class="font-weight-bold text-secondary"
                                 v-model="form.payment.remaining"
-                                :rules="rules.remaining"
+                                :rules="[remaining]"
                                 variant="solo-filled"
                                 readonly>
                   </v-text-field>
@@ -208,7 +208,7 @@
             <v-col cols="12">
 
               <!--       Submit       -->
-              <v-btn class="border rounded-lg"
+              <v-btn class="border bg-secondary rounded-lg"
                      :loading="loading"
                      prepend-icon="mdi-check-circle-outline"
                      height="40"
@@ -281,11 +281,7 @@ const bankAccountsCount     = ref(0);
 const cashAccountsCount     = ref(0);
 
 // Validation rules
-const rules = {
-  remaining: [
-    (value) => (value === 0 ? true : 'مقدار باقیمانده باید ۰ شود'),
-  ],
-};
+const remaining = (value) => (value === 0 ? true : 'مقدار باقیمانده باید ۰ شود');
 
 // Exit from dialog
 const exit = () => {

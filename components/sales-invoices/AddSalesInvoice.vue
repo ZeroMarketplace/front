@@ -21,7 +21,7 @@
                    v-model="form._customer"
                    :readonly="loading"
                    :insert-dialog-icon="true"
-                   :rules="rules.notEmptySelectable">
+                   :rules="[rules.requiredSelect]">
         </UserInput>
       </v-col>
 
@@ -32,7 +32,7 @@
                       class="mt-3"
                       v-model="form.dateTime"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       label="تاریخ و ساعت"
                       density="compact"
                       variant="outlined">
@@ -142,6 +142,7 @@
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="4">
         <ProductInput v-model="product._id"
+                      :rules="[rules.requiredSelect]"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -153,7 +154,7 @@
                       label="تعداد"
                       type="number"
                       :readonly="loading"
-                      :rules="[rules.notEmpty, maxCountRule(product.totalCount, index)]"
+                      :rules="[rules.required, maxCountRule(product.totalCount, index)]"
                       density="compact"
                       variant="outlined">
           <template v-slot:details>
@@ -176,7 +177,7 @@
                         v-model="product._warehouse"
                         @update:modelValue="setProductTotalCount(index)"
                         :readonly="loading"
-                        :rules="rules.notEmptySelectable">
+                        :rules="[rules.requiredSelect]">
         </WarehouseInput>
       </v-col>
 
@@ -185,7 +186,7 @@
         <v-text-field class=""
                       v-model="product.price"
                       label="قیمت واحد"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -264,7 +265,7 @@
                           placeholder="وارد کنید"
                           :label="getAddAndSubtractDetail(item._reason).title"
                           :readonly="loading"
-                          :rules="rules.notEmpty"
+                          :rules="[rules.required]"
                           @input="calculateInvoiceTotal"
                           density="compact"
                           variant="outlined"
@@ -384,6 +385,7 @@ import StockTransferDialog        from '~/components/inventories/StockTransferDi
 import UserInput                  from '~/components/users/UserInput.vue';
 import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
 import SettlementDialog           from "~/components/SettlementDialog.vue";
+import {rules}                    from "~/utils/validationRules";
 
 // Define reactive state
 const settlementDialogFlag   = ref(false);
@@ -405,20 +407,6 @@ const form                   = ref({
   total          : 0,
 });
 const inventories            = ref({});
-const rules                  = ref({
-  notEmpty          : [
-    (value) => {
-      if (value) return true;
-      return 'پر کردن این فیلد اجباری است';
-    },
-  ],
-  notEmptySelectable: [
-    (value) => {
-      if (value) return true;
-      return 'لطفا انتخاب کنید';
-    },
-  ],
-});
 const addAndSubtract         = ref([]);
 const selectedAddAndSubtract = ref([]);
 const defaultRetailWarehouse = ref('');

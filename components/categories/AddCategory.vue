@@ -19,7 +19,7 @@
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -81,9 +81,10 @@
 // Import required modules and composables
 import {useNuxtApp}     from "#app";
 import {ref, onMounted} from "vue";
-import PropertyInput    from "~/components/properties/PropertyInput.vue";
+import PropertyInput from "~/components/properties/PropertyInput.vue";
+import {rules}       from "~/utils/validationRules";
 
-// Define reactive data and rules
+// Define reactive data
 const form = ref({
   title        : "",
   profitPercent: 0,
@@ -91,21 +92,6 @@ const form = ref({
   _parentTitle : "",
   _properties  : []
 });
-
-const rules = {
-  notEmpty                  : [
-    value => {
-      if (value) return true;
-      return "پر کردن این فیلد اجباری است";
-    }
-  ],
-  notEmptySelectableMultiple: [
-    value => {
-      if (value.length) return true;
-      return "پر کردن این فیلد اجباری است";
-    }
-  ]
-};
 
 const action          = ref("add");
 const loading         = ref(false);

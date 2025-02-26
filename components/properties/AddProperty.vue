@@ -5,7 +5,7 @@
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">
         <v-text-field class="mt-3" v-model="form.title" label="عنوان" placeholder="وارد کنید" :readonly="loading"
-                      :rules="rules.notEmpty" density="compact" variant="outlined">
+                      :rules="[rules.required]" density="compact" variant="outlined">
         </v-text-field>
       </v-col>
 
@@ -30,8 +30,14 @@
 
           <!--         Title fa         -->
           <v-col>
-            <v-text-field class="mt-3" v-model="valueItem.title" label="عنوان" placeholder="وارد کنید"
-                          :readonly="loading" :rules="rules.notEmpty" density="compact" variant="outlined" hide-details>
+            <v-text-field class="mt-3" v-model="valueItem.title"
+                          label="عنوان"
+                          placeholder="وارد کنید"
+                          :readonly="loading"
+                          :rules="[rules.required]"
+                          density="compact"
+                          variant="outlined"
+                          hide-details>
             </v-text-field>
           </v-col>
 
@@ -79,6 +85,7 @@
 import {ref}        from 'vue';
 import {useNuxtApp} from '#app';
 import {useAPI}     from '~/composables/useAPI';
+import {rules}      from "~/utils/validationRules";
 
 const {$notify} = useNuxtApp();
 const emit      = defineEmits(['exit', 'refresh']);
@@ -94,15 +101,6 @@ const form = ref({
     }
   ]
 });
-
-const rules = {
-  notEmpty: [
-    value => {
-      if (value) return true;
-      return 'پر کردن این فیلد اجباری است';
-    }
-  ]
-};
 
 const action  = ref('add');
 const loading = ref(false);

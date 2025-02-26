@@ -19,6 +19,7 @@
         <UserInput v-model="form._supplier"
                    label="تامین کننده"
                    class="mt-md-3 mb-5"
+                   :rules="[rules.required]"
                    :insert-dialog-icon="true"
                    :readonly="loading"/>
       </v-col>
@@ -30,7 +31,7 @@
                       class="mt-3"
                       v-model="form.dateTime"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       label="تاریخ و ساعت"
                       density="compact"
                       variant="outlined">
@@ -50,7 +51,7 @@
       <v-col class="mt-n8 mt-md-3" cols="12" md="4">
         <WarehouseInput class=""
                         label="وارد می‌شود به انبار"
-                        :rules="rules.notEmptySelectable"
+                        :rules="[rules.requiredSelect]"
                         v-model="form._warehouse">
         </WarehouseInput>
       </v-col>
@@ -96,7 +97,7 @@
       <!--  Product Name    -->
       <v-col class="pa-1 mt-2" cols="12" md="3">
         <ProductInput v-model="product._id"
-                      :rules="rules.notEmptySelectable"
+                      :rules="[rules.requiredSelect]"
                       @selected="val => onProductSelected(val,index)"/>
       </v-col>
 
@@ -108,7 +109,7 @@
                       label="تعداد"
                       type="number"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -123,7 +124,7 @@
                       label="فی خرید"
                       type="number"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -137,7 +138,7 @@
                       type="number"
                       :label="'فی مصرف' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -151,7 +152,7 @@
                       :label="'فی فروشگاه' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
                       type="number"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -229,7 +230,7 @@
                           placeholder="وارد کنید"
                           :label="getAddAndSubtractDetail(item._reason).title"
                           :readonly="loading"
-                          :rules="rules.notEmpty"
+                          :rules="[rules.required]"
                           @input="calculateInvoiceTotal"
                           density="compact"
                           variant="outlined"
@@ -348,6 +349,7 @@ import UserInput                  from '~/components/users/UserInput.vue';
 import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
 import SettlementDialog           from "~/components/SettlementDialog.vue";
 import {useAPI}                   from '~/composables/useAPI';
+import {rules}                    from "~/utils/validationRules";
 
 const settlementDialog       = ref(false);
 const settlementId           = ref('');
@@ -370,11 +372,6 @@ const action                 = ref('add');
 const {$notify}              = useNuxtApp();
 const categories             = ref({});
 const emit                   = defineEmits(['exit', 'refresh']);
-
-const rules = {
-  notEmpty          : [value => (value ? true : 'پر کردن این فیلد اجباری است')],
-  notEmptySelectable: [value => (value ? true : 'لطفا انتخاب کنید')]
-};
 
 const closeSettlementDialog = () => {
   settlementDialog.value = false;

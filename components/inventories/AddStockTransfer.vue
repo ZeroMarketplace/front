@@ -12,7 +12,7 @@
       <v-col class="" cols="12" md="4">
         <WarehouseInput class="mt-3"
                         label="انبار مبدا"
-                        :rules="rules.notEmptySelectable"
+                        :rules="[rules.requiredSelect]"
                         v-model="form._sourceWarehouse">
         </WarehouseInput>
       </v-col>
@@ -21,7 +21,7 @@
       <v-col class="mt-n8 mt-md-0" cols="12" md="4" offset-md="1">
         <WarehouseInput class="mt-3"
                         label="انبار مقصد"
-                        :input-rules="rules.notEmptySelectable"
+                        :rules="[rules.requiredSelect]"
                         v-model="form._destinationWarehouse">
         </WarehouseInput>
       </v-col>
@@ -69,7 +69,7 @@
                       label="تعداد"
                       type="number"
                       :readonly="loading"
-                      :rules="[rules.notEmpty, rules.maxCountRule(product.totalCount)]"
+                      :rules="[rules.required, maxCountRule(product.totalCount)]"
                       density="compact"
                       variant="outlined"
                       hide-details>
@@ -85,7 +85,7 @@
         <v-text-field class=""
                       v-model="product.price"
                       label="قیمت واحد"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined"
                       readonly
@@ -196,6 +196,7 @@ import {useNuxtApp}           from '#app';
 import ProductInput           from '~/components/products/ProductInput.vue';
 import WarehouseInput         from '~/components/warehouses/WarehouseInput.vue';
 import {useAPI}               from "~/composables/useAPI";
+import {rules}                from "~/utils/validationRules";
 
 // Define reactive form data
 const form = ref({
@@ -207,27 +208,22 @@ const form = ref({
   total                : 0
 });
 
-// Validation rules
-const rules = {
-  notEmpty          : [(value) => (value ? true : 'پر کردن این فیلد اجباری است')],
-  notEmptySelectable: [(value) => (value ? true : 'لطفا انتخاب کنید')],
-  maxCountRule(count) {
-    return value => {
-      if (value > count) {
-        return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
-      } else {
-        return true;
-      }
-    };
-  }
-};
-
 const inventories        = ref({});
 const loading            = ref(false);
 const action             = ref('add');
 const stockTransfersForm = ref(null);
 const {$notify}          = useNuxtApp();
 const emit               = defineEmits(['exit', 'refresh']);
+
+const maxCountRule = (count) => {
+  return value => {
+    if (value > count) {
+      return value <= count || `بیشترین تعداد قابل انتقال ${count}`;
+    } else {
+      return true;
+    }
+  };
+};
 
 // Function to reset form
 const reset = () => {

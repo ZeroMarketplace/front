@@ -10,7 +10,7 @@
                       label="عنوان"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       density="compact"
                       variant="outlined">
         </v-text-field>
@@ -23,7 +23,7 @@
                       label="مقدار پیش فرض"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="rules.notEmpty"
+                      :rules="[rules.required]"
                       type="number"
                       density="compact"
                       variant="outlined">
@@ -46,7 +46,7 @@
                   placeholder="انتخاب کنید"
                   :items="operations"
                   :readonly="loading"
-                  :rules="rules.notEmpty"
+                  :rules="[rules.required]"
                   density="compact"
                   variant="outlined">
         </v-select>
@@ -91,10 +91,11 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
-import {useNuxtApp}                  from '#app';
-import {useAPI}                      from '~/composables/useAPI';
-import AccountInput                  from '~/components/accounts/AccountInput.vue';
+import {ref}        from 'vue';
+import {useNuxtApp} from '#app';
+import {useAPI}     from '~/composables/useAPI';
+import AccountInput from '~/components/accounts/AccountInput.vue';
+import {rules}      from "~/utils/validationRules";
 
 // Define reactive state
 const form = ref({
@@ -104,11 +105,6 @@ const form = ref({
   _account : ''
 });
 
-const rules = {
-  notEmpty: [
-    value => (value ? true : 'پر کردن این فیلد اجباری است')
-  ]
-};
 
 const operations = [
   {title: 'اضافه کردن', value: 'add'},
