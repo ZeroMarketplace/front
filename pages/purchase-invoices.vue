@@ -68,6 +68,9 @@
         <template v-slot:item._supplier="{ item }">
           {{ item._supplier.fullName }}
         </template>
+        <template v-slot:item.total="{ item }">
+          {{ formatters.price(item.total) }}
+        </template>
         <template v-slot:item._warehouse="{ item }">
           {{ item._warehouse.title }}
         </template>
@@ -130,6 +133,7 @@ import AddPurchaseInvoice         from "~/components/purchase-invoices/AddPurcha
 import Loading                    from "~/components/Loading.vue";
 import EmptyList                  from "~/components/EmptyList.vue";
 import {useAPI}                   from '~/composables/useAPI';
+import {formatters}               from "~/utils/formatters";
 
 // Define page metadata
 definePageMeta({
@@ -171,7 +175,7 @@ const listHeaders        = [
     sortable: true
   },
   {
-    title   : 'مبلغ',
+    title   : 'مبلغ (تومان)',
     key     : 'total',
     align   : 'center',
     sortable: true

@@ -88,30 +88,22 @@
 
         <!--  Debit    -->
         <v-col class="pa-1" cols="12" md="2">
-          <v-text-field class="bg-red-lighten-5"
-                        v-model="account.debit"
-                        label="بدهکار"
-                        :readonly="loading"
-                        @input="calcDocument"
-                        type="number"
-                        density="compact"
-                        variant="outlined"
-                        hide-details>
-          </v-text-field>
+          <PriceInput class="bg-red-lighten-5"
+                      v-model="account.debit"
+                      label="بدهکار"
+                      :readonly="loading"
+                      @update:modelValue="calcDocument"
+                      hide-details/>
         </v-col>
 
         <!--   Credit   -->
         <v-col class="pa-1" cols="12" md="2">
-          <v-text-field class="bg-green-lighten-5"
-                        v-model="account.credit"
-                        label="بستانکار"
-                        :readonly="loading"
-                        @input="calcDocument"
-                        type="number"
-                        density="compact"
-                        variant="outlined"
-                        hide-details>
-          </v-text-field>
+          <PriceInput class="bg-green-lighten-5"
+                      v-model="account.credit"
+                      label="بستانکار"
+                      :readonly="loading"
+                      @update:modelValue="calcDocument"
+                      hide-details/>
         </v-col>
 
         <!--  Actions  -->
@@ -127,14 +119,15 @@
           </v-btn>
         </v-col>
       </v-row>
+
       <!--   Total and difference   -->
       <v-row class="mt-10">
         <v-col cols="12" md="6" offset-md="6" class="pl-md-16">
           <v-row>
-            <v-col class="bg-red-lighten-5 border rounded-lg">بدهکار: {{ form.sumOfDebit }}</v-col>
-            <v-col class="bg-green-lighten-5 border rounded-lg">بستانکار: {{ form.sumOfCredit }}</v-col>
+            <v-col class="bg-red-lighten-5 border rounded-lg">بدهکار: {{ formatters.price(form.sumOfDebit) }} تومان</v-col>
+            <v-col class="bg-green-lighten-5 border rounded-lg">بستانکار: {{ formatters.price(form.sumOfCredit) }} تومان</v-col>
             <v-col cols="12" class="bg-orange-lighten-5 border rounded-lg">اختلاف:
-              <span :class="form.difference >= 0 ? 'text-green' : 'text-red'">{{ form.difference }}</span>
+              <span :class="form.difference >= 0 ? 'text-green' : 'text-red'">{{ formatters.price(form.difference) }} تومانت</span>
             </v-col>
           </v-row>
         </v-col>
@@ -231,6 +224,8 @@ import AttachmentPreview              from '~/components/accounting-documents/At
 import {ref, reactive, onMounted}     from 'vue';
 import {useAPI}                       from "~/composables/useAPI";
 import {rules}                        from "~/utils/validationRules";
+import PriceInput                     from "~/components/price/PriceInput.vue";
+import {formatters}                   from "~/utils/formatters";
 
 // Define reactive state
 const form = reactive({

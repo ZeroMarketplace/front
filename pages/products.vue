@@ -61,7 +61,7 @@
           <v-list-item-title class="mr-2">
             {{ item.name }}
             <v-label class="d-block">
-              <label v-if="item.price">{{ item.price.store }} تومان</label>
+              <label v-if="item.price">{{ formatters.price(item.price.store) }} تومان</label>
               <label v-if="item.variants && item.variants.length">{{ getProductPriceRange(item) }}</label>
             </v-label>
           </v-list-item-title>
@@ -129,6 +129,7 @@ import {ref, nextTick, onMounted} from "vue"; // Vue Composition API functions
 import {useNuxtApp}               from "#app"; // Nuxt composables
 import ProductImage               from "~/components/products/ProductImage.vue"; // Component import
 import {useAPI}                   from '~/composables/useAPI'
+import {formatters}               from "~/utils/formatters";
 
 // Define page meta
 definePageMeta({
@@ -277,9 +278,9 @@ const getProductPriceRange = (item) => {
   if (min === 0 && max === 0) {
     return "قیمت ندارد";
   } else if (min === max) {
-    return `${min} تومان`;
+    return `${formatters.price(min)} تومان`;
   } else {
-    return `از ${min} تا ${max} تومان`;
+    return `از ${formatters.price(min)} تا ${formatters.price(max)} تومان`;
   }
 };
 

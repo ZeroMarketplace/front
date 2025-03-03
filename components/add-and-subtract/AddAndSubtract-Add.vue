@@ -18,24 +18,12 @@
 
       <!--      Default      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="mt-3 ltrDirection"
-                      v-model="form.default"
-                      label="مقدار پیش فرض"
-                      placeholder="وارد کنید"
-                      :readonly="loading"
-                      :rules="[rules.required]"
-                      type="number"
-                      density="compact"
-                      variant="outlined">
-          <template v-slot:append-inner>
-            <v-icon v-if="Number(form.default) <= 100">
-              mdi-percent
-            </v-icon>
-            <v-label v-else>
-              تومان
-            </v-label>
-          </template>
-        </v-text-field>
+        <PercentOrPriceInput class="mt-3 ltrDirection"
+                             v-model="form.default"
+                             label="مقدار پیش فرض"
+                             placeholder="وارد کنید"
+                             :readonly="loading"
+                             :rules="[rules.required]"/>
       </v-col>
 
       <!--      Operation      -->
@@ -91,11 +79,12 @@
 </template>
 
 <script setup>
-import {ref}        from 'vue';
-import {useNuxtApp} from '#app';
-import {useAPI}     from '~/composables/useAPI';
-import AccountInput from '~/components/accounts/AccountInput.vue';
-import {rules}      from "~/utils/validationRules";
+import {ref}               from 'vue';
+import {useNuxtApp}        from '#app';
+import {useAPI}            from '~/composables/useAPI';
+import AccountInput        from '~/components/accounts/AccountInput.vue';
+import {rules}             from "~/utils/validationRules";
+import PercentOrPriceInput from "~/components/price/PercentOrPriceInput.vue";
 
 // Define reactive state
 const form = ref({

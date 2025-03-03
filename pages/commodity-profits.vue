@@ -63,6 +63,9 @@
           {{ item.count + ' ' }}
           {{ item._product._unit.title }}
         </template>
+        <template v-slot:item.amount="{ item }">
+          {{ formatters.price(item.amount) }}
+        </template>
         <template v-slot:item.referenceCode="{ item }">
           {{ item._product.code }}
         </template>
@@ -99,6 +102,7 @@ import {ref, watch, onMounted, nextTick} from 'vue';
 import {useAPI}                          from "~/composables/useAPI";
 import Loading                           from "~/components/Loading.vue";
 import EmptyList                         from "~/components/EmptyList.vue";
+import {formatters}                      from '~/utils/formatters'
 
 definePageMeta({
   layout      : 'admin',
@@ -123,7 +127,7 @@ const listHeaders = [
   {title: 'کد محصول', key: 'referenceCode', align: 'center', sortable: false},
   {title: 'نام محصول', key: 'productTitle', align: 'center', sortable: false},
   {title: 'تعداد', key: 'count', align: 'center', sortable: false},
-  {title: 'سود', key: 'amount', align: 'center', sortable: false},
+  {title: 'سود (تومان)', key: 'amount', align: 'center', sortable: false},
   {title: 'شرح', key: 'description', align: 'center', sortable: false},
   {title: 'تاریخ', key: 'updatedAtJalali', align: 'center', sortable: false}
 ];

@@ -68,6 +68,9 @@
         <template v-slot:item._customer="{ item }">
           {{ item._customer.fullName }}
         </template>
+        <template v-slot:item.total="{ item }">
+          {{ formatters.price(item.total) }}
+        </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
           <v-btn class="mx-2"
@@ -125,6 +128,7 @@ import {useNuxtApp}                      from "#app";
 import {useAPI}                          from '~/composables/useAPI';
 import Loading                           from "~/components/Loading.vue";
 import EmptyList                         from "~/components/EmptyList.vue";
+import {formatters}                      from "~/utils/formatters";
 
 // Define page metadata
 definePageMeta({
@@ -158,7 +162,7 @@ const listHeaders     = ref([
     sortable: true,
   },
   {
-    title   : "مبلغ",
+    title   : "مبلغ (تومان)",
     key     : "total",
     align   : "center",
     sortable: true,

@@ -183,20 +183,18 @@
 
       <!--   Sales Price    -->
       <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="product.price"
-                      label="قیمت واحد"
-                      :rules="[rules.required]"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
+        <PriceInput class=""
+                    v-model="product.price"
+                    @update:modelValue="calculateProductTotal(index)"
+                    label="قیمت واحد"
+                    :rules="[rules.required]"
+                    hide-details/>
       </v-col>
 
       <!--  Total  -->
       <v-col class="pa-1 text-caption text-center pt-2" cols="12" md="1">
         <p>جمع کل</p>
-        {{ product.total }}
+        {{ formatters.price(product.total) }}
       </v-col>
 
       <!--  Actions  -->
@@ -231,7 +229,6 @@
       </v-btn>
     </nuxt-link>
 
-
     <!--  Add-And-Subtract & Total   -->
     <v-row class="mt-2 mx-4">
 
@@ -259,26 +256,11 @@
         <v-row class="my-5 my-md-2">
           <!--      Add And Subtract     -->
           <v-col v-for="item in form.addAndSubtract" cols="12" md="8">
-            <v-text-field class=""
-                          v-model="item.value"
-                          type="number"
-                          placeholder="وارد کنید"
-                          :label="getAddAndSubtractDetail(item._reason).title"
-                          :readonly="loading"
-                          :rules="[rules.required]"
-                          @input="calculateInvoiceTotal"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
-              <template v-slot:append-inner>
-                <v-icon v-if="Number(item.value) <= 100">
-                  mdi-percent
-                </v-icon>
-                <v-label v-else>
-                  تومان
-                </v-label>
-              </template>
-            </v-text-field>
+            <PercentOrPriceInput v-model="item.value"
+                                 :label="getAddAndSubtractDetail(item._reason).title"
+                                 :readonly="loading"
+                                 :rules="[rules.required]"
+                                 @update:modelValue="calculateInvoiceTotal"/>
           </v-col>
 
         </v-row>
@@ -294,7 +276,7 @@
                 کل:
               </v-col>
               <v-col cols="7" class="text-end">
-                {{ form.total }} تومان
+                {{ formatters.price(form.total) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -306,7 +288,7 @@
                 {{ getAddAndSubtractDetail(addAndSubtract._reason).title }}:
               </v-col>
               <v-col cols="7" class="text-end">
-                {{ addAndSubtract.amount }} تومان
+                {{ formatters.price(addAndSubtract.amount) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -318,7 +300,7 @@
                 جمع کل:
               </v-col>
               <v-col cols="7" class="text-end font-weight-bold">
-                {{ form.sum }} تومان
+                {{ formatters.price(form.sum) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -384,8 +366,11 @@ import ProductInput               from '~/components/products/ProductInput.vue';
 import StockTransferDialog        from '~/components/inventories/StockTransferDialog.vue';
 import UserInput                  from '~/components/users/UserInput.vue';
 import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
-import SettlementDialog           from "~/components/SettlementDialog.vue";
+import SettlementDialog           from "~/components/settlements/SettlementDialog.vue";
 import {rules}                    from "~/utils/validationRules";
+import {formatters}               from "~/utils/formatters";
+import PercentOrPriceInput        from "~/components/price/PercentOrPriceInput.vue";
+import PriceInput                 from "~/components/price/PriceInput.vue";
 
 // Define reactive state
 const settlementDialogFlag   = ref(false);
@@ -600,18 +585,20 @@ const calculateInvoiceTotal = () => {
     form.value.total += product.total;
   });
 
-  form.value.sum = form.value.total;
+  form.value.sum = Number(form.value.total);
 
+  // calc subtracts
   form.value.addAndSubtract.forEach((addAndSubtract) => {
     const detailAddAndSubtract = getAddAndSubtractDetail(addAndSubtract._reason);
+    addAndSubtract.value       = Number(addAndSubtract.value);
     if (detailAddAndSubtract) {
       if (detailAddAndSubtract.operation === 'subtract') {
         let operationSum = 0;
-        if (Number(addAndSubtract.value) <= 100) {
-          operationSum = (form.value.total * addAndSubtract.value) / 100;
+        if (addAndSubtract.value <= 100) {
+          operationSum = Math.floor((form.value.total * addAndSubtract.value) / 100);
           form.value.sum -= operationSum;
         } else {
-          operationSum = Number(addAndSubtract.value);
+          operationSum = addAndSubtract.value;
           form.value.sum -= addAndSubtract.value;
         }
         addAndSubtract.amount = operationSum;
@@ -619,16 +606,18 @@ const calculateInvoiceTotal = () => {
     }
   });
 
+  // calc addition
   form.value.addAndSubtract.forEach((addAndSubtract) => {
     const detailAddAndSubtract = getAddAndSubtractDetail(addAndSubtract._reason);
+    addAndSubtract.value       = Number(addAndSubtract.value);
     if (detailAddAndSubtract) {
       if (detailAddAndSubtract.operation === 'add') {
         let operationSum = 0;
-        if (Number(addAndSubtract.value) <= 100) {
-          operationSum = (form.value.sum * addAndSubtract.value) / 100;
+        if (addAndSubtract.value <= 100) {
+          operationSum = Math.ceil((form.value.sum * addAndSubtract.value) / 100);
           form.value.sum += operationSum;
         } else {
-          operationSum = Number(addAndSubtract.value);
+          operationSum = addAndSubtract.value;
           form.value.sum += addAndSubtract.value;
         }
         addAndSubtract.amount = operationSum;
@@ -638,7 +627,7 @@ const calculateInvoiceTotal = () => {
 };
 
 const calculateProductTotal = (index) => {
-  form.value.products[index].total = form.value.products[index].count * form.value.products[index].price;
+  form.value.products[index].total = Number(form.value.products[index].count) * Number(form.value.products[index].price);
   calculateInvoiceTotal();
 };
 

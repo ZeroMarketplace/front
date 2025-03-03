@@ -33,19 +33,12 @@
 
       <!--      Balance      -->
       <v-col class="mt-n5 mt-md-0" cols="12" md="4">
-        <v-text-field class="ltrDirection"
+        <BalanceInput class="ltrDirection"
                       v-model="form.balance"
                       label="مانده حساب"
                       placeholder="وارد کنید"
                       :readonly="loading"
-                      :rules="[rules.required]"
-                      type="number"
-                      density="compact"
-                      variant="outlined">
-          <template v-slot:append-inner>
-            تومان
-          </template>
-        </v-text-field>
+                      :rules="[rules.required]"/>
       </v-col>
 
       <!--      Description      -->
@@ -96,7 +89,8 @@
 <script setup>
 import {ref}        from 'vue';
 import {useNuxtApp} from '#app';
-import {rules}      from "~/utils/validationRules";
+import {rules}    from "~/utils/validationRules";
+import BalanceInput from "~/components/price/PriceInput.vue";
 
 definePageMeta({
   layout      : 'admin',

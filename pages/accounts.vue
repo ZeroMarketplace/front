@@ -105,8 +105,8 @@
                 <v-label>
                   موجودی:
                   <span class="mx-2 font-weight-bold">
-                      {{ item.balance }}
-                    </span>
+                      {{ formatters.price(item.balance) }}
+                  </span>
 
                   تومان
                 </v-label>

@@ -118,45 +118,29 @@
 
       <!--   Purchase Price    -->
       <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="product.price.purchase"
-                      @input="calculateProductPrices(index)"
-                      label="فی خرید"
-                      type="number"
-                      :readonly="loading"
-                      :rules="[rules.required]"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
+        <PriceInput class=""
+                    v-model="product.price.purchase"
+                    @update:modelValue="calculateProductPrices(index)"
+                    label="فی خرید"
+                    :readonly="loading"
+                    :rules="[rules.required]"/>
       </v-col>
 
       <!--   Consumer Price    -->
       <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="product.price.consumer"
-                      type="number"
-                      :label="'فی مصرف' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
-                      :readonly="loading"
-                      :rules="[rules.required]"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
+        <PriceInput v-model="product.price.consumer"
+                    :label="'فی مصرف' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
+                    :readonly="loading"
+                    :rules="[rules.required]"/>
       </v-col>
 
       <!--   Store Price    -->
       <v-col class="pa-1 mt-2" cols="12" md="2">
-        <v-text-field class=""
-                      v-model="product.price.store"
-                      :label="'فی فروشگاه' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
-                      type="number"
-                      :readonly="loading"
-                      :rules="[rules.required]"
-                      density="compact"
-                      variant="outlined"
-                      hide-details>
-        </v-text-field>
+        <PriceInput class=""
+                    v-model="product.price.store"
+                    :label="'فی فروشگاه' + (product.profitPercent ? '(%'+product.profitPercent+')' : '')"
+                    :readonly="loading"
+                    :rules="[rules.required]"/>
       </v-col>
 
       <!--  Total  -->
@@ -224,26 +208,11 @@
         <v-row class="my-5 my-md-2">
           <!--      Add And Subtract     -->
           <v-col v-for="item in form.AddAndSub" cols="12" md="8">
-            <v-text-field class=""
-                          v-model="item.value"
-                          type="number"
-                          placeholder="وارد کنید"
-                          :label="getAddAndSubtractDetail(item._reason).title"
-                          :readonly="loading"
-                          :rules="[rules.required]"
-                          @input="calculateInvoiceTotal"
-                          density="compact"
-                          variant="outlined"
-                          hide-details>
-              <template v-slot:append-inner>
-                <v-icon v-if="Number(item.value) <= 100">
-                  mdi-percent
-                </v-icon>
-                <v-label v-else>
-                  تومان
-                </v-label>
-              </template>
-            </v-text-field>
+            <PercentOrPriceInput v-model="item.value"
+                                 :label="getAddAndSubtractDetail(item._reason).title"
+                                 :readonly="loading"
+                                 :rules="[rules.required]"
+                                 @update:modelValue="calculateInvoiceTotal"/>
           </v-col>
 
         </v-row>
@@ -259,7 +228,7 @@
                 کل:
               </v-col>
               <v-col cols="7" class="text-end">
-                {{ form.total }} تومان
+                {{ formatters.price(form.total) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -271,7 +240,7 @@
                 {{ getAddAndSubtractDetail(addAndSubtract._reason).title }}:
               </v-col>
               <v-col cols="7" class="text-end">
-                {{ addAndSubtract.amount }} تومان
+                {{ formatters.price(addAndSubtract.amount) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -283,7 +252,7 @@
                 جمع کل:
               </v-col>
               <v-col cols="7" class="text-end font-weight-bold">
-                {{ form.sum }} تومان
+                {{ formatters.price(form.sum) }} تومان
               </v-col>
             </v-row>
           </v-col>
@@ -347,9 +316,12 @@ import {useNuxtApp}               from '#app';
 import ProductInput               from '~/components/products/ProductInput.vue';
 import UserInput                  from '~/components/users/UserInput.vue';
 import WarehouseInput             from '~/components/warehouses/WarehouseInput.vue';
-import SettlementDialog           from "~/components/SettlementDialog.vue";
+import SettlementDialog           from "~/components/settlements/SettlementDialog.vue";
 import {useAPI}                   from '~/composables/useAPI';
 import {rules}                    from "~/utils/validationRules";
+import PriceInput                 from "~/components/price/PriceInput.vue";
+import PercentOrPriceInput        from "~/components/price/PercentOrPriceInput.vue";
+import {formatters}               from "~/utils/formatters";
 
 const settlementDialog       = ref(false);
 const settlementId           = ref('');
@@ -487,12 +459,41 @@ const calculateInvoiceTotal = () => {
   form.value.total = form.value.products.reduce((sum, product) => sum + product.total, 0);
   form.value.sum   = form.value.total;
 
+  // calc subtracts
   form.value.AddAndSub.forEach((item) => {
-    let detail = addAndSubtract.value.find(p => p._id === item._reason);
-    if (detail) {
-      let operationSum = Number(item.value) <= 100 ? (form.value.total * item.value / 100) : Number(item.value);
-      form.value.sum += detail.operation === 'add' ? operationSum : -operationSum;
-      item.amount      = operationSum;
+    const detailAddAndSubtract = addAndSubtract.value.find(p => p._id === item._reason);
+    item.value                 = Number(item.value);
+    if (detailAddAndSubtract) {
+      if (detailAddAndSubtract.operation === 'subtract') {
+        let operationSum = 0;
+        if (item.value <= 100) {
+          operationSum = Math.ceil((form.value.total * item.value) / 100);
+          form.value.sum -= operationSum;
+        } else {
+          operationSum = item.value;
+          form.value.sum -= item.value;
+        }
+        item.amount = operationSum;
+      }
+    }
+  });
+
+  // calc addition
+  form.value.AddAndSub.forEach((item) => {
+    const detailAddAndSubtract = addAndSubtract.value.find(p => p._id === item._reason);
+    item.value                 = Number(item.value);
+    if (detailAddAndSubtract) {
+      if (detailAddAndSubtract.operation === 'add') {
+        let operationSum = 0;
+        if (item.value <= 100) {
+          operationSum = Math.floor((form.value.sum * item.value) / 100);
+          form.value.sum += operationSum;
+        } else {
+          operationSum = item.value;
+          form.value.sum += item.value;
+        }
+        item.amount = operationSum;
+      }
     }
   });
 };

@@ -55,11 +55,12 @@
                 <!--   Amount   -->
                 <v-col class="d-flex" cols="12" md="12">
                   <v-label class="d-inline-block mx-2 mt-4">مبلغ:</v-label>
-                  <v-text-field class="font-weight-bold text-secondary"
-                                v-model="info.amount"
-                                variant="solo-filled"
-                                readonly>
-                  </v-text-field>
+                  <PriceInput class="font-weight-bold text-secondary"
+                              v-model="info.amount"
+                              label=""
+                              density="default"
+                              variant="solo-filled"
+                              readonly/>
                 </v-col>
 
               </v-row>
@@ -80,16 +81,14 @@
                        cols="12"
                        md="12">
                   <v-label class="d-inline-block mx-7 mt-2">نقد:</v-label>
-                  <v-text-field class=""
-                                v-model="form.payment.cash"
-                                :readonly="form.payment.distributedCash"
-                                :disabled="!validCashAccounts"
-                                @click:append="form.window = 2"
-                                append-icon="mdi-cash-multiple"
-                                type="number"
-                                density="compact"
-                                variant="outlined">
-                  </v-text-field>
+                  <PriceInput v-model="form.payment.cash"
+                              :readonly="form.payment.distributedCash"
+                              :disabled="!validCashAccounts"
+                              @click:append="form.window = 2"
+                              append-icon="mdi-cash-multiple"
+                              label=""
+                              density="compact"
+                              variant="outlined"/>
                 </v-col>
 
                 <!--      Invalid Cash Accounts          -->
@@ -108,16 +107,15 @@
                        cols="12"
                        md="12">
                   <v-label class="d-inline-block mx-2 mt-2">کارتخوان:</v-label>
-                  <v-text-field class=""
-                                v-model="form.payment.bank"
-                                :readonly="form.payment.distributedBank"
-                                :disabled="!validBankAccounts"
-                                @click:append="form.window = 3"
-                                append-icon="mdi-credit-card-multiple-outline"
-                                type="number"
-                                density="compact"
-                                variant="outlined">
-                  </v-text-field>
+                  <PriceInput class=""
+                              v-model="form.payment.bank"
+                              :readonly="form.payment.distributedBank"
+                              :disabled="!validBankAccounts"
+                              @click:append="form.window = 3"
+                              append-icon="mdi-credit-card-multiple-outline"
+                              label=""
+                              density="compact"
+                              variant="outlined"/>
                 </v-col>
 
                 <!--      Invalid Bank Accounts          -->
@@ -136,12 +134,11 @@
                        cols="12"
                        md="12">
                   <v-label class="d-inline-block mx-6 mt-2">نسیه:</v-label>
-                  <v-text-field class="ml-11"
-                                v-model="form.payment.credit"
-                                type="number"
-                                density="compact"
-                                variant="outlined">
-                  </v-text-field>
+                  <PriceInput class="ml-11"
+                              v-model="form.payment.credit"
+                              label=""
+                              density="compact"
+                              variant="outlined"/>
                 </v-col>
 
               </v-row>
@@ -153,12 +150,13 @@
                 <!--   Amount   -->
                 <v-col class="d-flex" cols="12" md="12">
                   <v-label class="d-inline-block mx-2 mt-4">باقیمانده:</v-label>
-                  <v-text-field class="font-weight-bold text-secondary"
-                                v-model="form.payment.remaining"
-                                :rules="[remaining]"
-                                variant="solo-filled"
-                                readonly>
-                  </v-text-field>
+                  <PriceInput class="font-weight-bold text-secondary"
+                              v-model="form.payment.remaining"
+                              :rules="[remaining]"
+                              label=""
+                              density="default"
+                              variant="solo-filled"
+                              readonly/>
                 </v-col>
               </v-row>
             </v-col>
@@ -175,12 +173,7 @@
                   accounts.find(i => i._id === cashAccount._account).title
                 }}:
               </v-label>
-              <v-text-field class=""
-                            v-model="cashAccount.amount"
-                            type="number"
-                            density="compact"
-                            variant="outlined">
-              </v-text-field>
+              <PriceInput label="" v-model="cashAccount.amount"/>
             </v-row>
           </v-window-item>
 
@@ -195,14 +188,10 @@
                   accounts.find(i => i._id === bankAccount._account).title
                 }}:
               </v-label>
-              <v-text-field class=""
-                            v-model="bankAccount.amount"
-                            type="number"
-                            density="compact"
-                            variant="outlined">
-              </v-text-field>
+              <PriceInput label="" v-model="bankAccount.amount"/>
             </v-row>
           </v-window-item>
+
           <!--     Actions       -->
           <v-row class="mx-1 pb-5">
             <v-col cols="12">

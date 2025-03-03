@@ -64,6 +64,9 @@
                     @update:options="setListOptions"
                     sticky
                     show-current-page>
+        <template v-slot:item.amount="{ item }">
+          {{ formatters.price(item.amount) }}
+        </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
           <v-btn class="mx-2"
@@ -111,6 +114,7 @@ import AddAccountingDocument             from '~/components/accounting-documents
 import {useAPI}                          from "~/composables/useAPI";
 import Loading                           from '~/components/Loading.vue';
 import EmptyList                         from '~/components/EmptyList.vue';
+import {formatters}                      from "../utils/formatters";
 
 definePageMeta({
   layout      : 'admin',
@@ -127,7 +131,7 @@ const listHeaders           = ref([
   {title: 'کد سند', key: 'code', align: 'center', sortable: true},
   {title: 'تاریخ', key: 'dateTimeJalali', align: 'center', sortable: true},
   {title: 'توضیحات', key: 'description', align: 'center', sortable: true},
-  {title: 'مبلغ', key: 'amount', align: 'center', sortable: true},
+  {title: 'مبلغ (تومان)', key: 'amount', align: 'center', sortable: true},
   {title: 'عملیات', key: 'operation', align: 'center', sortable: false},
 ]);
 const listTotal             = ref(0);
