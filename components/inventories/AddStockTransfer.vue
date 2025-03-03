@@ -8,20 +8,20 @@
     <v-label class="text-black font-weight-bold mx-3">مشخصات انتقال</v-label>
     <v-row class="mx-5">
 
-      <!--   Warehouse   -->
+      <!--   Source Warehouse   -->
       <v-col class="" cols="12" md="4">
         <WarehouseInput class="mt-3"
                         label="انبار مبدا"
-                        :rules="[rules.requiredSelect]"
+                        :rules="[rules.requiredSelect, differentWarehouseRule]"
                         v-model="form._sourceWarehouse">
         </WarehouseInput>
       </v-col>
 
-      <!--   Warehouse   -->
+      <!--   Destination Warehouse   -->
       <v-col class="mt-n8 mt-md-0" cols="12" md="4" offset-md="1">
         <WarehouseInput class="mt-3"
                         label="انبار مقصد"
-                        :rules="[rules.requiredSelect]"
+                        :rules="[rules.requiredSelect, differentWarehouseRule]"
                         v-model="form._destinationWarehouse">
         </WarehouseInput>
       </v-col>
@@ -215,6 +215,15 @@ const stockTransfersForm = ref(null);
 const {$notify}          = useNuxtApp();
 const emit               = defineEmits(['exit', 'refresh']);
 
+// validate different warehouses
+const differentWarehouseRule = () => {
+  if (form.value._sourceWarehouse === form.value._destinationWarehouse) {
+    return 'انبار‌های انتقال باید متفاوت باشد';
+  } else {
+    return true;
+  }
+};
+
 const maxCountRule = (count) => {
   return value => {
     if (value > count) {
@@ -359,8 +368,18 @@ const stockTransferProduct = async (index) => {
         form.value.products[index].submitLoading = false;
         form.value.products[index].error         = true;
 
+
         // show error
-        this.notify('مشکلی در انتقال به وجود آمد', 'error');
+        $notify('مشکلی در انتقال به وجود آمد', 'error');
+
+        if(response.status === 400) {
+          switch (response._data.message) {
+            // different warehouse error
+            case '_sourceWarehouse & _destinationWarehouse must be unique and different':
+              $notify('انبار مبدا و مقصد باید منحصر به فرد و متفاوت باشد', 'error');
+              break;
+          }
+        }
       }
     }
   });

@@ -37,7 +37,7 @@
             <v-col class="" cols="12">
               <WarehouseInput class=""
                               label="انبار مبدا"
-                              :rules="[rules.requiredSelect]"
+                              :rules="[rules.requiredSelect, differentWarehouseRule]"
                               v-model="form._sourceWarehouse">
               </WarehouseInput>
             </v-col>
@@ -46,7 +46,7 @@
             <v-col class="" cols="12">
               <WarehouseInput class=""
                               label="انبار مقصد"
-                              :rules="[rules.requiredSelect]"
+                              :rules="[rules.requiredSelect, differentWarehouseRule]"
                               v-model="form._destinationWarehouse">
               </WarehouseInput>
             </v-col>
@@ -111,11 +111,11 @@
 </template>
 
 <script setup>
-import {ref, watch} from 'vue';
-import {useNuxtApp}            from '#app';
-import ProductInput            from "~/components/products/ProductInput.vue";
-import WarehouseInput          from "~/components/warehouses/WarehouseInput.vue";
-import {useAPI}                from "~/composables/useAPI";
+import {ref, watch}   from 'vue';
+import {useNuxtApp}   from '#app';
+import ProductInput   from "~/components/products/ProductInput.vue";
+import WarehouseInput from "~/components/warehouses/WarehouseInput.vue";
+import {useAPI}       from "~/composables/useAPI";
 
 // Define reactive form state
 const form = ref({
@@ -133,6 +133,16 @@ const stockTransferForm = ref(null);
 
 // Define Emits
 const emit = defineEmits(['exti', 'refresh']);
+
+
+// validate different warehouses
+const differentWarehouseRule = () => {
+  if (form.value._sourceWarehouse === form.value._destinationWarehouse) {
+    return 'انبار‌های انتقال باید متفاوت باشد';
+  } else {
+    return true;
+  }
+};
 
 // Function for close the dialog
 const closeTheDialog = () => {
@@ -176,6 +186,16 @@ const submit = async (formRef) => {
           });
         } else {
           $notify('مشکلی در انتقال به وجود آمد', 'error');
+
+          // different warehouse error
+          if (response.status === 400) {
+            switch (response._data.message) {
+              case '_sourceWarehouse & _destinationWarehouse must be unique and different':
+                $notify('انبار مبدا و مقصد باید منحصر به فرد و متفاوت باشد', 'error');
+                break;
+            }
+          }
+
         }
       }
     });
@@ -195,7 +215,7 @@ const getInventoryByProductId = async (_id) => {
   await useAPI(`products/${_id}/inventory?typeOfSales=retail`, {
     method    : 'GET',
     onResponse: ({response}) => {
-      if(response.status === 200) {
+      if (response.status === 200) {
         inventory.value = response._data;
         setProductTotalCount();
       }
