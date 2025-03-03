@@ -74,6 +74,20 @@
         <template v-slot:item._warehouse="{ item }">
           {{ item._warehouse.title }}
         </template>
+        <template v-slot:item.status="{ item }">
+          <span class="text-black" v-if="item.status === 'Draft'">پیش نویس</span>
+          <span class="text-orange" v-if="item.status === 'Pending Approval'">در انتظار تایید</span>
+          <span class="text-green" v-if="item.status === 'Approved'">تایید شده</span>
+          <span class="text-black" v-if="item.status === 'Processing'">در حال تامین</span>
+          <span class="text-orange" v-if="item.status === 'Partially Received'">دریافت جزئی</span>
+          <span class="text-green" v-if="item.status === 'Completed'">کامل شده</span>
+          <span class="text-black" v-if="item.status === 'Unpaid'">پرداخت نشده</span>
+          <span class="text-orange" v-if="item.status === 'Partially Paid'">پرداخت جزئی</span>
+          <span class="text-green" v-if="item.status === 'Paid'">پرداخت شده</span>
+          <span class="text-red" v-if="item.status === 'Cancelled'">باطل شده</span>
+          <span class="text-red" v-if="item.status === 'Returned'">مرجوع شده</span>
+          <span class="text-orange" v-if="item.status === 'On Hold'">مرجوع شده</span>
+        </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
           <v-btn class="mx-2"
@@ -183,6 +197,12 @@ const listHeaders        = [
   {
     title   : 'انبار',
     key     : '_warehouse',
+    align   : 'center',
+    sortable: true
+  },
+  {
+    title   : 'وضعیت',
+    key     : 'status',
     align   : 'center',
     sortable: true
   },
