@@ -96,7 +96,7 @@
           <v-col cols="5">
             <!--    Price    -->
             <v-row v-if="form.productSelector.price" class="text-caption mx-5">
-              قیمت: {{ form.productSelector.price }}
+              قیمت: {{ formatters.price(form.productSelector.price) }} تومان
             </v-row>
             <!--    Inventory    -->
             <v-row class="text-caption mx-5"
