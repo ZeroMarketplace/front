@@ -31,9 +31,19 @@
                  size="small"
                  @click="toggleAction"
                  icon>
+            <!--      Icons      -->
             <v-icon v-if="action === 'list'">mdi-plus</v-icon>
             <v-icon v-if="action === 'edit'">mdi-file-tree-outline</v-icon>
             <v-icon v-if="action === 'add'">mdi-file-tree-outline</v-icon>
+
+            <!--       Description       -->
+            <v-tooltip
+                activator="parent"
+                location="top">
+              <span v-if="action === 'list'">اضافه کردن</span>
+              <span v-if="action === 'edit'">دسته‌بندی‌ها</span>
+              <span v-if="action === 'add'">دسته‌بندی‌ها</span>
+            </v-tooltip>
           </v-btn>
         </v-col>
       </v-row>
@@ -57,6 +67,7 @@
                                   @setEdit="setEdit"
                                   @setParent="setParent"
                                   @setDelete="setDelete"
+                                  @setStatus="setStatus"
                                   :item="item"/>
       </v-list>
 
@@ -98,21 +109,47 @@ const toggleAction = () => {
   }
 };
 
+const filter = () => {
+  let search = new URLSearchParams();
+
+  // set the statuses
+  search.set('statuses', [1, 2]);
+
+
+  return search;
+};
+
 // Fetches the list of categories
 const getCategories = async () => {
+  // start loading
   loading.value = true;
-  await useAPI('categories', {
+  await useAPI('categories?' + filter(), {
     method    : 'get',
     onResponse: ({response}) => {
-      list.value    = response._data.list; // set list of categories
-      loading.value = false; // stop loading
+      // set list of categories
+      list.value = [];
+
+      // add the loading flags to each item
+      response._data.list.forEach(item => {
+        item.deleteLoading    = false;
+        item.setStatusLoading = false;
+
+        list.value.push(item);
+      })
+
     }
   });
+  // stop loading
+  loading.value = false;
 };
 
 // Deletes a category by ID
-const deleteCategory = async (_id) => {
-  await useAPI('categories/' + _id, {
+const deleteCategory = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  // send the request
+  await useAPI('categories/' + item._id, {
     method    : 'delete',
     onResponse: ({response}) => {
       if (response.status === 200) {
@@ -122,7 +159,37 @@ const deleteCategory = async (_id) => {
         $notify('مشکلی در پردازش عملیات پیش آمد. لطفا دوباره تلاش کنید.', 'error');
       }
     }
-  })
+  });
+
+  item.deleteLoading = false;
+};
+
+const setStatus = async (item) => {
+
+  // start loading
+  item.setStatusLoading = true;
+
+  // detect the status
+  let status = item.status === 1 ? 2 : 1;
+
+  // send the request
+  await useAPI('categories/' + item._id + '/status', {
+    method    : 'patch',
+    body      : {
+      status: status
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        await getCategories();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+
+  // stop loading
+  item.setStatusLoading = false;
 };
 
 // Prepares data for editing a category
@@ -133,9 +200,9 @@ const setEdit = (data) => {
 };
 
 // Confirms and deletes a category
-const setDelete = (data) => {
+const setDelete = (item) => {
   if (confirm("آیا مطمئن هستید؟")) {
-    deleteCategory(data._id);
+    deleteCategory(item);
   }
 };
 

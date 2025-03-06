@@ -8,7 +8,36 @@
              @click="activeChildren = !activeChildren"
              variant="text"
              icon>
+        <!--    Icons     -->
         <v-icon size="20">mdi-{{ (activeChildren ? 'menu-down' : 'menu-right') }}</v-icon>
+
+        <!--       Description       -->
+        <v-tooltip
+            activator="parent"
+            location="top">
+          <span v-if="!activeChildren">گستردن</span>
+          <span v-else>بستن</span>
+        </v-tooltip>
+
+      </v-btn>
+
+      <!--  Status   -->
+      <v-btn class="mx-1"
+             :color="item.status === 1 ? 'green' : 'red'"
+             size="30"
+             :loading="item.setStatusLoading"
+             @click="setStatus(item)">
+        <!--       Icons       -->
+        <v-icon v-if="item.status === 1" size="15">mdi-check-outline</v-icon>
+        <v-icon v-if="item.status === 2" size="15">mdi-close-outline</v-icon>
+
+        <!--       Description       -->
+        <v-tooltip
+            activator="parent"
+            location="top">
+          <span v-if="item.status === 1">غیر فعال کردن</span>
+          <span v-if="item.status === 2">فعال کردن</span>
+        </v-tooltip>
       </v-btn>
 
       <!--  Title    -->
@@ -27,7 +56,15 @@
              size="30"
              @click="setParent(item)"
              icon>
+        <!--    Icon     -->
         <v-icon size="15">mdi-plus</v-icon>
+
+        <!--       Description       -->
+        <v-tooltip
+            activator="parent"
+            location="top">
+          افزودن زیر دسته
+        </v-tooltip>
       </v-btn>
 
       <!--  Edit   -->
@@ -36,16 +73,33 @@
              size="30"
              @click="setEdit(item)"
              icon>
+        <!--    Icon    -->
         <v-icon size="15">mdi-pencil</v-icon>
+
+        <!--       Description       -->
+        <v-tooltip
+            activator="parent"
+            location="top">
+          ویرایش
+        </v-tooltip>
       </v-btn>
 
       <!--  Delete   -->
       <v-btn class="mx-2"
              color="red"
              size="30"
+             :loading="item.deleteLoading"
              @click="setDelete(item)"
              icon>
+        <!--    Icon    -->
         <v-icon size="15">mdi-delete-outline</v-icon>
+
+        <!--       Description       -->
+        <v-tooltip
+            activator="parent"
+            location="top">
+          حذف
+        </v-tooltip>
       </v-btn>
 
     </template>
@@ -56,6 +110,7 @@
                                 @setEdit="setEdit"
                                 @setParent="setParent"
                                 @setDelete="setDelete"
+                                @setStatus="setStatus"
                                 :item="itemChild"/>
     </v-list>
 
@@ -63,12 +118,15 @@
 </template>
 
 <script setup>
-const props = defineProps({
+const props          = defineProps({
   item: Object
 });
-const emit = defineEmits(['setParent', 'setDelete', 'setEdit']);
+const emit           = defineEmits(['setParent', 'setDelete', 'setEdit']);
 const activeChildren = ref(false);
-const activeMenu = ref(true);
+
+const setStatus = (item) => {
+  emit('setStatus', item);
+}
 
 const setParent = (item) => {
   emit('setParent', item);
