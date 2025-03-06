@@ -127,7 +127,7 @@
             <v-col class="bg-red-lighten-5 border rounded-lg">بدهکار: {{ formatters.price(form.sumOfDebit) }} تومان</v-col>
             <v-col class="bg-green-lighten-5 border rounded-lg">بستانکار: {{ formatters.price(form.sumOfCredit) }} تومان</v-col>
             <v-col cols="12" class="bg-orange-lighten-5 border rounded-lg">اختلاف:
-              <span :class="form.difference >= 0 ? 'text-green' : 'text-red'">{{ formatters.price(form.difference) }} تومانت</span>
+              <span :class="form.difference >= 0 ? 'text-green' : 'text-red'">{{ formatters.price(form.difference) }} تومان</span>
             </v-col>
           </v-row>
         </v-col>
