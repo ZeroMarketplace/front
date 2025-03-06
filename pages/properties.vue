@@ -31,9 +31,19 @@
                  size="small"
                  @click="toggleAction"
                  icon>
+            <!--      Icons      -->
             <v-icon v-if="action === 'list'">mdi-plus</v-icon>
             <v-icon v-if="action === 'edit'">mdi-order-bool-descending-variant</v-icon>
             <v-icon v-if="action === 'add'">mdi-order-bool-descending-variant</v-icon>
+
+            <!--       Description       -->
+            <v-tooltip
+                activator="parent"
+                location="top">
+              <span v-if="action === 'list'">اضافه کردن</span>
+              <span v-if="action === 'edit'">ویژگی‌ها</span>
+              <span v-if="action === 'add'">ویژگی‌ها</span>
+            </v-tooltip>
           </v-btn>
         </v-col>
       </v-row>
@@ -54,18 +64,49 @@
       <v-list class="mx-5">
         <v-list-item v-for="item in list" class="rounded border-b pa-2" link>
 
+          <template v-slot:prepend>
+            <!--  Status   -->
+            <v-btn class="ml-2"
+                   :color="item.status === 1 ? 'green' : 'red'"
+                   size="30"
+                   :loading="item.setStatusLoading"
+                   @click="setStatus(item)">
+              <!--       Icons       -->
+              <v-icon v-if="item.status === 1" size="15">mdi-check-outline</v-icon>
+              <v-icon v-if="item.status === 2" size="15">mdi-close-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                <span v-if="item.status === 1">غیر فعال کردن</span>
+                <span v-if="item.status === 2">فعال کردن</span>
+              </v-tooltip>
+            </v-btn>
+          </template>
+
           <!--      Title        -->
           <v-list-item-title>{{ item.title }}</v-list-item-title>
 
           <!--      Actions        -->
           <template v-slot:append>
+
             <!--  Delete   -->
             <v-btn class="mx-2"
                    color="red"
                    size="30"
-                   @click="setDelete({_id: item._id})"
+                   :loading="item.deleteLoading"
+                   @click="setDelete(item)"
                    icon>
+              <!--       Icon       -->
               <v-icon size="15">mdi-delete-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                حذف
+              </v-tooltip>
             </v-btn>
 
             <!--  Edit   -->
@@ -74,7 +115,15 @@
                    size="30"
                    @click="setEdit(item)"
                    icon>
+              <!--       Icon       -->
               <v-icon size="15">mdi-pencil</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                ویرایش
+              </v-tooltip>
             </v-btn>
 
           </template>
@@ -135,6 +184,9 @@ const filter = () => {
   search.set('sortColumn', sortColumn.value);
   search.set('sortDirection', sortDirection.value);
 
+  // set statuses
+  search.set('statuses', [1, 2, 'asdf']);
+
   return search;
 };
 
@@ -146,7 +198,16 @@ const getProperties = async () => {
     method    : 'get',
     onResponse: ({response}) => {
       // fill the list and stop loading
-      list.value    = response._data.list;
+      list.value = [];
+
+      // add loadings flags to each item
+      response._data.list.forEach(item => {
+        item.setStatusLoading = false;
+        item.deleteLoading    = false;
+
+        list.value.push(item);
+      })
+
       loading.value = false;
 
       // set page count from list total
@@ -155,8 +216,12 @@ const getProperties = async () => {
   });
 };
 
-const deleteProperty = async (_id) => {
-  await useAPI('properties/' + _id, {
+const deleteProperty = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  // send the request
+  await useAPI('properties/' + item._id, {
     method    : 'delete',
     onResponse: async ({response}) => {
       if (response.status === 200) {
@@ -167,6 +232,36 @@ const deleteProperty = async (_id) => {
       }
     }
   });
+
+  // stop the loading
+  item.deleteLoading = false;
+};
+
+const setStatus = async (item) => {
+  // start loading
+  item.setStatusLoading = true;
+
+  // detect the status
+  let status = item.status === 1 ? 2 : 1;
+
+  // send the request
+  await useAPI('properties/' + item._id + '/status', {
+    method    : 'patch',
+    body      : {
+      status: status
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        await getProperties();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+
+  // stop loading
+  item.setStatusLoading = false;
 };
 
 const setEdit = (data) => {
@@ -174,9 +269,9 @@ const setEdit = (data) => {
   action.value = 'edit';
 };
 
-const setDelete = (data) => {
+const setDelete = (item) => {
   if (confirm('آیا مطمئن هستید؟')) {
-    deleteProperty(data._id);
+    deleteProperty(item);
   }
 };
 
