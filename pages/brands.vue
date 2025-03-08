@@ -31,9 +31,19 @@
                  size="small"
                  @click="toggleAction"
                  icon>
+            <!--      Icons       -->
             <v-icon v-if="action === 'list'">mdi-plus</v-icon>
             <v-icon v-if="action === 'edit'">mdi-draw-pen</v-icon>
             <v-icon v-if="action === 'add'">mdi-draw-pen</v-icon>
+
+            <!--       Description       -->
+            <v-tooltip
+                activator="parent"
+                location="top">
+              <span v-if="action === 'list'">اضافه کردن</span>
+              <span v-if="action === 'edit'">برند‌ها</span>
+              <span v-if="action === 'add'">برند‌ها</span>
+            </v-tooltip>
           </v-btn>
         </v-col>
       </v-row>
@@ -56,6 +66,28 @@
         <v-list-item v-for="item in list"
                      class="rounded border-b pa-2" link>
 
+          <template v-slot:prepend>
+            <!--  Status   -->
+            <v-btn class="ml-2"
+                   :color="item.status === 1 ? 'green' : 'red'"
+                   size="30"
+                   :loading="item.setStatusLoading"
+                   @click="setStatus(item)">
+              <!--       Icons       -->
+              <v-icon v-if="item.status === 1" size="15">mdi-check-outline</v-icon>
+              <v-icon v-if="item.status === 2" size="15">mdi-close-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                <span v-if="item.status === 1">غیر فعال کردن</span>
+                <span v-if="item.status === 2">فعال کردن</span>
+              </v-tooltip>
+            </v-btn>
+          </template>
+
+
           <!--      Title        -->
           <v-list-item-title>{{ item.title }}</v-list-item-title>
 
@@ -67,7 +99,15 @@
                    size="30"
                    @click="setDelete({_id: item._id})"
                    icon>
+              <!--       Icon       -->
               <v-icon size="15">mdi-delete-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                حذف
+              </v-tooltip>
             </v-btn>
 
             <!--  Edit   -->
@@ -76,7 +116,15 @@
                    size="30"
                    @click="setEdit(item)"
                    icon>
+              <!--       Icon       -->
               <v-icon size="15">mdi-pencil</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                ویرایش
+              </v-tooltip>
             </v-btn>
 
           </template>
@@ -85,7 +133,8 @@
       </v-list>
 
       <!--   Pagination    -->
-      <v-pagination class="mt-5"
+      <v-pagination v-if="pageCount > 1"
+                    class="mt-5"
                     active-color="secondary"
                     v-model="page"
                     :length="pageCount"
@@ -114,11 +163,11 @@ definePageMeta({
 });
 
 // Reactive state variables
-const list      = ref([]);
-const loading   = ref(true);
-const action    = ref("list");
-const {$notify} = useNuxtApp();
-const addBrand  = ref(null);
+const list          = ref([]);
+const loading       = ref(true);
+const action        = ref("list");
+const {$notify}     = useNuxtApp();
+const addBrand      = ref(null);
 const page          = ref(1);
 const perPage       = ref(10);
 const pageCount     = ref(1);
@@ -137,28 +186,49 @@ const filter = () => {
   search.set('sortColumn', sortColumn.value);
   search.set('sortDirection', sortDirection.value);
 
+  // statuses
+  search.set('statuses', [1, 2]);
+
   return search;
 };
 
 // Fetch the list of brands from the API
 const getBrands = async () => {
+  // start loading
   loading.value = true;
+
+  // send the request
   await useAPI('brands?' + filter(), {
     method    : 'get',
     onResponse: ({response}) => {
-      // Set data to list variable and stop loading
-      list.value    = response._data.list;
-      loading.value = false;
+      if (response.status === 200) {
+        // Set data to list variable and stop loading
+        list.value = [];
 
-      // set page count from list total
-      pageCount.value = Math.ceil((response._data.total / perPage.value));
+        response._data.list.forEach(item => {
+          item.setStatusLoading = false;
+          item.deleteLoading    = false;
+
+          list.value.push(item);
+        });
+
+        // set page count from list total
+        pageCount.value = Math.ceil((response._data.total / perPage.value));
+      }
     }
   });
+
+  // stop loading
+  loading.value = false;
 };
 
 // Delete a brand by ID
-const deleteBrand = async (_id) => {
-  await useAPI('brands/' + _id, {
+const deleteBrand = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  // send the request
+  await useAPI('brands/' + item._id, {
     method    : 'delete',
     onResponse: ({response}) => {
       if (response.status === 200) {
@@ -166,11 +236,41 @@ const deleteBrand = async (_id) => {
         // Refresh the list
         getBrands();
       } else {
-        // Show error message
+        // Show the error message
         $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
       }
     }
   });
+
+  // stop loading
+  item.deleteLoading = false;
+};
+
+const setStatus = async (item) => {
+  // start loading
+  item.setStatusLoading = true;
+
+  // detect the status
+  let status = item.status === 1 ? 2 : 1;
+
+  // send the request
+  await useAPI('brands/' + item._id + '/status', {
+    method    : 'patch',
+    body      : {
+      status: status
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        await getBrands();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+
+  // stop loading
+  item.setStatusLoading = false;
 };
 
 // Set brand to edit mode
@@ -181,9 +281,9 @@ const setEdit = (data) => {
 };
 
 // Confirm and delete a brand
-const setDelete = (data) => {
+const setDelete = (item) => {
   if (confirm("آیا مطمئن هستید؟")) {
-    deleteBrand(data._id);
+    deleteBrand(item);
   }
 };
 
