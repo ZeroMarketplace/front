@@ -82,7 +82,9 @@
 <script setup>
 import {useNuxtApp}     from "#app";
 import {ref, onMounted} from "vue";
-import {useAPI}         from '~/composables/useAPI'
+import {useAPI}         from '~/composables/useAPI';
+import Loading          from "~/components/Loading.vue";
+import EmptyList        from "~/components/EmptyList.vue";
 
 // Page metadata configuration
 definePageMeta({
@@ -164,6 +166,7 @@ const deleteCategory = async (item) => {
   item.deleteLoading = false;
 };
 
+// set status for category
 const setStatus = async (item) => {
 
   // start loading
