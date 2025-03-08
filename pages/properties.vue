@@ -152,6 +152,8 @@
 import {ref, onMounted, watch} from 'vue';
 import {useCookie, useNuxtApp} from '#app';
 import {useAPI}                from '~/composables/useAPI';
+import Loading                 from "~/components/Loading.vue";
+import EmptyList               from "~/components/EmptyList.vue";
 
 definePageMeta({
   layout      : 'admin',
@@ -237,6 +239,7 @@ const deleteProperty = async (item) => {
   item.deleteLoading = false;
 };
 
+// set status for property
 const setStatus = async (item) => {
   // start loading
   item.setStatusLoading = true;
