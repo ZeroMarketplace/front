@@ -31,9 +31,19 @@
                  size="small"
                  @click="toggleAction"
                  icon>
+            <!--      Icons       -->
             <v-icon v-if="action === 'list'">mdi-plus</v-icon>
             <v-icon v-if="action === 'edit'">mdi-warehouse</v-icon>
             <v-icon v-if="action === 'add'">mdi-warehouse</v-icon>
+
+            <!--       Description       -->
+            <v-tooltip
+                activator="parent"
+                location="top">
+              <span v-if="action === 'list'">اضافه کردن</span>
+              <span v-if="action === 'edit'">انبار‌ها</span>
+              <span v-if="action === 'add'">انبار‌ها</span>
+            </v-tooltip>
           </v-btn>
         </v-col>
       </v-row>
@@ -56,6 +66,27 @@
         <v-list-item v-for="item in list"
                      class="rounded border-b pa-2" link>
 
+          <template v-slot:prepend>
+            <!--  Status   -->
+            <v-btn class="ml-2"
+                   :color="item.status === 1 ? 'green' : 'red'"
+                   size="30"
+                   :loading="item.setStatusLoading"
+                   @click="setStatus(item)">
+              <!--       Icons       -->
+              <v-icon v-if="item.status === 1" size="15">mdi-check-outline</v-icon>
+              <v-icon v-if="item.status === 2" size="15">mdi-close-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                <span v-if="item.status === 1">غیر فعال کردن</span>
+                <span v-if="item.status === 2">فعال کردن</span>
+              </v-tooltip>
+            </v-btn>
+          </template>
+
           <!--      Title        -->
           <v-list-item-title>{{ item.title }}</v-list-item-title>
 
@@ -69,16 +100,19 @@
                    :class="item.defaultFor ? 'bg-secondary' : 'bg-white border'"
                    size="30"
                    icon>
+              <!--       Icon       -->
               <v-icon size="15">mdi-star-outline</v-icon>
+
+              <!--       Menu        -->
               <v-menu activator="parent">
                 <v-list>
                   <!--         Online Sales             -->
-                  <v-list-item @click="setDefault('onlineSales',item)"
+                  <v-list-item @click="setDefault(2, item)"
                                key="1"
                                value="onlineSales">
                     <v-list-item-title>
                       فروش آنلاین
-                      <v-icon v-if="item.defaultFor === 'onlineSales'"
+                      <v-icon v-if="item.defaultFor === 2"
                               size="15"
                               color="secondary">mdi-star-outline
                       </v-icon>
@@ -86,12 +120,12 @@
                   </v-list-item>
 
                   <!--          Retail            -->
-                  <v-list-item @click="setDefault('retail',item)"
+                  <v-list-item @click="setDefault(1, item)"
                                key="2"
                                value="retail">
                     <v-list-item-title>
                       خرده فروشی
-                      <v-icon v-if="item.defaultFor === 'retail'"
+                      <v-icon v-if="item.defaultFor === 1"
                               size="15"
                               color="secondary">mdi-star-outline
                       </v-icon>
@@ -100,15 +134,15 @@
 
                 </v-list>
               </v-menu>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                پیش فرض برای ...
+              </v-tooltip>
             </v-btn>
 
-            <!--  inventory of products   -->
-            <v-btn class="mx-2"
-                   color="secondary"
-                   size="30"
-                   icon>
-              <v-icon size="15">mdi-format-list-bulleted-square</v-icon>
-            </v-btn>
 
             <!--  Edit   -->
             <v-btn class="mx-2"
@@ -116,7 +150,15 @@
                    size="30"
                    @click="setEdit(item)"
                    icon>
+              <!--       Icon        -->
               <v-icon size="15">mdi-pencil</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                ویرایش
+              </v-tooltip>
             </v-btn>
 
             <!--  Delete   -->
@@ -125,7 +167,15 @@
                    size="30"
                    @click="setDelete({_id: item._id})"
                    icon>
+              <!--      Icon        -->
               <v-icon size="15">mdi-delete-outline</v-icon>
+
+              <!--       Description       -->
+              <v-tooltip
+                  activator="parent"
+                  location="top">
+                حذف
+              </v-tooltip>
             </v-btn>
 
           </template>
@@ -154,6 +204,8 @@
 import {ref, onMounted} from 'vue';
 import {useNuxtApp}     from '#app';
 import {useAPI}         from '~/composables/useAPI';
+import Loading          from "~/components/Loading.vue";
+import EmptyList        from "~/components/EmptyList.vue";
 
 // Define page meta
 definePageMeta({
@@ -164,11 +216,11 @@ definePageMeta({
 });
 
 // Reactive variables
-const list         = ref([]);
-const loading      = ref(true);
-const action       = ref('list');
-const addWarehouse = ref(null);
-const {$notify}    = useNuxtApp();
+const list          = ref([]);
+const loading       = ref(true);
+const action        = ref('list');
+const addWarehouse  = ref(null);
+const {$notify}     = useNuxtApp();
 const page          = ref(1);
 const perPage       = ref(10);
 const pageCount     = ref(1);
@@ -188,13 +240,19 @@ const filter = () => {
   search.set('sortColumn', sortColumn.value);
   search.set('sortDirection', sortDirection.value);
 
+  // statuses
+  search.set('statuses', [1, 2]);
+
   return search;
 };
 
 
 // Fetch the warehouses list
 const getWarehouses = async () => {
+  // start loading
   loading.value = true;
+
+  // send the request
   await useAPI('warehouses?' + filter(), {
     method    : 'get',
     onResponse: ({response}) => {
@@ -207,10 +265,11 @@ const getWarehouses = async () => {
 
       // set page count from list total
       pageCount.value = Math.ceil((response._data.total / perPage.value));
-
-      loading.value = false;
     }
   });
+
+  // stop loading
+  loading.value = false;
 };
 
 // Toggle action between list, add, and edit
@@ -223,8 +282,12 @@ const toggleAction = () => {
 };
 
 // Delete warehouse by ID
-const deleteWarehouse = async (_id) => {
-  await useAPI('warehouses/' + _id, {
+const deleteWarehouse = async (item) => {
+  // start loading
+  item.deleteLoading = true;
+
+  // send the request
+  await useAPI('warehouses/' + item._id, {
     method    : 'delete',
     onResponse: ({response}) => {
       if (response.status === 200) {
@@ -237,6 +300,36 @@ const deleteWarehouse = async (_id) => {
       }
     }
   });
+
+  item.deleteLoading = false;
+};
+
+// set status for warehouse
+const setStatus = async (item) => {
+  // start loading
+  item.setStatusLoading = true;
+
+  // detect the status
+  let status = item.status === 1 ? 2 : 1;
+
+  // send the request
+  await useAPI('warehouses/' + item._id + '/status', {
+    method    : 'patch',
+    body      : {
+      status: status
+    },
+    onResponse: async ({response}) => {
+      if (response.status === 200) {
+        $notify('عملیات با موفقت انجام شد', 'success');
+        await getWarehouses();
+      } else {
+        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
+      }
+    }
+  });
+
+  // stop loading
+  item.setStatusLoading = false;
 };
 
 // Set warehouse for editing
@@ -246,9 +339,9 @@ const setEdit = (data) => {
 };
 
 // Confirm and delete warehouse
-const setDelete = (data) => {
+const setDelete = (item) => {
   if (confirm('آیا مطمئن هستید؟')) {
-    deleteWarehouse(data._id);
+    deleteWarehouse(item);
   }
 };
 
@@ -256,8 +349,13 @@ const setDelete = (data) => {
 const setDefault = async (typeOfSales, item) => {
   // start loading
   item.setDefaultLoading = true;
-  await useAPI('warehouses/default/' + typeOfSales + '/' + item._id, {
-    method    : 'put',
+
+  // send the request
+  await useAPI('warehouses/' + item._id + '/defaultFor', {
+    method    : 'patch',
+    body      : {
+      typeOfSales: typeOfSales,
+    },
     onResponse: ({response}) => {
       if (response.status === 200) {
         $notify('عملیات با موفقیت انجام شد', 'success');
@@ -267,11 +365,11 @@ const setDefault = async (typeOfSales, item) => {
       } else {
         $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
       }
-
-      // stop loading
-      item.setDefaultLoading = false;
     }
   });
+
+  // stop loading
+  item.setDefaultLoading = false;
 };
 
 // watch page change for get warehouses
@@ -286,7 +384,6 @@ onMounted(async () => {
   });
 });
 </script>
-
 
 <style scoped>
 
