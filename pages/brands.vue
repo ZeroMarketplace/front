@@ -153,6 +153,8 @@
 import {ref, onMounted, nextTick, watch} from "vue"; // Vue composition API functions
 import {useNuxtApp}                      from "#app"; // Nuxt composables
 import {useAPI}                          from '~/composables/useAPI';
+import Loading                           from "~/components/Loading.vue";
+import EmptyList                         from "~/components/EmptyList.vue";
 
 // Page meta for layout, middleware, and role
 definePageMeta({
@@ -246,6 +248,7 @@ const deleteBrand = async (item) => {
   item.deleteLoading = false;
 };
 
+// set status for brand
 const setStatus = async (item) => {
   // start loading
   item.setStatusLoading = true;
