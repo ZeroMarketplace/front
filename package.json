@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.2.96",
+    "@vue/compiler-sfc": "^3.4",
     "axios": "^1.7.7",
     "jsonwebtoken": "^9.0.2",
     "persian-date": "^1.1.0",
@@ -19,10 +20,11 @@
     "sass": "^1.63.6",
     "socket.io-client": "^4.7.5",
     "vee-validate": "^4.10.3",
+    "vue": "^3.4",
     "vue3-otp-input": "^0.4.1",
     "vue3-perfect-scrollbar": "^2.0.0",
     "vue3-persian-datetime-picker": "^1.2.2",
-    "vuetify": "^3.7.7"
+    "vuetify": "3.8.5"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",

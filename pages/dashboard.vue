@@ -1,7 +1,5 @@
 <template>
-  <div>
-    Dashboard
-  </div>
+  <div>Dashboard</div>
 </template>
 
 <script lang="ts" setup>
@@ -13,6 +11,4 @@ definePageMeta({
 })
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
