@@ -1,0 +1,61 @@
+@import "fontiran.css";
+
+$bodyColor: #ebeaea;
+
+body{
+  font-family: IRANSans !important;
+  background-color: $bodyColor !important;
+}
+
+.body {
+  background-color: $bodyColor !important;
+}
+
+
+label,
+div,
+html,
+h1,h2,h3,h4,h5,p,
+.text-h1,
+.text-h2,
+.text-h3,
+.text-h4,
+.text-h5,
+.text-h6,
+.text-subtitle-1,
+.text-subtitle-2,
+.text-caption {
+  font-family: IRANSans !important;
+}
+
+.ltrDirection {
+  direction: ltr !important;
+}
+
+.otp-input {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  margin: 0 2px;
+  font-size: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  text-align: center;
+  display: flex !important;
+
+  .is-complete {
+    background-color: #e4e4e4;
+  }
+
+  ::-webkit-inner-spin-button,
+  ::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input::placeholder {
+    font-size: 15px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+}

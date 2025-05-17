@@ -1,0 +1,33 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.2.96",
+    "axios": "^1.7.7",
+    "jsonwebtoken": "^9.0.2",
+    "persian-date": "^1.1.0",
+    "pinia": "^2.1.4",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "plyr": "^3.7.8",
+    "sass": "^1.63.6",
+    "socket.io-client": "^4.7.5",
+    "vee-validate": "^4.10.3",
+    "vue3-otp-input": "^0.4.1",
+    "vue3-perfect-scrollbar": "^2.0.0",
+    "vue3-persian-datetime-picker": "^1.2.2",
+    "vuetify": "^3.7.7"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@types/node": "^18",
+    "nuxt": "^3.10.2",
+    "nuxt-security": "^0.14.4"
+  }
+}
