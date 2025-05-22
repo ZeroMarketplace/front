@@ -2,7 +2,7 @@
 
 $bodyColor: #ebeaea;
 
-body{
+body {
   font-family: IRANSans !important;
   background-color: $bodyColor !important;
 }
@@ -11,11 +11,15 @@ body{
   background-color: $bodyColor !important;
 }
 
-
 label,
 div,
 html,
-h1,h2,h3,h4,h5,p,
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
 .text-h1,
 .text-h2,
 .text-h3,
@@ -57,5 +61,22 @@ h1,h2,h3,h4,h5,p,
     text-align: center;
     font-weight: 600;
   }
+}
 
+a {
+  text-decoration: none;
+  color: #000000;
+}
+
+.tslider-container .swiper-pagination-bullet-active {
+  opacity: var(--swiper-pagination-bullet-opacity, 1);
+  background: #fff !important;
+}
+
+.tslider-container .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.products-tab-container .add-to-cart-btn {
+  background: #ec407a !important;
 }
