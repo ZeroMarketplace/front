@@ -1,4 +1,23 @@
 <script setup>
+const range = ref([0, 10000000])
+
+const formattedMax = computed({
+  get: () => Number(range.value[1]).toLocaleString(),
+  set: (val) => {
+    const cleaned = val.replace(/,/g, '')
+    const num = parseInt(cleaned)
+    if (!isNaN(num)) range.value[1] = num
+  }
+})
+
+const formattedMin = computed({
+  get: () => Number(range.value[0]).toLocaleString(),
+  set: (val) => {
+    const cleaned = val.replace(/,/g, '')
+    const num = parseInt(cleaned)
+    if (!isNaN(num)) range.value[0] = num
+  }
+})
 </script>
 
 <template>
@@ -10,6 +29,7 @@
     <v-btn
       block
       class="mb-8 text-body-2 font-weight-regular text-h1 bg-C4C4C436"
+      @click="log"
     >
       فیلتر کردن نتایج
     </v-btn>
@@ -40,15 +60,47 @@
       بازه ی قیمتی
     </v-text>
 
-    <v-slider color="pink" thumb-label class="mb-4" />
+    <div>
+      <v-range-slider
+        v-model="range"
+        :max="100000000"
+        :min="0"
+        :step="1"
+        class="align-center"
+        hide-details
+        color="pink"
+      ></v-range-slider>
+
+      <div class="d-flex justify-space-between my-2">
+        <v-text-field
+          v-model="formattedMin"
+          type="text"
+          density="compact"
+          variant="plain"
+          hide-details
+          single-line
+          class="minRange"
+        >تومان</v-text-field>
+        <v-text-field
+          v-model="formattedMax"
+          type="text"
+          density="compact"
+          variant="plain"
+          hide-details
+          single-line
+          class="maxRange"
+        >تومان</v-text-field>
+      </div>
+    </div>
 
     <v-divider class="mb-5" />
 
-    <v-switch label="فقط کالا های ویژه" />
+    <v-switch label="فقط کالا های ویژه" class="mb-n5"/>
   </v-sheet>
 </template>
 
 <style scoped>
+
 .filter-container {
   width: 291px;
   height: 573px;
@@ -107,4 +159,37 @@
 .bg-C4C4C436{
     background-color: #C4C4C436;
 }
+
+:deep(input[type='number'])::-webkit-outer-spin-button,
+:deep(input[type='number'])::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+:deep(input[type='number']) {
+  -moz-appearance: textfield;
+}
+
+:deep(.minRange input),
+:deep(.maxRange input),
+:deep(.minRange .v-field__input),
+:deep(.maxRange .v-field__input) {
+  color: #88888F;
+  font-size: 10px !important;
+  font-weight: 400;
+}
+
+:deep(.maxRange input),
+:deep(.maxRange .v-field__input) {
+  direction: ltr;
+}
+
+:deep(.v-selection-control__wrapper){
+  width: 30px;
+}
+
+:deep(.v-selection-control__input i){
+  background-color: white;
+  color: #1171F5;
+}
+
 </style>

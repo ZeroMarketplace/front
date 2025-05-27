@@ -1,6 +1,14 @@
 <script setup>
+const route = useRoute()
 
 const showdialog = ref(false)
+const categoryRef = ref(null)
+
+function handleCardClick(e) {
+  if (!categoryRef.value?.contains(e.target)) {
+    showdialog.value = false
+  }
+}
 
 const products = [
   { id: 1 },
@@ -14,6 +22,19 @@ const products = [
   { id: 9 },
   { id: 10 },
 ]
+
+ const items = [
+    {
+      title: 'خانه',
+      disabled: false,
+      href: '/',
+    },
+    {
+      title: 'لوازم دیجیتال',
+      disabled: false,
+      href: 'category',
+    },
+  ]
 </script>
 
 <template>
@@ -30,6 +51,13 @@ const products = [
 
       
       <v-container>
+        <v-breadcrumbs :items="items">
+          <template v-slot:title="{ item }">
+            <p :class="{ activeUrl: route.name === item.href }">
+              {{ item.title }}
+            </p>
+          </template>
+        </v-breadcrumbs>
         <v-row>
           <v-col
             v-for="product in products"
@@ -47,15 +75,20 @@ const products = [
   </div>
 
     
-  <v-dialog v-model="showdialog" fullscreen class="d-sm-none">
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
-        فیلتر نتایج
-        <v-btn icon @click="showdialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-card-title>
+  <v-dialog
+    v-model="showdialog"
+    fullscreen
+    class="d-sm-none blur-dialog"
+    scrim="transparent"
+  >
+    <v-card 
+      class="align-center no-click-effect" 
+      @click="handleCardClick" 
+      ripple="false"
+      >
+      <div  ref="categoryRef">
         <categoryFilter />
+      </div>
     </v-card>
   </v-dialog>
 
@@ -63,10 +96,30 @@ const products = [
 </template>
 
 <style scoped>
+
+.activeUrl {
+  color: #EC407A;
+}
+
 .filter-sidebar {
   min-width: 200px;
   height: 100%;
   background-color: white;
   box-shadow: 0px 8px 80px #0000000A;
 }
+
+
+:deep(.v-card--variant-elevated) {
+  backdrop-filter: blur(4px);
+  background-color: rgba(255, 255, 255, 0.058);
+}
+/* Disable ripple and click highlight */
+.no-click-effect {
+  --v-theme-overlay-multiplier: 0 !important;
+  user-select: none;
+}
+.no-click-effect:active {
+  background-color: transparent !important;
+}
+
 </style>
