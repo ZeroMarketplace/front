@@ -1,4 +1,5 @@
-import axios, {AxiosInstance} from 'axios'
+import axios from 'axios'
+import type { AxiosInstance } from 'axios'
 import {defineNuxtPlugin} from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
