@@ -1,6 +1,39 @@
+<script setup>
+
+const selectedBank = ref('')
+
+const cartItems = ref([
+  { id: 1, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 12250,color: 'blue',model:'44M' },
+  { id: 2, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 250,color: 'pink',model:'125GB' },
+  { id: 3, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 250,color: 'black',model:'44M' },
+])
+
+let totalPrice = ref(0)
+
+function increment(item) {
+  if (item.quantity < 100) item.quantity++
+}
+
+function decrement(item) {
+  if (item.quantity > 1) item.quantity--
+}
+
+
+function onQuantityChange(item) {
+  if (item.quantity < 1) item.quantity = 1
+  if (item.quantity > 100) item.quantity = 100
+}
+
+watch(cartItems, () => {
+  totalPrice.value = cartItems.value.reduce((sum, item) => {
+    return sum + item.price * item.quantity
+  }, 0)
+}, { deep: true, immediate: true })
+</script>
+
 <template>
     <div class="d-flex align-center justify-center flex-column">
-        <ProcessOrderProgressBar/>
+        <ProcessOrderProgressBar :step-active="3"/>
         <v-container>
             <v-row>
             <v-col cols="12">
@@ -44,7 +77,7 @@
                             <v-icon small class="mdi mdi-chevron-down bg-C4C4C4 rounded-pill" @click="decrement(item)"></v-icon>
                         </div>
                         
-                        <div class="text-center d-flex align-center ga-3">
+                        <div class="text-center d-flex align-center ga-1">
                             <p class="totalPrice">{{ (item.price * item.quantity).toLocaleString() }}</p>
                             <p class="totalPriceToman">تومان</p>
                         </div>
@@ -93,31 +126,31 @@
                 <div class="d-flex justify-space-between align-center">
                     <p class="paymnetFormTitles">قابل پرداخت:</p>
                     <div class="d-flex text-center ga-1 text-h6 align-center">
-                        4,800
+                        {{ totalPrice }}
                         <p class="paymnetFormSubtitles">تومان</p>
                     </div>
                 </div>
             </div>
             <div class="paymentForm d-flex flex-column justify-space-between">
-                <div class="image-selection">
+                <div class="d-flex ga-4 justify-center">
                     <div
-                    class="image-wrapper"
-                    :class="{ selected: selectedImage === 'img1' }"
-                    @click="selectedImage = 'img1'"
+                    class="bank-image-wrapper"
+                    :class="{ selected: selectedBank === 'samanBank' }"
+                    @click="selectedBank = 'img1'"
                     >
-                    <img src="/assets/images/samanBank.png" alt="Image 1" class="option-image" />
+                    <img src="/assets/images/samanBank.png" alt="samanBank" class="bankImg" />
                     <span class="text-subtitle-2">درگاه بانک سامان</span>
-                    <span class="mdi mdi-check-circle tick-icon" v-if="selectedImage === 'img1'"></span>
+                    <span class="mdi mdi-check-circle tick-icon" v-if="selectedBank === 'samanBank'"></span>
                     </div>
 
                     <div
-                    class="image-wrapper"
-                    :class="{ selected: selectedImage === 'img2' }"
-                    @click="selectedImage = 'img2'"
+                    class="bank-image-wrapper"
+                    :class="{ selected: selectedBank === 'sadadBank' }"
+                    @click="selectedBank = 'sadadBank'"
                     >
-                    <img src="/assets/images/sadadBank.png" alt="Image 2" class="option-image" />
+                    <img src="/assets/images/sadadBank.png" alt="sadadBank" class="bankImg" />
                     <span class="text-subtitle-2">درگاه بانک ملی</span>
-                    <span class="mdi mdi-check-circle tick-icon" v-if="selectedImage === 'img2'"></span>
+                    <span class="mdi mdi-check-circle tick-icon" v-if="selectedBank === 'sadadBank'"></span>
                     </div>
                 </div>
                 <v-btn color="#424242" rounded="lg" class="text-body-2">پرداخت (۲۸۰ تومان)</v-btn>
@@ -125,33 +158,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-
-const selectedImage = ref('')
-
-// sample cart data
-const cartItems = reactive([
-  { id: 1, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 250,color: 'blue',model:'44M' },
-  { id: 2, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 250,color: 'blue',model:'125GB' },
-  { id: 3, name: 'تی شرت مردانه طرح ساده', quantity: 6, price: 250,color: 'blue',model:'44M' },
-])
-
-function increment(item) {
-  if (item.quantity < 100) item.quantity++
-}
-
-function decrement(item) {
-  if (item.quantity > 1) item.quantity--
-}
-
-
-function onQuantityChange(item) {
-  if (item.quantity < 1) item.quantity = 1
-  if (item.quantity > 100) item.quantity = 100
-  // You can add any other logic here (e.g., update cart total)
-}
-</script>
 
 <style scoped>
 .bg-grey-light {
@@ -282,16 +288,12 @@ function onQuantityChange(item) {
     font-weight: 400 !important;
     color: black;
 }
-.image-selection {
-  display: flex;
-  gap: 16px;
-}
 
-.image-wrapper {
+.bank-image-wrapper {
   position: relative;
   border: 1px solid transparent;
   border-radius: 8px;
-  padding: 4px;
+  padding: 16px;
   cursor: pointer;
   transition: border 0.3s ease;
   display: flex;
@@ -300,19 +302,19 @@ function onQuantityChange(item) {
   gap: 8px;
 }
 
-.image-wrapper.selected {
+.bank-image-wrapper.selected {
   border: 1px solid #424242;
 }
 
-.option-image {
-  width: 74px; /* adjust as needed */
+.bankImg {
+  width: 74px;
   height: 52px;
 }
 
 .tick-icon {
   position: absolute;
-  top: -12px;
-  right: -10px;
+  top: -8px;
+  right: -8px;
   background-color: #424242;
   width: 20px;
   height: 20px;
