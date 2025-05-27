@@ -2,10 +2,10 @@
 const route = useRoute()
 
 const showdialog = ref(false)
-const categoryRef = ref(null)
+const productRef = ref(null)
 
 function handleCardClick(e) {
-  if (!categoryRef.value?.contains(e.target)) {
+  if (!productRef.value?.contains(e.target)) {
     showdialog.value = false
   }
 }
@@ -32,14 +32,14 @@ const products = [
     {
       title: 'لوازم دیجیتال',
       disabled: false,
-      href: 'category',
+      href: 'product',
     },
   ]
 </script>
 
 <template>
   <div class="d-flex">
-      <categoryFilter class="filter-sidebar d-none d-sm-block " />
+      <productFilter class="filter-sidebar d-none d-sm-block " />
     <div class="flex-grow-1">
 
       <!-- Mobile Filter Button -->
@@ -53,7 +53,7 @@ const products = [
       <v-container>
         <v-breadcrumbs :items="items">
           <template v-slot:title="{ item }">
-            <p :class="{ activeUrl: route.name === item.href }">
+            <p :class="{ activeUrl: route.name === item.href }" class="text-body-2">
               {{ item.title }}
             </p>
           </template>
@@ -86,8 +86,8 @@ const products = [
       @click="handleCardClick" 
       ripple="false"
       >
-      <div  ref="categoryRef">
-        <categoryFilter />
+      <div  ref="productRef">
+        <productFilter />
       </div>
     </v-card>
   </v-dialog>
