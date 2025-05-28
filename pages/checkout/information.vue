@@ -35,49 +35,62 @@ onMounted(async () => {
   const L = await import('leaflet')
   await import('leaflet/dist/leaflet.css')
 
-  const map = L.map('map').setView([35.6892, 51.3890], 13)
+  const map = L.map('map', {
+    center: [35.6892, 51.3890],
+    zoom: 13,
+    zoomControl: true
+  })
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map)
 
-  let marker = null
-
-  map.on('click', function (e) {
-    const { lat, lng } = e.latlng
-    informationForm.value.selectedCoords = {
-      lat: lat.toFixed(6),
-      lng: lng.toFixed(6)
-    }
-
-    if (marker) map.removeLayer(marker)
-
-    const customIcon = L.divIcon({
-      html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EC407A" width="30" height="30">
+  const markerIcon = document.createElement('div')
+  markerIcon.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#EC407A" width="50" height="50">
       <path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7m0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5Z" />
-    </svg>`,
-      className: '',
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-    })
+    </svg>
+  `
+  markerIcon.style.position = 'absolute'
+  markerIcon.style.top = '50%'
+  markerIcon.style.left = '50%'
+  markerIcon.style.transform = 'translate(-50%, -100%)'
+  markerIcon.style.pointerEvents = 'none'
+  markerIcon.style.zIndex = '1000'
 
-    marker = L.marker([lat, lng], { icon: customIcon }).addTo(map)
-  })
+  const mapContainer = document.getElementById('map')
+  if (mapContainer) {
+    mapContainer.style.position = 'relative'
+    mapContainer.appendChild(markerIcon)
+  }
+  window.leafletMap = map
 })
 
-function log(){
-  console.log(informationForm.value)
+
+
+const showSnackbar = ref(false)
+
+const confirmMapSelection = () => {
+  const map = window.leafletMap
+  if (map) {
+    const center = map.getCenter()
+    informationForm.value.selectedCoords = {
+      lat: center.lat.toFixed(6),
+      lng: center.lng.toFixed(6)
+    }
+    showSnackbar.value = true
+  }
 }
 
 </script>
 <template>
     <div class="d-flex flex-column ga-2 align-center">
-        <ProcessOrderProgressBar :step-active="2"/>
+        <ProcessOrderProgressBar :step-active="2" class="w-100"/>
         <v-container fluid class="px-0">
-            <v-row class="ga-4 justify-center" align="center" wrap>
+            <v-row class="justify-center" align="baseline" wrap>
                
-                <v-col cols="12" md="6" lg="5" order="1" order-md="1" class="d-flex justify-center">
-                <div class="px-8 py-7 completionForm">
+                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm=12  xs="12" order="1" order-md="1" class="d-flex justify-center formSize">
+                <div class="px-8 py-7 completionForm min-height-850">
                     <p class="FromTitle">فرم تکمیل اطلاعات</p>
                     <v-radio-group class="mt-7" v-model="informationForm.address">
                       <v-radio label="مشهد - خیابان بهار - بهار ۶ - پلاک ۱۰ - طبقه اول" 
@@ -182,29 +195,34 @@ function log(){
                 </v-col>
 
                 
-                <v-col cols="12" md="5" lg="4" order="2" order-md="2" class="d-flex flex-column justify-center align-center" >
-                <div class="d-flex flex-column ga-4 w-100 align-center">
-                    <div class="px-8 py-7 w-100  completionForm">
-                    <p class="FromTitle">انتخاب موقعیت</p>
-                    <div id="map" class="leaflet-map mt-7"></div>
-                    </div>
-                    <div class="px-8 py-7 w-100 completionForm">
-                    <p class="FromTitle">نحوه ارسال</p>
-                    <v-select
-                        class="mt-7"
-                        label="انتخاب نحوه ارسال"
-                        :items="['تیپاکس', 'پست']"
-                        variant="outlined"
-                        v-model="informationForm.deliveryMethod"
-                        :rules="[rules.selectRequired]"
-                    />
-                    </div>
-                </div>
+                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm="12" xs="12" order="2" order-md="2" class="d-flex flex-column justify-space-between align-center formSize" >
+                  <div class="d-flex flex-column ga-4 w-100 h-100 justify-space-between align-center">
+                      <div class="px-8 py-7 w-100  completionForm">
+                        <p class="FromTitle">انتخاب موقعیت</p>
+                        <div id="map" class="leaflet-map mt-4"></div>
+                        <v-btn @click="confirmMapSelection" color="#424242" class="btnMinSize rounded-lg align-self-end px-8 mb-0 mt-4 mr-4">انتخاب آدرس</v-btn>
+                        <v-snackbar v-model="showSnackbar" color="success" timeout="2000" location="top" class="glass-snackbar">
+                          <span class="mdi mdi-check text-body-1"></span>
+                          آدرس با موفقیت انتخاب شد.
+                        </v-snackbar>
+                      </div>
+                      <div class="px-8 py-7 w-100 completionForm height-200">
+                      <p class="FromTitle">نحوه ارسال</p>
+                      <v-select
+                          class="mt-9"
+                          label="انتخاب نحوه ارسال"
+                          :items="['تیپاکس', 'پست']"
+                          variant="outlined"
+                          v-model="informationForm.deliveryMethod"
+                          :rules="[rules.selectRequired]"
+                      />
+                      </div>
+                  </div>
                 </v-col>
             </v-row>
         </v-container>
 
-        <v-btn color="#424242" class="btnMinSize rounded-lg align-self-end px-8 ml-12" @click="log">مرحله بعد</v-btn>
+        <v-btn color="#424242" class="btnMinSize rounded-lg align-self-end px-8 ml-12">مرحله بعد</v-btn>
     </div>
 
 </template>
@@ -212,8 +230,9 @@ function log(){
 .completionForm{
     border-radius: 21px;
     background-color: white;
-    max-width: 544px;
     min-width: 350px;
+    min-width: 100% !important;
+    width: 100% !important;
 }
 .FromTitle{
     border-right: 4px solid #424242;
@@ -250,7 +269,7 @@ function log(){
 .leaflet-map {
   width: 100%;
   min-width: 300px;
-  height: 400px;
+  height: 475px;
   border-radius: 12px;
 }
 :deep(.v-selection-control--dirty .v-selection-control__input > .v-icon){
@@ -275,5 +294,43 @@ function log(){
 .btnMinSize{
   min-height: 45px !important;
   min-width: 140px !important;
+}
+.formSize{
+  min-height: 850px !important;
+  padding: 8px !important;
+}
+.height-200{
+  height: 200px !important;
+}
+.v-row{
+  max-width: 100%;
+}
+.v-container{
+  display: flex !important;
+  justify-content: center !important;
+}
+.min-height-850{
+  min-height: 850px !important;
+}
+.glass-snackbar {
+  width: 344px;
+  height: 48px;
+  border-radius: 12px;
+  justify-self: end;
+  margin-top: 64px;
+  margin-right: 32px;
+}
+:deep(.v-snackbar__wrapper){
+  background-color: rgb(255, 255, 255,0.2) !important;
+  backdrop-filter: blur(16px);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 0 4px #42424288;
+}
+:deep(.v-snackbar__content){
+  color: #EC407A !important;
+    font-size: 14px !important;
+    font-weight: 500;
 }
 </style>
