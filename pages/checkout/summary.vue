@@ -33,7 +33,7 @@ watch(cartItems, () => {
 
 <template>
     <div class="d-flex align-center justify-center flex-column">
-        <ProcessOrderProgressBar :step-active="3"/>
+        <ProcessOrderProgressBar :step-active="3" class="w-100 mb-6"/>
         <v-container>
             <v-row>
             <v-col cols="12">
@@ -325,5 +325,15 @@ watch(cartItems, () => {
 .tick-icon:before{
     top: -5px !important;
     position: relative;
-  }
+}
+.v-col{
+    padding: 0px;
+}
+.v-container{
+    padding: 12px;
+    margin: 0px;
+    min-width: 100%;
+    margin-bottom: 24px;
+
+}
 </style>

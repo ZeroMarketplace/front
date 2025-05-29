@@ -2,7 +2,7 @@
 </script>
 <template>
     <div class="d-flex align-center justify-center flex-column ga-6 mb-8 h-100">
-        <ProcessOrderProgressBar :step-active="5"/>
+        <ProcessOrderProgressBar :step-active="5" class="w-100"/>
         <div class="d-flex  flex-column container align-center w-100">
             <v-icon size="121" color="#A9A9A9" class="mdi mdi-emoticon-sad"></v-icon>
             <span class="mt-5 messageTitle text-center">متاسفانه سفارش شما موفقیت آمیز نبود.</span>
