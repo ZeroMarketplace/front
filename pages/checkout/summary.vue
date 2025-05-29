@@ -99,7 +99,7 @@ watch(cartItems, () => {
             </v-text-field>
             <v-btn class="couponBtn">بررسی</v-btn>
         </div>
-        <div class="d-flex flex-column flex-sm-row ga-4 mb-8">
+        <div class="d-flex flex-column flex-sm-row ga-4 mb-8 w-100">
             <div class="paymentForm d-flex flex-column justify-space-evenly ga-3">
                 <div class="d-flex justify-space-between">
                     <p class="paymnetFormTitles">تخفیف:</p>
@@ -131,12 +131,12 @@ watch(cartItems, () => {
                     </div>
                 </div>
             </div>
-            <div class="paymentForm d-flex flex-column justify-space-between">
+            <div class="paymentForm d-flex flex-column justify-space-between align-center">
                 <div class="d-flex ga-4 justify-center">
                     <div
                     class="bank-image-wrapper"
                     :class="{ selected: selectedBank === 'samanBank' }"
-                    @click="selectedBank = 'img1'"
+                    @click="selectedBank = 'samanBank'"
                     >
                     <img src="/assets/images/samanBank.png" alt="samanBank" class="bankImg" />
                     <span class="text-subtitle-2">درگاه بانک سامان</span>
@@ -153,7 +153,7 @@ watch(cartItems, () => {
                     <span class="mdi mdi-check-circle tick-icon" v-if="selectedBank === 'sadadBank'"></span>
                     </div>
                 </div>
-                <v-btn color="#424242" rounded="lg" class="text-body-2">پرداخت (۲۸۰ تومان)</v-btn>
+                <v-btn color="#424242" rounded="lg" class="text-body-2 maxWBtn">پرداخت (۲۸۰ تومان)</v-btn>
             </div>
         </div>
     </div>
@@ -174,7 +174,7 @@ watch(cartItems, () => {
 }
 
 :deep(.v-list ){
-    border-radius: 25px;
+    border-radius: 21px;
     padding: 30px;
 }
 
@@ -261,6 +261,7 @@ watch(cartItems, () => {
  height: 218px;
  border-radius: 20px;
  padding: 28px 32px;
+ width: 100%;
 }
 
 @media only screen and (max-width: 750px){
@@ -335,5 +336,9 @@ watch(cartItems, () => {
     min-width: 100%;
     margin-bottom: 24px;
 
+}
+.maxWBtn{
+    width: 100%;
+    max-width: 280px !important;
 }
 </style>

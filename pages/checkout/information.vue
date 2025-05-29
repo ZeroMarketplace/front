@@ -89,7 +89,7 @@ const confirmMapSelection = () => {
         <v-container fluid class="px-0">
             <v-row class="justify-center" align="baseline" wrap>
                
-                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm=12  xs="12" order="1" order-md="1" class="d-flex justify-center formSize">
+                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm=12  xs="12" order="1" order-md="1" class="d-flex justify-center formSize pr-0">
                 <div class="px-8 py-7 completionForm min-height-850">
                     <p class="FromTitle">فرم تکمیل اطلاعات</p>
                     <v-radio-group class="mt-7" v-model="informationForm.address">
@@ -195,7 +195,7 @@ const confirmMapSelection = () => {
                 </v-col>
 
                 
-                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm="12" xs="12" order="2" order-md="2" class="d-flex flex-column justify-space-between align-center formSize" >
+                <v-col cols="12" xl="6" xxl="6" md="6" lg="6" sm="12" xs="12" order="2" order-md="2" class="d-flex flex-column justify-space-between align-center formSize pl-0" >
                   <div class="d-flex flex-column ga-4 w-100 h-100 justify-space-between align-center">
                       <div class="px-8 py-7 w-100  completionForm">
                         <p class="FromTitle">انتخاب موقعیت</p>
@@ -297,7 +297,7 @@ const confirmMapSelection = () => {
 }
 .formSize{
   min-height: 850px !important;
-  padding: 8px !important;
+  padding: 12px !important;
 }
 .height-200{
   height: 200px !important;
@@ -332,5 +332,11 @@ const confirmMapSelection = () => {
   color: #EC407A !important;
     font-size: 14px !important;
     font-weight: 500;
+}
+.pr-0{
+  padding-right: 0px !important;
+}
+.pl-0{
+  padding-left: 0px !important;
 }
 </style>

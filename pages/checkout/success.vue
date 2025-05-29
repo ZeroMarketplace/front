@@ -1,7 +1,7 @@
 <script setup>
 </script>
 <template>
-    <div class="d-flex align-center justify-center flex-column ga-6 mb-8 h-100">
+    <div class="d-flex align-center flex-column ga-6 mb-8 h-100">
         <ProcessOrderProgressBar :step-active="4" class="w-100"/>
         <div class="d-flex  flex-column container align-center w-100">
             <v-icon size="121" color="#EC407A" class="mdi mdi-emoticon"></v-icon>
