@@ -1,8 +1,8 @@
 <template>
   <v-card flat class="pa-6 rounded-xl">
     <div class="border-b pb-4 mb-4">
-      <div class="d-flex align-center justify-space-between">
-        <div class="d-flex align-center mb-2">
+      <div class="d-flex align-center flex-wrap justify-space-between">
+        <div class="d-flex align-center ml-4">
           <span class="text-h6 font-weight-bold">{{ product.title }}</span>
           <div class="product-discount-badge mr-2">30%</div>
         </div>
@@ -12,7 +12,7 @@
         </div>
       </div>
       <div>
-        <div class="d-flex align-center">
+        <div class="d-flex align-center mt-4">
           <v-icon class="text-grey-darken-1">mdi-message-text-outline</v-icon>
           <span class="mr-1 text-grey-darken-1">3 دیدگاه</span>
         </div>
@@ -44,7 +44,7 @@
           </div>
           <div class="mb-2 d-flex align-center">
             <span class="font-weight-bold pl-2">رنگ:</span>
-            <ProductVariantSelector
+            <product-detail-productVariantSelector
               type="color"
               :options="product.colors"
               :model-value="selectedColor"
@@ -53,7 +53,7 @@
           </div>
           <div class="mb-2 d-flex align-center">
             <span class="font-weight-bold pl-2">سایز:</span>
-            <ProductVariantSelector
+            <product-detail-productVariantSelector
               type="size"
               :options="product.sizes"
               :model-value="selectedSize"
@@ -63,8 +63,10 @@
         </div>
       </v-col>
     </v-row>
-    <div class="d-flex justify-space-between align-center mt-4 p-price-section">
-      <div class="d-flex flex-column mt-4">
+    <div
+      class="d-flex justify-space-between flex-wrap align-center mt-4 p-price-section"
+    >
+      <div class="d-flex flex-column mt-4 mb-4 mb-md-auto">
         <span
           class="text-grey text-decoration-line-through mr-2"
           v-if="product.oldPrice"
@@ -76,17 +78,42 @@
           ><span class="pr-2 text-grey">تومان</span>
         </div>
       </div>
-      <v-btn size="large" color="pink-lighten-1" class="rounded-base">
+      <v-btn
+        size="large"
+        color="pink-lighten-1"
+        class="rounded-base w-100 w-md-auto"
+      >
         <v-icon right>mdi-cart</v-icon>
         <span class="pr-2 font-weight-regular"> افزودن به سبد خرید</span>
       </v-btn>
     </div>
   </v-card>
+  <!-- Sticky Bottom Bar (Mobile Only) -->
+  <Teleport to="body">
+    <div class="sticky-bottom-bar d-md-none">
+      <div class="d-flex justify-space-between align-center w-100">
+        <div class="d-flex flex-column mt-4 mb-4 mb-md-auto">
+          <span
+            class="text-grey text-decoration-line-through mr-2"
+            v-if="product.oldPrice"
+            >{{ product.oldPrice.toLocaleString() }}</span
+          >
+          <div class="d-flex align-center">
+            <span class="font-weight-bold text-pink-lighten-1"
+              >{{ product.price.toLocaleString() }}
+            </span>
+            <div class="pr-2 text-grey order-first">تومان</div>
+          </div>
+        </div>
+        <v-btn size="large" color="pink-lighten-1 ml-2" class="rounded-base">
+          <v-icon>mdi-cart</v-icon>
+        </v-btn>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import ProductVariantSelector from "./ProductVariantSelector.vue";
-
 defineProps<{
   product: any;
   selectedColor: string;
@@ -108,6 +135,7 @@ defineEmits(["update:color", "update:size"]);
   color: #ffffff;
   font-size: 12px;
   font-weight: 400;
+  flex-shrink: 0;
 }
 .rate-value {
   columns: #424242;
@@ -116,5 +144,22 @@ defineEmits(["update:color", "update:size"]);
 }
 .p-price-section {
   border-top: 1px dashed rgba(0, 0, 0, 0.2);
+}
+.sticky-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  background: #fff;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.07);
+  padding: 16px 20px 12px 20px;
+  z-index: 100;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+}
+@media (min-width: 960px) {
+  .sticky-bottom-bar {
+    display: none !important;
+  }
 }
 </style>

@@ -46,13 +46,7 @@
             پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.
           </p>
         </div>
-        <div class="d-flex justify-center align-center mb-4">
-          <img
-            src="/img/products/iphones.png"
-            alt="iPhones"
-            style="max-width: 80%; height: auto; border-radius: 24px"
-          />
-        </div>
+        <div class="d-flex justify-center align-center mb-4"></div>
         <div>
           <p class="text-body-1 text-grey-darken-2 mb-0">
             لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ، و با
@@ -70,8 +64,17 @@
         </div>
       </div>
     </v-tabs-window-item>
-    <v-tabs-window-item value="specs"> </v-tabs-window-item>
-    <v-tabs-window-item value="comments"> vvv </v-tabs-window-item>
+    <v-tabs-window-item value="specs">
+      <div class="bg-white px-8 py-10 p-tab-content mb-6">
+        <div class="specification-items">
+          <div class="specification-item" v-for="item in 12">
+            <div>رنگ :</div>
+            <div>آبی</div>
+          </div>
+        </div>
+      </div>
+    </v-tabs-window-item>
+    <v-tabs-window-item value="comments"> </v-tabs-window-item>
   </v-tabs-window>
 </template>
 
@@ -94,7 +97,7 @@ watch(
 }
 .product-tabs {
   min-height: 56px;
-  width: 40%;
+  width: 100%;
 }
 .tab-title {
   font-size: 1.1rem;
@@ -107,5 +110,40 @@ watch(
 }
 .tab-title.font-weight-bold {
   font-weight: bold;
+}
+.specification-items {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px 24px;
+}
+.specification-item {
+  background: #f1f1f1;
+  padding: 15px 20px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #000000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 960px) {
+  .specification-item:nth-child(2n + 1) {
+    background: #fff;
+  }
+}
+@media (min-width: 960px) {
+  .specification-items {
+    grid-template-columns: 1fr 1fr;
+  }
+  .specification-item:nth-child(4n-1),
+  .specification-item:nth-child(4n) {
+    background: #fff;
+  }
+  .product-tabs {
+    min-height: 56px;
+    width: 40%;
+  }
 }
 </style>

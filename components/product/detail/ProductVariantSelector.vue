@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex gap-2">
+  <div class="d-flex gap-2 flex-wrap">
     <template v-if="type === 'color'">
       <div
         v-for="option in options"

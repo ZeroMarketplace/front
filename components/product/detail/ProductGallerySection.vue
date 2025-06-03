@@ -99,31 +99,35 @@ const config = ref({
   },
   breakpoints: {
     "320": {
-      slidesPerView: 1.2,
+      slidesPerView: 3,
       spaceBetween: 20,
     },
     "410": {
-      slidesPerView: 1.4,
+      slidesPerView: 4,
       spaceBetween: 20,
     },
     "640": {
-      slidesPerView: 1.4,
+      slidesPerView: 5,
       spaceBetween: 20,
     },
     "768": {
-      slidesPerView: 2.4,
-      spaceBetween: 20,
+      slidesPerView: 6,
+      spaceBetween: 5,
+    },
+    "840": {
+      slidesPerView: 8,
+      spaceBetween: 5,
     },
     "1024": {
       slidesPerView: 3,
-      spaceBetween: 20,
+      spaceBetween: 5,
     },
     "1200": {
       slidesPerView: 3,
-      spaceBetween: 20,
+      spaceBetween: 5,
     },
     "1400": {
-      slidesPerView: 3,
+      slidesPerView: 4,
       spaceBetween: 5,
     },
   },
@@ -225,7 +229,7 @@ watch(
   z-index: 10;
   color: #424242;
   font-size: 1rem;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   transform: translateY(-50%);
@@ -243,5 +247,11 @@ watch(
 /* Ensure parent v-col is 100% height */
 :deep(.v-col) {
   height: 100%;
+}
+@media (min-width: 960px) {
+  .gallery-prev-nav-btn,
+  .gallery-next-nav-btn {
+    display: flex;
+  }
 }
 </style>
