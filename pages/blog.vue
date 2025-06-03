@@ -23,7 +23,7 @@ const route = useRoute()
 
 <template>
     <div class="d-flex flex-column pa-4 align-center">
-        <v-breadcrumbs :items="items" class="w-100 d-flex overflow-x-scroll">
+        <v-breadcrumbs :items="items" class="w-100 d-flex overflow-x-auto">
             <template v-slot:title="{ item }">
                 <Nuxt-Link :class="{ activeUrl: route.name === item.href }" class="text-body-2 text-no-wrap">
                     {{ item.title }}
