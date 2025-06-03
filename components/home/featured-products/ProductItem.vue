@@ -2,7 +2,7 @@
   <div class="featured-product-card">
     <span class="discount-badge">30%</span>
     <div class="featured-product-content">
-      <nuxt-link to="/">
+      <nuxt-link :to="`/product/2/test`">
         <div class="featured-product-image-wrap">
           <img
             class="featured-product-image"
@@ -12,7 +12,7 @@
         </div>
       </nuxt-link>
       <div class="featured-product-info">
-        <nuxt-link to="/">
+        <nuxt-link :to="`/product/2/test`">
           <div class="featured-product-title">تی شرت مردانه طرح ساده</div>
         </nuxt-link>
         <div class="featured-product-price-row">

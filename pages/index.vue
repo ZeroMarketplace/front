@@ -1,6 +1,8 @@
 <template>
   <home-top-slider></home-top-slider>
-  <home-products></home-products>
+  <section class="mt-15">
+    <home-products></home-products>
+  </section>
   <home-product-categories-product-tab></home-product-categories-product-tab>
   <home-banner-bottom-banner></home-banner-bottom-banner>
   <home-featured-products-featured-product-slider></home-featured-products-featured-product-slider>

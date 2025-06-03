@@ -1,12 +1,12 @@
 <script setup>
-const route = useRoute()
+const route = useRoute();
 
-const showdialog = ref(false)
-const productRef = ref(null)
+const showdialog = ref(false);
+const productRef = ref(null);
 
 function handleCardClick(e) {
   if (!productRef.value?.contains(e.target)) {
-    showdialog.value = false
+    showdialog.value = false;
   }
 }
 
@@ -21,39 +21,40 @@ const products = [
   { id: 8 },
   { id: 9 },
   { id: 10 },
-]
+];
 
- const items = [
-    {
-      title: 'خانه',
-      disabled: false,
-      href: '/',
-    },
-    {
-      title: 'لوازم دیجیتال',
-      disabled: false,
-      href: 'product',
-    },
-  ]
+const items = [
+  {
+    title: "خانه",
+    disabled: false,
+    href: "/",
+  },
+  {
+    title: "لوازم دیجیتال",
+    disabled: false,
+    href: "product",
+  },
+];
 </script>
 
 <template>
   <div class="d-flex">
-      <productFilter class="filter-sidebar d-none d-sm-block " />
+    <productFilter class="filter-sidebar d-none d-sm-block" />
     <div class="flex-grow-1">
-
       <!-- Mobile Filter Button -->
       <v-container class="d-sm-none">
         <v-btn block color="primary" class="mb-4" @click="showdialog = true">
-          فیلتر 
+          فیلتر
         </v-btn>
       </v-container>
 
-      
       <v-container>
         <v-breadcrumbs :items="items">
           <template v-slot:title="{ item }">
-            <p :class="{ activeUrl: route.name === item.href }" class="text-body-2">
+            <p
+              :class="{ activeUrl: route.name === item.href }"
+              class="text-body-2"
+            >
               {{ item.title }}
             </p>
           </template>
@@ -74,40 +75,35 @@ const products = [
     </div>
   </div>
 
-    
   <v-dialog
     v-model="showdialog"
     fullscreen
     class="d-sm-none blur-dialog"
     scrim="transparent"
   >
-    <v-card 
-      class="align-center no-click-effect" 
-      @click="handleCardClick" 
+    <v-card
+      class="align-center no-click-effect"
+      @click="handleCardClick"
       ripple="false"
-      >
-      <div  ref="productRef">
+    >
+      <div ref="productRef">
         <productFilter />
       </div>
     </v-card>
   </v-dialog>
-
-
 </template>
 
 <style scoped>
-
 .activeUrl {
-  color: #EC407A;
+  color: #ec407a;
 }
 
 .filter-sidebar {
   min-width: 200px;
   height: 100%;
   background-color: white;
-  box-shadow: 0px 8px 80px #0000000A;
+  box-shadow: 0px 8px 80px #0000000a;
 }
-
 
 :deep(.v-card--variant-elevated) {
   backdrop-filter: blur(4px);
@@ -121,5 +117,4 @@ const products = [
 .no-click-effect:active {
   background-color: transparent !important;
 }
-
 </style>
