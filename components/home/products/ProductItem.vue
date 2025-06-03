@@ -1,7 +1,7 @@
 <template>
   <div class="product-card">
     <span class="discount-badge">30%</span>
-    <nuxt-link to="/">
+    <nuxt-link :to="`/product/2/test`">
       <div class="product-media">
         <img
           class="product-image"
@@ -11,7 +11,7 @@
       </div>
     </nuxt-link>
 
-    <nuxt-link to="/">
+    <nuxt-link :to="`/product/2/test`">
       <div class="product-title">ساعت هوشمند اپل 44m</div>
     </nuxt-link>
 

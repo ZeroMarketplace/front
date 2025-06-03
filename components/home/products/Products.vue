@@ -6,20 +6,22 @@
     <button class="t-products-next-nav-btn">
       <v-icon class="">mdi-arrow-left</v-icon>
     </button>
-    <Swiper
-      :breakpoints="config.breakpoints"
-      :modules="[SwiperNavigation, SwiperPagination]"
-      :navigation="{
-        nextEl: '.t-products-next-nav-btn',
-        prevEl: '.t-products-prev-nav-btn',
-      }"
-      class="custom-swiper"
-      dir="rtl"
-    >
-      <swiper-slide v-for="(slide, index) in 10" :key="index">
-        <home-products-product-item></home-products-product-item>
-      </swiper-slide>
-    </Swiper>
+    <div>
+      <Swiper
+        :breakpoints="config.breakpoints"
+        :modules="[SwiperNavigation, SwiperPagination]"
+        :navigation="{
+          nextEl: '.t-products-next-nav-btn',
+          prevEl: '.t-products-prev-nav-btn',
+        }"
+        class="custom-swiper"
+        dir="rtl"
+      >
+        <swiper-slide v-for="(slide, index) in 10" :key="index">
+          <home-products-product-item></home-products-product-item>
+        </swiper-slide>
+      </Swiper>
+    </div>
   </div>
 </template>
 
@@ -65,7 +67,7 @@ const config = ref({
 <style scoped>
 .products-container {
   position: relative;
-  margin-top: 70px;
+  margin-top: 30px;
 }
 .t-products-prev-nav-btn,
 .t-products-next-nav-btn {
