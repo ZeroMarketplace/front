@@ -1,11 +1,14 @@
+<script setup>
+const showDialog = ref(false)
+</script>
 <template>
-    <div>
-                <div class="d-flex py-4 ga-1 align-center w-100">
+    <div class="w-100 cursor-pointer">
+        <div class="d-flex py-4 ga-1 align-center w-100">
             <span class="mdi mdi-comment-text-outline"></span>
             <p class="text-body-1">نظرات</p>
             <p class="activeUrl text-caption">(49نظر)</p>
         </div>
-        <v-container>
+        <v-container @click="showDialog = true">
             <v-card class="pa-4 rounded-xl w-100 d-flex align-center justify-space-between">
                 <div class="d-flex align-center">
                     <span class="mdi mdi-account-circle-outline activeUrl text-h5 mt-1"></span>
@@ -45,6 +48,7 @@
                 </p>
             </v-card>
         </v-container>
+        <add-comment v-model:show="showDialog"/>
     </div>
 </template>
 <style scoped>
