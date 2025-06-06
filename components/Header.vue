@@ -103,24 +103,114 @@
     </v-row>
 
     <v-divider class="d-none d-md-block mt-3"></v-divider>
-
     <!--  Category   -->
-    <v-btn class="mt-2 d-none d-md-inline-flex"
-           prepend-icon="mdi-view-dashboard"
-           append-icon="mdi-menu-down"
-           variant="text">
-      دسته بندی
-    </v-btn>
+      <v-menu transition="slide-y-transition" close-on-content-click="false" open-on-hover>
+    <!-- Activator Button -->
+    <template v-slot:activator="{ props }">
+      <v-btn
+        v-bind="props"
+        variant="text"
+        prepend-icon="mdi-view-dashboard"
+        class="mt-2 d-none d-md-inline-flex"
+      >
+        دسته بندی
+      </v-btn>
+    </template>
+
+    <!-- Mega Menu -->
+    <v-card class="mega-menu" flat>
+      <v-container fluid class="pl-1">
+        <v-row class="pl-0">
+          <!-- First Column: Main Items -->
+          <v-col cols="3" class="pl-0">
+            <v-list nav>
+              <v-list-item
+                v-for="(item, index) in items"
+                :key="index"
+                @mouseenter="hoveredItem = item"
+                :class="[{'hoverable-item' : hoveredItem?.title === item.title}, 'd-flex', 'flex-row']"
+                
+              >
+                <v-list-item-title>
+                  <div class="d-flex justify-space-between w-100">
+                    <div class="d-flex ga-3">
+                      <span class="mdi mdi-content-cut"></span>
+                      <p class="text-body-2">{{ item.title }}</p>
+                    </div>
+                    <span v-show="hoveredItem.title == item.title" class="mdi mdi-chevron-double-left"></span>
+                  </div>
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-col>
+
+          <!-- Second Column: Submenu with Two-Column Wrap -->
+          <v-col cols="4" class="pr-0">
+            <div class="submenu-columns" v-if="hoveredItem?.children">
+              <div
+                v-for="(group, groupIndex) in hoveredItem.children"
+                :key="groupIndex"
+                class="submenu-group"
+              >
+              <div class="d-flex ga-3 mb-1">
+                <span class="mdi mdi-circle text-pink text-subtitle-2"></span>
+                <p class="submenu-header text-body-2 text-no-wrap">{{ group.header }}</p>
+              </div>
+                
+                <Nuxtlink
+                  v-for="(subItem, subIndex) in group.items"
+                  :key="subIndex"
+                >
+                <p class="submenu-item">{{ subItem }}</p>
+                </Nuxtlink>
+              </div>
+            </div>
+          </v-col>
+
+          <!-- Third Column: Image Section -->
+          <v-col cols="5" class="d-flex align-center justify-center">
+            <v-row>
+              <v-col cols="6" class="d-flex flex-column ga-2 p-1">
+                <v-img
+                  v-if="hoveredItem?.image"
+                  :src="hoveredItem.image"
+                  max-width="180"
+                  cover
+                  class="CategoryImage"
+                ></v-img>
+                <v-img
+                  v-if="hoveredItem?.image"
+                  :src="hoveredItem.image"
+                  max-width="180"
+                  cover
+                  class="CategoryImage"
+                ></v-img>
+              </v-col>
+              <v-col cols="6" class="p-1">
+                <v-img
+                  v-if="hoveredItem?.image"
+                  :src="hoveredItem.image"
+                  max-width="180"
+                  class="h-100 CategoryImage"
+                  cover
+                ></v-img>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+  </v-menu>
 
     <!--  Contact us   -->
-    <v-btn class="mt-2 float-end d-none d-md-inline-flex"
+    <v-btn class="mt-2 d-none d-md-inline-flex"
            prepend-icon="mdi-phone-in-talk-outline"
            variant="text">
       ارتباط با ما
     </v-btn>
 
     <!--  About us   -->
-    <v-btn class="mt-2 float-end d-none d-md-inline-flex"
+    <v-btn class="mt-2 d-none d-md-inline-flex"
            prepend-icon="mdi-information-slab-circle-outline"
            variant="text">
       درباره ما
@@ -131,6 +221,64 @@
 
 <script setup>
 const user = useCookie('user');
+
+
+const items = [
+  {
+    title: 'لوازم التحریر',
+    image: 'https://picsum.photos/200',
+    children: [
+      {
+        header: 'کیف و کوله پشتی',
+        items: ['کیف چرمی', 'کیف کودک', 'کیف دانشجویی']
+      },
+      {
+        header: 'مداد رنگی',
+        items: []
+      },
+      {
+        header: 'دفتر و دفترچه',
+        items: ['دفتر سیمی', 'دفتر بیسیم', 'دفتر ساده']
+      },
+      {
+        header: 'ابزار الات رنگ',
+        items: ['گواش', 'آبرنگ']
+      },
+      {
+        header: 'خودکار و روان نویس',
+        items: []
+      },
+      {
+        header: 'پاک کن و غلط گیر',
+        items: []
+      },
+    ]
+  },
+  {
+    title: 'زیبایی و سلامت',
+    image: 'https://picsum.photos/200',
+    children: [
+      {
+        header: 'مراقبت پوستی',
+        items: ['ماسک', 'پاک کننده', 'ضدآفتاب']
+      },
+      {
+        header: 'شوینده',
+        items: ['شامپو', 'صابون', 'نمک حمام']
+      },
+      {
+        header: 'رژلب',
+        items: ['جامد ', 'مایع', 'تینت']
+      },
+      {
+        header: 'آرایش چشم',
+        items: ['خط چشم', 'مداد چشم', 'مداد چشم مایع']
+      }
+    ]
+  }
+];
+
+const hoveredItem = ref(items[0]) // default selected
 
 const openProfile = () => {
   if (user.value) {
@@ -153,5 +301,54 @@ const openProfile = () => {
 .textSmall {
   font-size: 0.85em;
   display: inline-block;
+}
+.mega-menu {
+  min-width: 900px;
+  background-color: white;
+  padding: 16px;
+  z-index: 1000;
+  border-radius: 20px !important;
+}
+
+.hoverable-item {
+  background-color: #F4F4F4;
+  cursor: pointer;
+  border-radius: 10px !important;
+}
+
+/* 2 columns, grouped headers stay together */
+.submenu-columns {
+  column-count: 2;
+  column-gap: 24px;
+}
+
+.submenu-group {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.submenu-header {
+  color: #000000;
+}
+
+.submenu-item {
+  margin: 0 0 0.25rem 0;
+  color: #42424299;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.submenu-item:hover {
+  cursor: pointer;
+  background-color: #F4F4F4;
+  border-radius: 10px !important;
+}
+:deep(.v-list-item__content){
+  width: 100%;
+}
+.CategoryImage{
+  border-radius: 14px;
 }
 </style>
