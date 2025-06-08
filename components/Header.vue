@@ -351,4 +351,8 @@ const openProfile = () => {
 .CategoryImage{
   border-radius: 14px;
 }
+:deep(.v-overlay__content){
+  width: 100% !important;
+  top: 170px !important;
+}
 </style>
