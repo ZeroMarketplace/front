@@ -168,30 +168,31 @@
           </v-col>
 
           <!-- Third Column: Image Section -->
-          <v-col cols="5" class="d-flex align-center justify-center">
+          <v-col cols="5" class="d-flex">
             <v-row>
-              <v-col cols="6" class="d-flex flex-column ga-2 p-1">
-                <v-img
-                  v-if="hoveredItem?.image"
-                  :src="hoveredItem.image"
-                  max-width="180"
-                  cover
-                  class="CategoryImage"
-                ></v-img>
-                <v-img
-                  v-if="hoveredItem?.image"
-                  :src="hoveredItem.image"
-                  max-width="180"
-                  cover
-                  class="CategoryImage"
-                ></v-img>
+              <v-col cols="6" class="d-flex flex-column ga-6">
+                <v-row class="justify-end py-1 pl-6" >
+                  <v-img
+                    v-if="hoveredItem?.image"
+                    :src="hoveredItem.image"
+                    cover
+                    class="CategoryImage max-width-80"
+                  ></v-img>
+                </v-row>
+                <v-row class="justify-end py-1 pl-6 mt-0">
+                  <v-img
+                    v-if="hoveredItem?.image"
+                    :src="hoveredItem.image"
+                    cover
+                    class="CategoryImage max-width-80"
+                  ></v-img>
+                </v-row>
               </v-col>
-              <v-col cols="6" class="p-1">
+              <v-col cols="6" class="pa-1 d-flex justify-end">
                 <v-img
                   v-if="hoveredItem?.image"
                   :src="hoveredItem.image"
-                  max-width="180"
-                  class="h-100 CategoryImage"
+                  class="h-100 w-100 CategoryImage"
                   cover
                 ></v-img>
               </v-col>
@@ -350,6 +351,9 @@ const openProfile = () => {
 }
 .CategoryImage{
   border-radius: 14px;
+}
+.max-width-80{
+  max-width: 80%;
 }
 :deep(.v-overlay__content){
   width: 100% !important;
