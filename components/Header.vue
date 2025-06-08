@@ -104,7 +104,7 @@
 
     <v-divider class="d-none d-md-block mt-3"></v-divider>
     <!--  Category   -->
-      <v-menu transition="slide-y-transition" close-on-content-click="false">
+      <v-menu transition="slide-y-transition" close-on-content-click="false" open-on-hover>
     <!-- Activator Button -->
     <template v-slot:activator="{ props }">
       <v-btn
