@@ -184,7 +184,7 @@
                     v-if="hoveredItem?.image"
                     :src="hoveredItem.image"
                     cover
-                    class="CategoryImag max-width-80"
+                    class="CategoryImage max-width-80"
                   ></v-img>
                 </v-row>
               </v-col>
