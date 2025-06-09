@@ -104,13 +104,14 @@
 
     <v-divider class="d-none d-md-block mt-3"></v-divider>
     <!--  Category   -->
-      <v-menu transition="slide-y-transition" close-on-content-click="false" open-on-hover>
+    <v-menu transition="slide-y-transition" close-on-content-click="false" max-height="400px" min-height="400px" open-on-hover>
+      <div class="top-black-border"></div>
     <!-- Activator Button -->
     <template v-slot:activator="{ props }">
       <v-btn
         v-bind="props"
         variant="text"
-        prepend-icon="mdi-view-dashboard"
+        prepend-icon="mdi-shape-plus-outline"
         class="mt-2 d-none d-md-inline-flex"
       >
         دسته بندی
@@ -118,12 +119,12 @@
     </template>
 
     <!-- Mega Menu -->
-    <v-card class="mega-menu" flat>
-      <v-container fluid class="pl-1">
+    <v-card class="mega-menu" flat max-height="400px" min-height="400px">
+      <v-container fluid class="px-1" max-height="400px" min-height="380px">
         <v-row class="pl-0">
           <!-- First Column: Main Items -->
-          <v-col cols="3" class="pl-0">
-            <v-list nav>
+          <v-col cols="2" class="pa-0 max-height-360">
+            <v-list nav class="py-0 pr-0">
               <v-list-item
                 v-for="(item, index) in items"
                 :key="index"
@@ -133,19 +134,34 @@
               >
                 <v-list-item-title>
                   <div class="d-flex justify-space-between w-100">
-                    <div class="d-flex ga-3">
+                    <div class="d-flex ga-3 pa-3">
                       <span class="mdi mdi-content-cut"></span>
                       <p class="text-body-2">{{ item.title }}</p>
                     </div>
-                    <span v-show="hoveredItem.title == item.title" class="mdi mdi-chevron-double-left"></span>
+                    
                   </div>
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-col>
+          <v-col cols="1" class="pa-0 max-height-360">
+            <v-list nav class="pa-0">
+              <v-list-item
+                v-for="(item, index) in items"
+                :key="index"
+                @mouseenter="hoveredItem = item"
+                class="px-0 py-2"
+                
+              >
+                <v-list-item-title class="px-0">
+                  <span v-show="hoveredItem.title == item.title" class="mdi mdi-chevron-double-left text-subtitle-1"></span>
                 </v-list-item-title>
               </v-list-item>
             </v-list>
           </v-col>
 
           <!-- Second Column: Submenu with Two-Column Wrap -->
-          <v-col cols="4" class="pr-0">
+          <v-col cols="4" class="pr-0 max-height-360">
             <div class="submenu-columns" v-if="hoveredItem?.children">
               <div
                 v-for="(group, groupIndex) in hoveredItem.children"
@@ -168,7 +184,7 @@
           </v-col>
 
           <!-- Third Column: Image Section -->
-          <v-col cols="5" class="d-flex">
+          <v-col cols="5" class="d-flex max-height-360">
             <v-row>
               <v-col cols="6" class="d-flex flex-column ga-6">
                 <v-row class="justify-end py-1 pl-6" >
@@ -176,6 +192,7 @@
                     v-if="hoveredItem?.image"
                     :src="hoveredItem.image"
                     cover
+                    max-height="165px"
                     class="CategoryImage max-width-80"
                   ></v-img>
                 </v-row>
@@ -184,6 +201,7 @@
                     v-if="hoveredItem?.image"
                     :src="hoveredItem.image"
                     cover
+                    max-height="165px"
                     class="CategoryImage max-width-80"
                   ></v-img>
                 </v-row>
@@ -194,6 +212,7 @@
                   :src="hoveredItem.image"
                   class="h-100 w-100 CategoryImage"
                   cover
+                  max-height="350px"
                 ></v-img>
               </v-col>
             </v-row>
@@ -276,6 +295,28 @@ const items = [
         items: ['خط چشم', 'مداد چشم', 'مداد چشم مایع']
       }
     ]
+  },
+  {
+    title: 'خانه و اشپزخانه',
+    image: 'https://picsum.photos/200',
+    children: [
+      {
+        header: 'وسایل اشپزی',
+        items: ['ظروف پلاستیکی', 'یخچال', 'فر']
+      },
+      {
+        header: 'قالب کیک',
+        items: ['مثلثی', 'مستطیلی', 'قلبی']
+      },
+      {
+        header: 'چنگال',
+        items: ['نقره', 'مس', 'طلا']
+      },
+      {
+        header: 'سرویس چینی',
+        items: ['', '', '']
+      }
+    ]
   }
 ];
 
@@ -336,15 +377,15 @@ const openProfile = () => {
   margin: 0 0 0.25rem 0;
   color: #42424299;
   cursor: pointer;
-  padding: 10px;
+  padding: 4px;
   font-size: 13px;
   font-weight: 400;
+  padding-right: 26px;
 }
 
 .submenu-item:hover {
   cursor: pointer;
-  background-color: #F4F4F4;
-  border-radius: 10px !important;
+  color: #424242;
 }
 :deep(.v-list-item__content){
   width: 100%;
@@ -356,7 +397,25 @@ const openProfile = () => {
   max-width: 80%;
 }
 :deep(.v-overlay__content){
-  width: 100% !important;
+  width: 90% !important;
   top: 170px !important;
+  right: 70px !important;
+}
+.top-black-border{
+    width: 100px;
+    height: 2px;
+    position: absolute;
+    background: black;
+    z-index: 10000;
+    right: 3%;
+}
+:deep(.v-list-item--density-default){
+  min-height: 48px !important;
+  height: 48px !important;
+  max-height: 48px !important;
+}
+.max-height-360{
+  max-height: 360px !important;
+  min-height: 360px !important;
 }
 </style>
