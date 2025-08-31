@@ -187,19 +187,23 @@ const changeStep = (val) => {
   step.value = val;
 };
 
-const startTimer = () => {
-  timer.value.minutes = 4;
-  timer.value.second  = 60;
-  timer.value.active  = true;
+const startTimer = (ttl) => {
+  const totalSeconds = ttl || 300;
+  timer.value.minutes = Math.floor(totalSeconds / 60);
+  timer.value.second = totalSeconds % 60;
+  timer.value.active = true;
+  
+  if (timer.value.counter) {
+    clearInterval(timer.value.counter);
+  }
+  
   timer.value.counter = setInterval(() => {
-    if (timer.value.second === 1) {
-      if (timer.value.minutes) {
+    if (timer.value.second === 0) {
+      if (timer.value.minutes > 0) {
         timer.value.minutes--;
-        timer.value.second = 60;
+        timer.value.second = 59;
       } else {
         timer.value.active = false;
-        timer.value.minutes -= 1;
-        timer.value.second = 60;
         clearInterval(timer.value.counter);
       }
     } else {
@@ -209,8 +213,6 @@ const startTimer = () => {
 };
 
 const sendOTP = async () => {
-
-  // request
   await useAPI('auth/login/authenticate', {
     method: 'post',
     body  : {
@@ -218,8 +220,9 @@ const sendOTP = async () => {
       phone : form.value.phoneNumber,
     },
     onResponse({response}) {
-      if (response.status === 200) {
-        startTimer();
+      if (response.status === 200) {      
+        const ttl =  response._data.ttl || 300;
+        startTimer(ttl);
         changeStep(2);
       } else {
         $notify('مشکلی در ارسال کد بوجود آمد. لطفا بعدا تلاش کنید', 'error');
@@ -229,8 +232,6 @@ const sendOTP = async () => {
 };
 
 const verifyOTP = async () => {
-
-  // request
   await useAPI('auth/login/verification', {
     method: 'post',
     body  : {
@@ -239,15 +240,12 @@ const verifyOTP = async () => {
       code  : form.value.otp,
     },
     onResponse({response}) {
-
       if (response.status === 200) {
-        // set validation and action(1 -> register , 2 -> login)
         validation.value      = response._data.validation;
         action.value          = response._data.userIsExists ? 2 : 1;
         userHasPassword.value = response._data.userHasPassword;
         changeStep(3);
       } else {
-        // parse error
         if (response._data.message && response._data.message === 'The OTP code is wrong') {
           $notify('کد وارد شده صحیح نیست', 'error');
         }
@@ -258,7 +256,6 @@ const verifyOTP = async () => {
 };
 
 const login = async () => {
-  // request
   await useAPI('auth/login/access', {
     method: 'post',
     body  : {
@@ -299,12 +296,10 @@ const login = async () => {
         $notify('رمز عبور وارد شده اشتباه است', 'error');
       } else if (response.status === 400) {
         if (response._data && response._data.message) {
-          // validation has expired
           if (response._data.message === 'Validation has expired') {
             $notify('مدت زمان اعتبار سنجی شما تمام شده است. لطفا دوباره تلاش کنید', 'error');
           } else if (response._data.message === 'Validation error') {
             $notify('مقادیر وارد شده معتبر نیستند', 'error');
-            // password
             if (response._data.message.errors.includes('password must be a Strong Password')) {
               $notify('رمز عبور وارد شده ضعیف است', 'error');
             }

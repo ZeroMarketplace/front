@@ -20,7 +20,7 @@
     <v-divider class="mx-6"></v-divider>
 
     <!--  logout   -->
-    <v-btn class="mt-2 px-2 mr-9" height="50" variant="text">
+    <v-btn class="mt-2 px-2 mr-9" height="50" variant="text" @click="logout">
       <v-icon size="25">mdi-power</v-icon>
       <p class="mr-7">خروج از پنل کاربری</p>
     </v-btn>
@@ -36,6 +36,7 @@
 
 <script>
 import {useUserStore} from "~/store/user";
+import {useCookie} from '#app';
 
 export default {
   data() {
@@ -67,6 +68,20 @@ export default {
           icon: 'mdi-cart'
         }
       ]
+    }
+  },
+  methods: {
+    logout() {
+      const user = useCookie('user');
+      const token = useCookie('token');
+      
+      user.value = null;
+      token.value = null;
+      
+      const userStore = useUserStore();
+      userStore.$reset();
+      
+      this.$router.push('/login');
     }
   }
 }
