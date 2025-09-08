@@ -36,7 +36,7 @@
             </v-list-item>
           </v-list>
         </v-menu>
-        <nuxt-link to="/" class="d-flex align-center">
+        <nuxt-link to="/product" class="d-flex align-center">
           <span class="show-more pt-4 pt-sm-0">
             مشاهده همه
             <v-icon size="small" color="#2323237D" class="pr-4"
