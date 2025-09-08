@@ -17,8 +17,10 @@
         class="custom-swiper"
         dir="rtl"
       >
-        <swiper-slide v-for="(slide, index) in 10" :key="index">
-          <home-products-product-item></home-products-product-item>
+        <swiper-slide v-for="product in products" :key="product._id">
+          <home-products-product-item
+            :product="product"
+          ></home-products-product-item>
         </swiper-slide>
       </Swiper>
     </div>
@@ -26,6 +28,19 @@
 </template>
 
 <script setup lang="ts">
+type Product = {
+  _id: string;
+  title?: string;
+  name?: string;
+  files?: string[];
+};
+
+const { data: products } = await useAsyncData<Product[]>(
+  "products-home-latest",
+  () => useApiService.get("products/home/latest"),
+  { default: () => [] }
+);
+
 const config = ref({
   auto: {
     delay: 1000,

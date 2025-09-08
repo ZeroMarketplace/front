@@ -61,7 +61,7 @@
             prevEl: '.tab-products-prev-nav-btn',
           }"
         >
-          <swiper-slide v-for="(product, idx) in products" :key="idx">
+          <swiper-slide v-for="product in products" :key="product._id">
             <ProductItem :product="product" />
           </swiper-slide>
         </Swiper>
@@ -84,18 +84,18 @@ const filterOptions = [
 ];
 const selectedFilter = ref(0);
 
-const products = [
-  { id: 1 },
-  { id: 2 },
-  { id: 3 },
-  { id: 4 },
-  { id: 5 },
-  { id: 6 },
-  { id: 7 },
-  { id: 8 },
-  { id: 9 },
-  { id: 10 },
-];
+type Product = {
+  _id: string;
+  title?: string;
+  name?: string;
+  files?: string[];
+};
+
+const { data: products } = await useAsyncData<Product[]>(
+  "products-home-latest",
+  () => useApiService.get("products/home/latest"),
+  { default: () => [] }
+);
 
 const config = ref({
   auto: {

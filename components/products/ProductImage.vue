@@ -1,13 +1,15 @@
 <template>
   <div v-if="render">
     <!--  Image   -->
-    <v-img v-if="file"
-           :width="size"
-           :height="size"
-           max-width="100"
-           :src="staticsUrl + 'products/' + file"
-           aspect-ratio="1/1"
-           cover>
+    <v-img
+      v-if="file"
+      :width="size"
+      :height="size"
+      max-width="100"
+      :src="staticsUrl + file"
+      aspect-ratio="1/1"
+      cover
+    >
       <template v-slot:placeholder>
         <div class="d-flex align-center justify-center fill-height">
           <v-progress-circular indeterminate></v-progress-circular>
@@ -25,27 +27,24 @@ export default {
   props: {
     file: {
       type: String,
-      default: ''
+      default: "",
     },
     size: {
       type: Number,
-      default: 100
-    }
+      default: 100,
+    },
   },
   data() {
     return {
-      render: false
-    }
+      render: false,
+    };
   },
   created() {
     this.runtimeConfig = useRuntimeConfig();
-    this.staticsUrl    = this.runtimeConfig.public.STATICS_URL;
-    this.render        = true;
-  }
-}
+    this.staticsUrl = this.runtimeConfig.public.STATICS_URL;
+    this.render = true;
+  },
+};
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

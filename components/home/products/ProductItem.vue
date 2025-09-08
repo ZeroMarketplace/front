@@ -1,18 +1,22 @@
 <template>
   <div class="product-card">
     <span class="discount-badge">30%</span>
-    <nuxt-link :to="`/product/2/test`">
+    <nuxt-link
+      :to="`/product/${product?._id}/${(product?.title || product?.name || '')
+        .toString()
+        .replaceAll(' ', '-')}`"
+    >
       <div class="product-media">
-        <img
-          class="product-image"
-          src="/assets/images/products/01.png"
-          alt="ساعت هوشمند اپل 44m"
-        />
+        <products-product-image :file="product?.files?.[0] || ''" :size="120" />
       </div>
     </nuxt-link>
 
-    <nuxt-link :to="`/product/2/test`">
-      <div class="product-title">ساعت هوشمند اپل 44m</div>
+    <nuxt-link
+      :to="`/product/${product?._id}/${(product?.title || product?.name || '')
+        .toString()
+        .replaceAll(' ', '-')}`"
+    >
+      <div class="product-title">{{ product?.title || product?.name }}</div>
     </nuxt-link>
 
     <div class="product-card-footer">
@@ -27,7 +31,16 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+type Product = {
+  _id: string;
+  title?: string;
+  name?: string;
+  files?: string[];
+};
+
+defineProps<{ product: Product }>();
+</script>
 
 <style scoped>
 .product-card {
