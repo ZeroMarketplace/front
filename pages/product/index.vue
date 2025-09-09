@@ -10,18 +10,25 @@ function handleCardClick(e) {
   }
 }
 
-const products = [
-  { id: 1 },
-  { id: 2 },
-  { id: 3 },
-  { id: 4 },
-  { id: 5 },
-  { id: 6 },
-  { id: 7 },
-  { id: 8 },
-  { id: 9 },
-  { id: 10 },
-];
+const page = computed(() => Number(route.query.page || 1));
+const perPage = computed(() => Number(route.query.perPage || 12));
+
+const { data } = await useAsyncData(
+  "products-search",
+  () =>
+    useApiService.get("products/search", {
+      page: page.value,
+      perPage: perPage.value,
+    }),
+  { default: () => ({ list: [], total: 0, page: 1, perPage: 10 }) }
+);
+
+const products = computed(() => {
+  const list = data.value?.list || [];
+  return list.map((p) => ({
+    ...p,
+  }));
+});
 
 const items = [
   {
@@ -62,7 +69,7 @@ const items = [
         <v-row>
           <v-col
             v-for="product in products"
-            :key="product.id"
+            :key="product._id"
             cols="12"
             sm="6"
             md="4"

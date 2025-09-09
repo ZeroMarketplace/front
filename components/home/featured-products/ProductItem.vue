@@ -2,18 +2,31 @@
   <div class="featured-product-card">
     <span class="discount-badge">30%</span>
     <div class="featured-product-content">
-      <nuxt-link :to="`/product/2/test`">
+      <nuxt-link
+        :to="`/product/${product?._id}/${(product?.title || product?.name || '')
+          .toString()
+          .replaceAll(' ', '-')}`"
+      >
         <div class="featured-product-image-wrap">
-          <img
-            class="featured-product-image"
-            src="/img/products/01.png"
-            alt="تی شرت مردانه طرح ساده"
+          <products-product-image
+            :file="product?.files?.[0] || ''"
+            :size="120"
           />
         </div>
       </nuxt-link>
       <div class="featured-product-info">
-        <nuxt-link :to="`/product/2/test`">
-          <div class="featured-product-title">تی شرت مردانه طرح ساده</div>
+        <nuxt-link
+          :to="`/product/${product?._id}/${(
+            product?.title ||
+            product?.name ||
+            ''
+          )
+            .toString()
+            .replaceAll(' ', '-')}`"
+        >
+          <div class="featured-product-title">
+            {{ product?.title || product?.name }}
+          </div>
         </nuxt-link>
         <div class="featured-product-price-row">
           <span class="featured-product-price">450,000</span>
@@ -30,7 +43,16 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+type Product = {
+  _id: string;
+  title?: string;
+  name?: string;
+  files?: string[];
+};
+
+defineProps<{ product: Product }>();
+</script>
 
 <style scoped>
 .featured-product-card {
