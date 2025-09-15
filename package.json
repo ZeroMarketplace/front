@@ -14,6 +14,7 @@
     "axios": "^1.7.7",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
+    "lodash": "^4.17.21",
     "nuxt-swiper": "^1.2.2",
     "persian-date": "^1.1.0",
     "pinia": "^2.1.4",
