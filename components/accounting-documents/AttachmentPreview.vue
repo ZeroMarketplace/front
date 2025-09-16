@@ -1,11 +1,13 @@
 <template>
   <v-img :src="image" class="w-100 h-100">
-    <v-btn v-if="showDelete"
-           class="mt-2 mr-2 border border-opacity-100"
-           size="30"
-           variant="elevated"
-           @click="deleteFile"
-           icon>
+    <v-btn
+      v-if="showDelete"
+      class="mt-2 mr-2 border border-opacity-100"
+      size="30"
+      variant="elevated"
+      @click="deleteFile"
+      icon
+    >
       <v-icon color="red">mdi-delete</v-icon>
     </v-btn>
   </v-img>
@@ -13,30 +15,29 @@
 
 <script setup>
 // Import necessary composables
-import {ref, onMounted} from 'vue';
-import {useAPI}         from "~/composables/useAPI";
+import { ref, onMounted } from "vue";
 
 // Define props
 const props = defineProps({
-  src       : {
-    type    : String || Blob, // Accepts either a string URL or a Blob
+  src: {
+    type: String || Blob, // Accepts either a string URL or a Blob
     required: true,
   },
   showDelete: {
-    type   : Boolean,
+    type: Boolean,
     default: false,
   },
 });
 
 // Define reactive state
-const image = ref('');
+const image = ref("");
 
 // Define emit events
-const emit = defineEmits(['deleteFile']);
+const emit = defineEmits(["deleteFile"]);
 
 // Method to handle file deletion
 const deleteFile = () => {
-  emit('deleteFile');
+  emit("deleteFile");
 };
 
 // Lifecycle hook to fetch or set the image
@@ -46,19 +47,21 @@ onMounted(async () => {
     image.value = props.src;
   } else {
     // Fetch the image if src is a URL
-    const {data} = await useAPI(props.src, {
-      method      : 'get',
-      responseType: 'blob',
-    });
-
-    if (data.value) {
-      const blob  = new Blob([data.value], {type: 'image/jpeg'});
-      image.value = URL.createObjectURL(blob);
+    try {
+      const data = await useApiService.get(
+        props.src,
+        {},
+        { responseType: "blob" }
+      );
+      if (data) {
+        const blob = new Blob([data], { type: "image/jpeg" });
+        image.value = URL.createObjectURL(blob);
+      }
+    } catch (error) {
+      console.log("Error fetching image:", error);
     }
   }
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
