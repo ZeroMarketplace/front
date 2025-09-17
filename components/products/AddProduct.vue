@@ -550,7 +550,6 @@
 <script setup>
 import { ref, watch, nextTick } from "vue";
 import { useNuxtApp, useRuntimeConfig } from "#app";
-import { useAPI } from "~/composables/useAPI";
 import CategoryInput from "~/components/categories/CategoryInput.vue";
 import BrandInput from "~/components/brands/BrandInput.vue";
 import UnitInput from "~/components/units/UnitInput.vue";
@@ -658,9 +657,8 @@ const reset = () => {
 };
 
 const add = async () => {
-  await useAPI("products", {
-    method: "post",
-    body: {
+  try {
+    const data = await useApiService.post("products", {
       name: form.value.name,
       _categories: form.value._categories,
       _brand: form.value._brand,
@@ -674,30 +672,27 @@ const add = async () => {
       properties: form.value.properties,
       title: form.value.title,
       content: form.value.content,
-    },
-    onResponse: async ({ response }) => {
-      if (response.status === 200) {
-        if (form.value.files.length) {
-          $notify("عملیات با موفقت انجام شد", "success");
-          $notify("در حال بارگذاری فایل‌ها...", "warning");
-          await uploadFiles(response._data._id);
-        } else {
-          reset();
-          emit("exit");
-          emit("refresh");
-          $notify("عملیات با موفقت انجام شد", "success");
-        }
+    });
+    if (data) {
+      if (form.value.files.length) {
+        $notify("عملیات با موفقت انجام شد", "success");
+        $notify("در حال بارگذاری فایل‌ها...", "warning");
+        await uploadFiles(data._id);
       } else {
-        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+        reset();
+        emit("exit");
+        emit("refresh");
+        $notify("عملیات با موفقت انجام شد", "success");
       }
-    },
-  });
+    }
+  } catch (error) {
+    $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+  }
 };
 
 const edit = async () => {
-  await useAPI("products/" + form.value._id, {
-    method: "put",
-    body: {
+  try {
+    const data = await useApiService.put("products/" + form.value._id, {
       name: form.value.name,
       _categories: form.value._categories,
       _brand: form.value._brand,
@@ -711,24 +706,22 @@ const edit = async () => {
       properties: form.value.properties,
       title: form.value.title,
       content: form.value.content,
-    },
-    onResponse: async ({ response }) => {
-      if (response.status === 200) {
-        if (form.value.files.length) {
-          $notify("عملیات با موفقت انجام شد", "success");
-          $notify("در حال بارگذاری فایل‌ها...", "warning");
-          await uploadFiles(form.value._id);
-        } else {
-          $notify("عملیات با موفقت انجام شد", "success");
-          reset();
-          emit("exit");
-          emit("refresh");
-        }
+    });
+    if (data) {
+      if (form.value.files.length) {
+        $notify("عملیات با موفقت انجام شد", "success");
+        $notify("در حال بارگذاری فایل‌ها...", "warning");
+        await uploadFiles(form.value._id);
       } else {
-        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+        $notify("عملیات با موفقت انجام شد", "success");
+        reset();
+        emit("exit");
+        emit("refresh");
       }
-    },
-  });
+    }
+  } catch (error) {
+    $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+  }
 };
 
 const submit = async () => {
@@ -778,94 +771,94 @@ const uploadFiles = async (_id) => {
 
 const deleteFile = async (fileName, index) => {
   if (confirm("آیا مطمئن هستید؟")) {
-    await useAPI(`products/${form.value._id}/files${fileName}`, {
-      method: "delete",
-      onResponse: ({ response }) => {
-        if (response.status === 200) {
-          form.value.filesPreview.splice(index, 1);
-          $notify("عملیات با موفقت انجام شد", "success");
-        } else {
-          $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
-        }
-      },
-    });
+    try {
+      const data = await useApiService.remove(
+        `products/${form.value._id}/files${fileName}`
+      );
+      if (data) {
+        form.value.filesPreview.splice(index, 1);
+        $notify("عملیات با موفقت انجام شد", "success");
+      }
+    } catch (error) {
+      $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+    }
   }
 };
 
 const setEdit = async (data) => {
   // get product data
-  await useAPI("products/" + data._id, {
-    method: "get",
-    onResponse: async ({ response }) => {
-      if (response.status === 200) {
-        reset();
-        action.value = "edit";
+  try {
+    const response = await useApiService.get("products/" + data._id);
+    if (response) {
+      reset();
+      action.value = "edit";
 
-        // set the data of product into form
-        form.value._categories = response._data._categories;
-        form.value.name = response._data.name;
-        form.value.properties = response._data.properties;
-        form.value._brand = response._data._brand;
-        form.value._unit = response._data._unit;
-        form.value.barcode = response._data.barcode;
-        form.value.iranCode = response._data.iranCode;
-        form.value.variants = response._data.variants;
-        form.value.lastVariants = response._data.variants;
-        form.value.weight = response._data.weight;
-        form.value.dimensions = response._data.dimensions;
-        form.value.tags = response._data.tags;
-        form.value.title = response._data.title;
-        form.value.content = response._data.content;
-        form.value._id = response._data._id;
+      // set the data of product into form
+      form.value._categories = response._categories;
+      form.value.name = response.name;
+      form.value.properties = response.properties;
+      form.value._brand = response._brand;
+      form.value._unit = response._unit;
+      form.value.barcode = response.barcode;
+      form.value.iranCode = response.iranCode;
+      form.value.variants = response.variants;
+      form.value.lastVariants = response.variants;
+      form.value.weight = response.weight;
+      form.value.dimensions = response.dimensions;
+      form.value.tags = response.tags;
+      form.value.title = response.title;
+      form.value.content = response.content;
+      form.value._id = response._id;
 
-        // get category properties
-        await getCategoryProperties(data._categories);
+      // get category properties
+      await getCategoryProperties(data._categories);
 
-        // set files
-        if (response._data.files) {
-          const newFiles = response._data.files.map((fileName) => ({
-            uploaded: true,
-            name: fileName,
-            src: runTimeConfig.public.STATICS_URL + fileName,
-          }));
+      // set files
+      if (response.files) {
+        const newFiles = response.files.map((fileName) => ({
+          uploaded: true,
+          name: fileName,
+          src: runTimeConfig.public.STATICS_URL + fileName,
+        }));
 
-          form.value.filesPreview = [...form.value.filesPreview, ...newFiles];
-        }
-
-        // set variants props
-        response._data.variants.forEach((variant) => {
-          // set delete Loading field
-          variant.deleteLoading = false;
-
-          variant.properties.forEach((property) => {
-            let variantProp = form.value.variantsProps.find(
-              (prop) => prop._id === property._property
-            );
-            if (variantProp) {
-              if (!variantProp.values.includes(property.value))
-                variantProp.values.push(property.value);
-            } else {
-              form.value.variantsProps.push({
-                _id: property._property,
-                values: [property.value],
-              });
-            }
-
-            // add to variants values
-            if (!form.value.variantsValues.includes(property.value))
-              form.value.variantsValues.push(property.value);
-          });
-        });
-
-        // set dynamic properties
-        response._data.properties.forEach((property) => {
-          if (property._id) {
-            form.value.dynamicProperties.push(property._id);
-          }
-        });
+        form.value.filesPreview = [...form.value.filesPreview, ...newFiles];
       }
-    },
-  });
+
+      // set variants props
+      response.variants.forEach((variant) => {
+        // set delete Loading field
+        variant.deleteLoading = false;
+
+        variant.properties.forEach((property) => {
+          let variantProp = form.value.variantsProps.find(
+            (prop) => prop._id === property._property
+          );
+          if (variantProp) {
+            if (!variantProp.values.includes(property.value))
+              variantProp.values.push(property.value);
+          } else {
+            form.value.variantsProps.push({
+              _id: property._property,
+              values: [property.value],
+            });
+          }
+
+          // add to variants values
+          if (!form.value.variantsValues.includes(property.value))
+            form.value.variantsValues.push(property.value);
+        });
+      });
+
+      // set dynamic properties
+      response.properties.forEach((property) => {
+        if (property._id) {
+          form.value.dynamicProperties.push(property._id);
+        }
+      });
+    }
+  } catch (error) {
+    console.log("Error fetching product:", error);
+  }
 };
 
 const setCopy = async (data) => {
@@ -882,18 +875,18 @@ const setCopy = async (data) => {
 const getCategory = async () => {
   let categoryId = form.value._categories[0];
   if (categoryId) {
-    await useAPI("categories/" + categoryId, {
-      method: "get",
-      onResponse: async ({ response }) => {
-        if (response.status === 200) {
-          // set the category detail
-          category.value = response._data;
-          nextTick(async () => {
-            await getCategoryProperties();
-          });
-        }
-      },
-    });
+    try {
+      const response = await useApiService.get("categories/" + categoryId);
+      if (response) {
+        // set the category detail
+        category.value = response;
+        nextTick(async () => {
+          await getCategoryProperties();
+        });
+      }
+    } catch (error) {
+      console.log("Error fetching category:", error);
+    }
   } else {
     return false;
   }
@@ -902,15 +895,17 @@ const getCategory = async () => {
 const getCategoryProperties = async (val) => {
   if (category.value && category.value._properties) {
     const propertiesIds = category.value._properties.join(",");
-    await useAPI("properties?perPage=50&ids=" + propertiesIds, {
-      method: "get",
-      onResponse: async ({ response }) => {
-        if (response.status === 200) {
-          // set category properties list
-          categoryProperties.value = response._data.list;
-        }
-      },
-    });
+    try {
+      const response = await useApiService.get(
+        "properties?perPage=50&ids=" + propertiesIds
+      );
+      if (response) {
+        // set category properties list
+        categoryProperties.value = response.list;
+      }
+    } catch (error) {
+      console.log("Error fetching properties:", error);
+    }
   }
 };
 
@@ -1046,31 +1041,28 @@ const deleteVariant = async (index) => {
       form.value.variants[index].deleteLoading = true;
 
       // request to delete variant
-      await useAPI(
-        `products/${form.value._id}/variants/${form.value.variants[index]._id}`,
-        {
-          method: "delete",
-          onResponse: async ({ response }) => {
-            if (response.status === 200) {
-              // remove item from files preview
-              form.value.variants.splice(index, 1);
+      try {
+        const data = await useApiService.remove(
+          `products/${form.value._id}/variants/${form.value.variants[index]._id}`
+        );
+        if (data) {
+          // remove item from files preview
+          form.value.variants.splice(index, 1);
 
-              $notify("عملیات با موفقت انجام شد", "success");
-            } else if (response.status === 400) {
-              $notify(
-                "این تنوع در فاکتور خریدی استفاده شده است و قابل حذف نیست",
-                "error"
-              );
-            } else {
-              // show error
-              $notify(
-                "مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید",
-                "error"
-              );
-            }
-          },
+          $notify("عملیات با موفقت انجام شد", "success");
         }
-      );
+      } catch (error) {
+        const status = error?.response?.status;
+        if (status === 400) {
+          $notify(
+            "این تنوع در فاکتور خریدی استفاده شده است و قابل حذف نیست",
+            "error"
+          );
+        } else {
+          // show error
+          $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+        }
+      }
 
       this.form.variants[index].deleteLoading = false;
     } else {

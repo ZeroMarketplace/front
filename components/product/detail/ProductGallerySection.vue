@@ -12,7 +12,7 @@
         <v-icon class="">mdi-arrow-left</v-icon>
       </button>
 
-      <div>
+      <div v-if="staticsUrl">
         <swiper
           :spaceBetween="10"
           :navigation="{
@@ -23,27 +23,14 @@
           :modules="[SwiperNavigation, SwiperThumbs]"
           class="gallery-swiper"
         >
-          <swiper-slide>
+          <swiper-slide v-for="image in images" :key="image">
             <div class="p-gallery-img">
-              <img src="/img/products/03.png" />
-            </div> </swiper-slide
-          ><swiper-slide>
-            <div class="p-gallery-img">
-              <img src="/img/products/03.png" />
-            </div> </swiper-slide
-          ><swiper-slide>
-            <div class="p-gallery-img">
-              <img src="/img/products/03.png" />
-            </div>
-          </swiper-slide>
-          <swiper-slide>
-            <div class="p-gallery-img">
-              <img src="/img/products/03.png" />
+              <img :src="staticsUrl + image" />
             </div>
           </swiper-slide>
         </swiper>
       </div>
-      <div>
+      <div v-if="staticsUrl">
         <swiper
           :breakpoints="config.breakpoints"
           @swiper="setThumbsSwiper"
@@ -51,30 +38,11 @@
           :modules="[SwiperNavigation, SwiperThumbs]"
           class="p-thumb-swiper"
         >
-          <swiper-slide>
+          <swiper-slide v-for="image in images" :key="image">
             <div
               class="p-thumb-swiper-img rounded-lg overflow-hidden position-relative"
             >
-              <img class="" src="/img/products/03.png" />
-            </div> </swiper-slide
-          ><swiper-slide>
-            <div
-              class="p-thumb-swiper-img rounded-lg overflow-hidden position-relative"
-            >
-              <img class="" src="/img/products/03.png" />
-            </div> </swiper-slide
-          ><swiper-slide>
-            <div
-              class="p-thumb-swiper-img rounded-lg overflow-hidden position-relative"
-            >
-              <img src="/img/products/03.png" />
-            </div>
-          </swiper-slide>
-          <swiper-slide>
-            <div
-              class="p-thumb-swiper-img rounded-lg overflow-hidden position-relative"
-            >
-              <img src="/img/products/03.png" />
+              <img class="" :src="staticsUrl + image" />
             </div>
           </swiper-slide>
         </swiper>
@@ -87,8 +55,8 @@
 <script setup lang="ts">
 const props = defineProps<{ images: string[]; selectedImage: string }>();
 const emit = defineEmits(["select-image"]);
-const selectedIndex = computed(() => props.images.indexOf(props.selectedImage));
-
+const staticsUrl = ref("");
+const runtimeConfig = useRuntimeConfig();
 const thumbsSwiper = ref<any>(null);
 const mainSwiperRef = ref<any>(null);
 
@@ -133,28 +101,10 @@ const config = ref({
   },
 });
 
-function onThumbsSwiper(swiper: any) {
-  thumbsSwiper.value = swiper;
-}
-
 const setThumbsSwiper = (swiper) => {
   thumbsSwiper.value = swiper;
 };
 
-function selectThumb(img: string, i: number) {
-  emit("select-image", img);
-  // Move main swiper to the selected index
-  if (mainSwiperRef.value && mainSwiperRef.value.swiper) {
-    mainSwiperRef.value.swiper.slideTo(i);
-  }
-}
-
-function onMainSlideChange(swiper: any) {
-  const img = props.images[swiper.activeIndex];
-  if (img && img !== props.selectedImage) emit("select-image", img);
-}
-
-// Watch for selectedImage changes and update main swiper
 watch(
   () => props.selectedImage,
   (val) => {
@@ -166,6 +116,10 @@ watch(
     }
   }
 );
+onBeforeMount(() => {
+  staticsUrl.value = runtimeConfig.public.STATICS_URL;
+});
+onMounted(() => {});
 </script>
 
 <style scoped>

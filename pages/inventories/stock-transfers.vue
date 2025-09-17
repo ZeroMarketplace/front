@@ -1,7 +1,6 @@
 <template>
   <!--   Content     -->
   <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
-
     <!--    Title And Action    -->
     <v-col cols="12">
       <v-row>
@@ -28,10 +27,7 @@
 
         <!--     Action       -->
         <v-col class="text-end" cols="3">
-          <v-btn class="bg-secondary"
-                 size="small"
-                 @click="toggleAction"
-                 icon>
+          <v-btn class="bg-secondary" size="small" @click="toggleAction" icon>
             <v-icon v-if="action === 'list'">mdi-human-dolly</v-icon>
             <v-icon v-if="action === 'edit'">mdi-clipboard-list-outline</v-icon>
             <v-icon v-if="action === 'add'">mdi-clipboard-list-outline</v-icon>
@@ -42,31 +38,32 @@
     </v-col>
 
     <!--    Inventories Stock Transfer   -->
-    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+    <v-col v-show="action === 'add' || action === 'edit'" cols="12">
       <AddStockTransfer
-          ref="addStockTransfers"
-          @exit="toggleAction"
-          @refresh="getStockTransfers"/>
+        ref="addStockTransfers"
+        @exit="toggleAction"
+        @refresh="getStockTransfers"
+      />
     </v-col>
 
     <!--    Stock Transfers List   -->
     <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
       <!--    loading      -->
-      <Loading :loading="loading"/>
+      <Loading :loading="loading" />
 
       <!--    List      -->
-      <v-data-table class="mt-n5 overflow-auto"
-                    v-if="list.length"
-                    :loading="loading"
-                    :headers="listHeaders"
-                    :items="list"
-                    :items-per-page="perPage"
-                    :pageCount="listTotal"
-                    @update:options="setListOptions"
-                    sticky
-                    show-current-page>
-
+      <v-data-table
+        class="mt-n5 overflow-auto"
+        v-if="list.length"
+        :loading="loading"
+        :headers="listHeaders"
+        :items="list"
+        :items-per-page="perPage"
+        :pageCount="listTotal"
+        @update:options="setListOptions"
+        sticky
+        show-current-page
+      >
         <!--     Items       -->
         <template v-slot:item._sourceWarehouse="{ item }">
           {{ item._sourceWarehouse.title }}
@@ -75,7 +72,7 @@
           {{ item._destinationWarehouse.title }}
         </template>
         <template v-slot:item.count="{ item }">
-          {{ item.count + ' ' }}
+          {{ item.count + " " }}
           {{ item._product._unit.title }}
         </template>
         <template v-slot:item.code="{ item }">
@@ -86,85 +83,110 @@
         </template>
         <template v-slot:item.status="{ item }">
           <span class="text-red" v-if="item.status === 'Draft'">پیش نویس</span>
-          <span class="text-orange" v-if="item.status === 'Pending Approval'">در انتظار تایید</span>
-          <span class="text-green" v-if="item.status === 'Approved'">تایید شده</span>
-          <span class="text-orange" v-if="item.status === 'Dispatched'">خروج از انبار مبدا</span>
-          <span class="text-blue" v-if="item.status === 'In Transit'">در مسیر</span>
-          <span class="text-green" v-if="item.status === 'Received'">دریافت شده</span>
-          <span class="text-green" v-if="item.status === 'Completed'">تکمیل شده</span>
-          <span class="text-red" v-if="item.status === 'Canceled'">لغو شده</span>
+          <span class="text-orange" v-if="item.status === 'Pending Approval'"
+            >در انتظار تایید</span
+          >
+          <span class="text-green" v-if="item.status === 'Approved'"
+            >تایید شده</span
+          >
+          <span class="text-orange" v-if="item.status === 'Dispatched'"
+            >خروج از انبار مبدا</span
+          >
+          <span class="text-blue" v-if="item.status === 'In Transit'"
+            >در مسیر</span
+          >
+          <span class="text-green" v-if="item.status === 'Received'"
+            >دریافت شده</span
+          >
+          <span class="text-green" v-if="item.status === 'Completed'"
+            >تکمیل شده</span
+          >
+          <span class="text-red" v-if="item.status === 'Canceled'"
+            >لغو شده</span
+          >
         </template>
 
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
-          <v-btn class="mx-2"
-                 color="red"
-                 size="25"
-                 @click="setDelete(item)"
-                 icon>
+          <v-btn
+            class="mx-2"
+            color="red"
+            size="25"
+            @click="setDelete(item)"
+            icon
+          >
             <v-icon size="15">mdi-delete-outline</v-icon>
           </v-btn>
         </template>
 
         <!--      Pagination      -->
         <template v-slot:bottom>
-          <v-pagination v-if="pageCount > 1"
-                        class="mt-5"
-                        active-color="secondary"
-                        v-model="page"
-                        :length="pageCount"
-                        rounded="circle">
+          <v-pagination
+            v-if="pageCount > 1"
+            class="mt-5"
+            active-color="secondary"
+            v-model="page"
+            :length="pageCount"
+            rounded="circle"
+          >
           </v-pagination>
         </template>
       </v-data-table>
 
       <!--    Empty List Alert      -->
-      <EmptyList :list="list" :loading="loading"/>
-
+      <EmptyList :list="list" :loading="loading" />
     </v-col>
-
   </v-row>
 </template>
 
 <script setup>
-import {ref, watch, onMounted, nextTick} from "vue";
-import {useNuxtApp}                      from "#app";
-import AddStockTransfer                  from "~/components/inventories/AddStockTransfer.vue";
-import {useAPI}                          from "~/composables/useAPI";
-import Loading                           from "~/components/Loading.vue";
-import EmptyList                         from "~/components/EmptyList.vue";
+import { ref, watch, onMounted, nextTick } from "vue";
+import { useNuxtApp } from "#app";
+import AddStockTransfer from "~/components/inventories/AddStockTransfer.vue";
+import Loading from "~/components/Loading.vue";
+import EmptyList from "~/components/EmptyList.vue";
 
 // Define page metadata
 definePageMeta({
-  layout      : 'admin',
-  middleware  : 'auth',
+  layout: "admin",
+  middleware: "auth",
   requiresAuth: true,
-  requiresRole: 'admin',
+  requiresRole: "admin",
 });
 
 // Reactive state variables
-const list              = ref([]);
-const loading           = ref(true);
-const listTotal         = ref(0);
-const page              = ref(1);
-const perPage           = ref(10);
-const pageCount         = ref(1);
-const sortColumn        = ref("");
-const sortDirection     = ref("");
-const action            = ref("list");
+const list = ref([]);
+const loading = ref(true);
+const listTotal = ref(0);
+const page = ref(1);
+const perPage = ref(10);
+const pageCount = ref(1);
+const sortColumn = ref("");
+const sortDirection = ref("");
+const action = ref("list");
 const addStockTransfers = ref(null);
-const {$notify}         = useNuxtApp();
+const { $notify } = useNuxtApp();
 
 // Table headers
 const listHeaders = [
-  {title: "کد", key: "code", align: "center", sortable: false},
-  {title: "محصول", key: "_product", align: "center", sortable: false},
-  {title: "تعداد", key: "count", align: "center", sortable: false},
-  {title: "انبار مبدا", key: "_sourceWarehouse", align: "center", sortable: false},
-  {title: "انبار مقصد", key: "_destinationWarehouse", align: "center", sortable: false},
-  {title: "تاریخ", key: "updatedAtJalali", align: "center", sortable: false},
-  {title: "وضعیت", key: "status", align: "center", sortable: false},
-  {title: "عملیات", key: "operation", align: "center", sortable: false},
+  { title: "کد", key: "code", align: "center", sortable: false },
+  { title: "محصول", key: "_product", align: "center", sortable: false },
+  { title: "تعداد", key: "count", align: "center", sortable: false },
+  {
+    title: "انبار مبدا",
+    key: "_sourceWarehouse",
+    align: "center",
+    sortable: false,
+  },
+  {
+    title: "انبار مقصد",
+    key: "_destinationWarehouse",
+    align: "center",
+    sortable: false,
+  },
+  { title: "تاریخ", key: "updatedAtJalali", align: "center", sortable: false },
+  { title: "وضعیت", key: "status", align: "center", sortable: false },
+  { title: "عملیات", key: "operation", align: "center", sortable: false },
 ];
 
 // Toggle action mode
@@ -190,24 +212,20 @@ const filter = () => {
 const getStockTransfers = async () => {
   loading.value = true;
 
-  await useAPI('stock-transfers?' + filter(), {
-    method    : 'get',
-    onResponse: ({response}) => {
-      // set total and list
-      listTotal.value = response._data.total;
-      list.value      = [];
-
-      // set the loading properties for each item of the list and add them to the list
-      response._data.list.forEach(item => {
-        item.setEditLoading = false;
-        item.deleteLoading  = false;
-        list.value.push(item);
-      })
-
-      // calc and set the pageCount
-      pageCount.value = Math.ceil(listTotal.value / perPage.value);
-    }
-  });
+  try {
+    const data = await useApiService.get("stock-transfers?" + filter());
+    // set total and list
+    listTotal.value = data.total;
+    list.value = [];
+    // set the loading properties for each item of the list and add them to the list
+    data.list.forEach((item) => {
+      item.setEditLoading = false;
+      item.deleteLoading = false;
+      list.value.push(item);
+    });
+    // calc and set the pageCount
+    pageCount.value = Math.ceil(listTotal.value / perPage.value);
+  } catch (error) {}
 
   loading.value = false;
 };
@@ -216,7 +234,8 @@ const getStockTransfers = async () => {
 const setListOptions = (val) => {
   if (val && val.sortBy[0]) {
     if (val.sortBy[0].key === "_warehouse") return;
-    sortColumn.value    = val.sortBy[0].key === "dateTimeJalali" ? "dateTime" : val.sortBy[0].key;
+    sortColumn.value =
+      val.sortBy[0].key === "dateTimeJalali" ? "dateTime" : val.sortBy[0].key;
     sortDirection.value = val.sortBy[0].order === "desc" ? -1 : 1;
     getStockTransfers();
   }
@@ -234,20 +253,13 @@ const deleteStockTransfer = async (item) => {
   // start loading
   item.deleteLoading = true;
 
-  await useAPI('stock-transfers/' + item._id, {
-    method    : 'delete',
-    onResponse: ({response}) => {
-      if (response.status === 200) {
-        $notify("عملیات با موفقیت انجام شد", "success");
-
-        // refresh list
-        getStockTransfers();
-      } else {
-        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
-      }
-    }
-  });
-
+  try {
+    await useApiService.remove("stock-transfers/" + item._id);
+    $notify("عملیات با موفقیت انجام شد", "success");
+    getStockTransfers();
+  } catch (error) {
+    $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+  }
 };
 
 // Watch page changes to refresh data
@@ -263,7 +275,4 @@ onMounted(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

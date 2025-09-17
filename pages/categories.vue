@@ -1,6 +1,5 @@
 <template>
   <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16v">
-
     <!--    Title And Action    -->
     <v-col cols="12">
       <v-row>
@@ -27,19 +26,14 @@
 
         <!--     Action       -->
         <v-col class="text-end" cols="3">
-          <v-btn class="bg-secondary"
-                 size="small"
-                 @click="toggleAction"
-                 icon>
+          <v-btn class="bg-secondary" size="small" @click="toggleAction" icon>
             <!--      Icons      -->
             <v-icon v-if="action === 'list'">mdi-plus</v-icon>
             <v-icon v-if="action === 'edit'">mdi-file-tree-outline</v-icon>
             <v-icon v-if="action === 'add'">mdi-file-tree-outline</v-icon>
 
             <!--       Description       -->
-            <v-tooltip
-                activator="parent"
-                location="top">
+            <v-tooltip activator="parent" location="top">
               <span v-if="action === 'list'">اضافه کردن</span>
               <span v-if="action === 'edit'">دسته‌بندی‌ها</span>
               <span v-if="action === 'add'">دسته‌بندی‌ها</span>
@@ -51,54 +45,60 @@
     </v-col>
 
     <!--    Add Category   -->
-    <v-col v-show="(action === 'add' || action === 'edit')" cols="12" class="pb-10">
-      <categories-add-category ref="addCategory" @exit="toggleAction" @refresh="getCategories"/>
+    <v-col
+      v-show="action === 'add' || action === 'edit'"
+      cols="12"
+      class="pb-10"
+    >
+      <categories-add-category
+        ref="addCategory"
+        @exit="toggleAction"
+        @refresh="getCategories"
+      />
     </v-col>
 
     <!--    Category List   -->
     <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
       <!--    loading      -->
-      <Loading :loading="loading"/>
+      <Loading :loading="loading" />
 
       <!--   List   -->
       <v-list class="w-100">
-        <categories-category-view v-for="item in list"
-                                  @setEdit="setEdit"
-                                  @setParent="setParent"
-                                  @setDelete="setDelete"
-                                  @setStatus="setStatus"
-                                  :item="item"/>
+        <categories-category-view
+          v-for="item in list"
+          @setEdit="setEdit"
+          @setParent="setParent"
+          @setDelete="setDelete"
+          @setStatus="setStatus"
+          :item="item"
+        />
       </v-list>
 
       <!--    Empty List Alert      -->
-      <EmptyList class="py-16 mb-16" :list="list" :loading="loading"/>
-
+      <EmptyList class="py-16 mb-16" :list="list" :loading="loading" />
     </v-col>
-
   </v-row>
 </template>
 
 <script setup>
-import {useNuxtApp}     from "#app";
-import {ref, onMounted} from "vue";
-import {useAPI}         from '~/composables/useAPI';
-import Loading          from "~/components/Loading.vue";
-import EmptyList        from "~/components/EmptyList.vue";
+import { useNuxtApp } from "#app";
+import { ref, onMounted } from "vue";
+import Loading from "~/components/Loading.vue";
+import EmptyList from "~/components/EmptyList.vue";
 
 // Page metadata configuration
 definePageMeta({
-  layout      : "admin",
-  middleware  : "auth",
+  layout: "admin",
+  middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",
 });
 
 // Reactive variables
-const loading     = ref(true); // Tracks loading state
-const action      = ref("list"); // Determines current view state (list/add/edit)
-const list        = ref([]); // Stores the list of categories
-const {$notify}   = useNuxtApp();
+const loading = ref(true); // Tracks loading state
+const action = ref("list"); // Determines current view state (list/add/edit)
+const list = ref([]); // Stores the list of categories
+const { $notify } = useNuxtApp();
 const addCategory = ref(null); // Store the ref of child component
 
 // Toggles between different actions
@@ -115,8 +115,7 @@ const filter = () => {
   let search = new URLSearchParams();
 
   // set the statuses
-  search.set('statuses', [1, 2]);
-
+  search.set("statuses", [1, 2]);
 
   return search;
 };
@@ -125,22 +124,17 @@ const filter = () => {
 const getCategories = async () => {
   // start loading
   loading.value = true;
-  await useAPI('categories?' + filter(), {
-    method    : 'get',
-    onResponse: ({response}) => {
-      // set list of categories
-      list.value = [];
-
-      // add the loading flags to each item
-      response._data.list.forEach(item => {
-        item.deleteLoading    = false;
-        item.setStatusLoading = false;
-
-        list.value.push(item);
-      })
-
-    }
-  });
+  try {
+    const data = await useApiService.get("categories?" + filter());
+    // set list of categories
+    list.value = [];
+    // add the loading flags to each item
+    data.list.forEach((item) => {
+      item.deleteLoading = false;
+      item.setStatusLoading = false;
+      list.value.push(item);
+    });
+  } catch (error) {}
   // stop loading
   loading.value = false;
 };
@@ -151,24 +145,19 @@ const deleteCategory = async (item) => {
   item.deleteLoading = true;
 
   // send the request
-  await useAPI('categories/' + item._id, {
-    method    : 'delete',
-    onResponse: ({response}) => {
-      if (response.status === 200) {
-        $notify('عملیات با موفقت انجام شد', 'success');
-        getCategories();
-      } else {
-        $notify('مشکلی در پردازش عملیات پیش آمد. لطفا دوباره تلاش کنید.', 'error');
-      }
-    }
-  });
+  try {
+    await useApiService.remove("categories/" + item._id);
+    $notify("عملیات با موفقت انجام شد", "success");
+    getCategories();
+  } catch (error) {
+    $notify("مشکلی در پردازش عملیات پیش آمد. لطفا دوباره تلاش کنید.", "error");
+  }
 
   item.deleteLoading = false;
 };
 
 // set status for category
 const setStatus = async (item) => {
-
   // start loading
   item.setStatusLoading = true;
 
@@ -176,20 +165,13 @@ const setStatus = async (item) => {
   let status = item.status === 1 ? 2 : 1;
 
   // send the request
-  await useAPI('categories/' + item._id + '/status', {
-    method    : 'patch',
-    body      : {
-      status: status
-    },
-    onResponse: async ({response}) => {
-      if (response.status === 200) {
-        $notify('عملیات با موفقت انجام شد', 'success');
-        await getCategories();
-      } else {
-        $notify('مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید', 'error');
-      }
-    }
-  });
+  try {
+    await useApiService.patch("categories/" + item._id + "/status", { status });
+    $notify("عملیات با موفقت انجام شد", "success");
+    await getCategories();
+  } catch (error) {
+    $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+  }
 
   // stop loading
   item.setStatusLoading = false;
@@ -218,7 +200,6 @@ const setParent = (data) => {
 
 // Initialize the component on mount
 onMounted(() => {
-
   // fix the onMounted bug for reload categories
   setTimeout(() => {
     getCategories(); // Fetch the list of categories
@@ -226,7 +207,4 @@ onMounted(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
