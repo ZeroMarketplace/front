@@ -28,7 +28,7 @@
         @click="$emit('update:modelValue', option.value)"
         class="ma-1 text-white rounded-lg"
       >
-        {{ option.label }}
+        {{ option.title }}
       </v-btn>
     </template>
   </div>
