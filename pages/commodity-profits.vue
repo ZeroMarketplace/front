@@ -1,6 +1,5 @@
 <template>
   <v-row class="bg-white mr-4 mr-md-2 ml-md-5 mt-2 ml-6 rounded-lg pb-16">
-
     <!--    Title And Action    -->
     <v-col cols="12">
       <v-row>
@@ -42,25 +41,25 @@
 
     <!--    Commodity Profits List   -->
     <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
       <!--    loading      -->
-      <Loading :loading="loading"/>
+      <Loading :loading="loading" />
 
       <!--    List      -->
-      <v-data-table class="mt-n5 overflow-auto"
-                    v-if="list.length"
-                    :loading="loading"
-                    :headers="listHeaders"
-                    :items="list"
-                    :items-per-page="perPage"
-                    :pageCount="listTotal"
-                    @update:options="setListOptions"
-                    sticky
-                    show-current-page>
-
+      <v-data-table
+        class="mt-n5 overflow-auto"
+        v-if="list.length"
+        :loading="loading"
+        :headers="listHeaders"
+        :items="list"
+        :items-per-page="perPage"
+        :pageCount="listTotal"
+        @update:options="setListOptions"
+        sticky
+        show-current-page
+      >
         <!--     Items       -->
         <template v-slot:item.count="{ item }">
-          {{ item.count + ' ' }}
+          {{ item.count + " " }}
           {{ item._product._unit.title }}
         </template>
         <template v-slot:item.amount="{ item }">
@@ -73,63 +72,62 @@
           {{ item._product.title }}
         </template>
         <template v-slot:item.description="{ item }">
-              <span v-if="item.referenceType === 'sales-invoices'">
-                فاکتور فروش ({{ item._reference.code }})
-              </span>
+          <span v-if="item.referenceType === 'sales-invoices'">
+            فاکتور فروش ({{ item._reference.code }})
+          </span>
         </template>
 
         <!--      Pagination      -->
         <template v-slot:bottom>
-          <v-pagination class="mt-5"
-                        active-color="secondary"
-                        v-model="page"
-                        :length="pageCount"
-                        rounded="circle">
+          <v-pagination
+            class="mt-5"
+            active-color="secondary"
+            v-model="page"
+            :length="pageCount"
+            rounded="circle"
+          >
           </v-pagination>
         </template>
       </v-data-table>
 
       <!--    Empty List Alert      -->
-      <EmptyList :list="list" :loading="loading"/>
-
+      <EmptyList :list="list" :loading="loading" />
     </v-col>
-
   </v-row>
 </template>
 
 <script setup>
-import {ref, watch, onMounted, nextTick} from 'vue';
-import {useAPI}                          from "~/composables/useAPI";
-import Loading                           from "~/components/Loading.vue";
-import EmptyList                         from "~/components/EmptyList.vue";
-import {formatters}                      from '~/utils/formatters'
+import { ref, watch, onMounted, nextTick } from "vue";
+import Loading from "~/components/Loading.vue";
+import EmptyList from "~/components/EmptyList.vue";
+import { formatters } from "~/utils/formatters";
 
 definePageMeta({
-  layout      : 'admin',
-  middleware  : 'auth',
+  layout: "admin",
+  middleware: "auth",
   requiresAuth: true,
-  requiresRole: 'admin'
+  requiresRole: "admin",
 });
 
 // Define reactive variables
-const list          = ref([]);
-const loading       = ref(true);
-const listTotal     = ref(0);
-const page          = ref(1);
-const perPage       = ref(10);
-const pageCount     = ref(1);
-const sortColumn    = ref('');
-const sortDirection = ref('');
-const action        = ref('list');
+const list = ref([]);
+const loading = ref(true);
+const listTotal = ref(0);
+const page = ref(1);
+const perPage = ref(10);
+const pageCount = ref(1);
+const sortColumn = ref("");
+const sortDirection = ref("");
+const action = ref("list");
 
 // Define headers for the table
 const listHeaders = [
-  {title: 'کد محصول', key: 'referenceCode', align: 'center', sortable: false},
-  {title: 'نام محصول', key: 'productTitle', align: 'center', sortable: false},
-  {title: 'تعداد', key: 'count', align: 'center', sortable: false},
-  {title: 'سود (تومان)', key: 'amount', align: 'center', sortable: false},
-  {title: 'شرح', key: 'description', align: 'center', sortable: false},
-  {title: 'تاریخ', key: 'updatedAtJalali', align: 'center', sortable: false}
+  { title: "کد محصول", key: "referenceCode", align: "center", sortable: false },
+  { title: "نام محصول", key: "productTitle", align: "center", sortable: false },
+  { title: "تعداد", key: "count", align: "center", sortable: false },
+  { title: "سود (تومان)", key: "amount", align: "center", sortable: false },
+  { title: "شرح", key: "description", align: "center", sortable: false },
+  { title: "تاریخ", key: "updatedAtJalali", align: "center", sortable: false },
 ];
 
 // Function to toggle action mode
@@ -144,33 +142,32 @@ const listHeaders = [
 // Function to filter data
 const filter = () => {
   let search = new URLSearchParams();
-  search.set('perPage', perPage.value);
-  search.set('page', page.value);
-  search.set('sortColumn', sortColumn.value);
-  search.set('sortDirection', Number(sortDirection.value));
+  search.set("perPage", perPage.value);
+  search.set("page", page.value);
+  search.set("sortColumn", sortColumn.value);
+  search.set("sortDirection", Number(sortDirection.value));
   return search;
 };
 
 // Function to fetch commodity profits
 const getCommodityProfits = async () => {
   loading.value = true;
-  await useAPI('commodity-profits?' + filter(), {
-    method    : 'get',
-    onResponse: ({response}) => {
-      listTotal.value = response._data.total;
-      pageCount.value = Math.ceil(listTotal.value / perPage.value);
-      list.value      = response._data.list;
-    }
-  });
+  try {
+    const data = await useApiService.get("commodity-profits?" + filter());
+    listTotal.value = data.total;
+    pageCount.value = Math.ceil(listTotal.value / perPage.value);
+    list.value = data.list;
+  } catch (error) {}
   loading.value = false;
 };
 
 // Function to handle sorting
 const setListOptions = (val) => {
   if (val && val.sortBy[0]) {
-    if (val.sortBy[0].key === '_warehouse') return;
-    sortColumn.value    = val.sortBy[0].key === 'dateTimeJalali' ? 'dateTime' : val.sortBy[0].key;
-    sortDirection.value = val.sortBy[0].order === 'desc' ? -1 : 1;
+    if (val.sortBy[0].key === "_warehouse") return;
+    sortColumn.value =
+      val.sortBy[0].key === "dateTimeJalali" ? "dateTime" : val.sortBy[0].key;
+    sortDirection.value = val.sortBy[0].order === "desc" ? -1 : 1;
     getCommodityProfits();
   }
 };
@@ -213,7 +210,4 @@ onMounted(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

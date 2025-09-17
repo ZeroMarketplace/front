@@ -1,6 +1,5 @@
 <template>
   <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
-
     <!--    Title And Action    -->
     <v-col cols="12">
       <v-row>
@@ -41,81 +40,76 @@
     </v-col>
 
     <!--    Add Setting   -->
-    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+    <v-col v-show="action === 'add' || action === 'edit'" cols="12">
       <!--      <units-add-unit ref="addUnit" @exit="toggleAction" @refresh="getUnits"/>-->
     </v-col>
 
     <!--    Settings List   -->
     <v-col v-show="action === 'list'" cols="12" class="pb-16">
-
       <!--    loading      -->
-      <Loading :loading="loading"/>
+      <Loading :loading="loading" />
 
       <!--    List      -->
       <v-table class="text-center mt-n5">
         <tbody>
-        <tr v-for="item in list"
-            :key="item.key"
-            class="">
+          <tr v-for="item in list" :key="item.key" class="">
+            <!--     Title      -->
+            <td class="pa-2">{{ item.title }}</td>
 
-          <!--     Title      -->
-          <td class="pa-2">{{ item.title }}</td>
-
-          <!--    Value      -->
-          <td class="text-center pa-2">
-
-            <!--     Select       -->
-            <v-autocomplete v-if="item.type === 'select'"
-                            v-model="item.value"
-                            :items="item.options"
-                            class="mt-2 w-50"
-                            item-title="title"
-                            item-value="key"
-                            variant="outlined"
-                            @update:modelValue="edit(item)"
-                            density="compact">
-              <template v-slot:append>
-                <!--       Loading         -->
-                <v-progress-circular v-if="item.editLoading"
-                                     color="secondary"
-                                     indeterminate>
-                </v-progress-circular>
-              </template>
-            </v-autocomplete>
-
-          </td>
-        </tr>
+            <!--    Value      -->
+            <td class="text-center pa-2">
+              <!--     Select       -->
+              <v-autocomplete
+                v-if="item.type === 'select'"
+                v-model="item.value"
+                :items="item.options"
+                class="mt-2 w-50"
+                item-title="title"
+                item-value="key"
+                variant="outlined"
+                @update:modelValue="edit(item)"
+                density="compact"
+              >
+                <template v-slot:append>
+                  <!--       Loading         -->
+                  <v-progress-circular
+                    v-if="item.editLoading"
+                    color="secondary"
+                    indeterminate
+                  >
+                  </v-progress-circular>
+                </template>
+              </v-autocomplete>
+            </td>
+          </tr>
         </tbody>
       </v-table>
 
       <!--    Empty List Alert      -->
-      <EmptyList :list="list" :loading="loading"/>
-
+      <EmptyList :list="list" :loading="loading" />
     </v-col>
-
   </v-row>
 </template>
 
 <script setup>
-import {ref, onMounted, nextTick} from "vue"; // Vue composition API functions
-import {useNuxtApp}               from "#app"; // Nuxt composables
-import {useAPI}                   from '~/composables/useAPI';
-import Loading                    from "~/components/Loading.vue";
-import EmptyList                  from "~/components/EmptyList.vue";
+import { ref, onMounted, nextTick } from "vue"; // Vue composition API functions
+import { useNuxtApp } from "#app"; // Nuxt composables
+import Loading from "~/components/Loading.vue";
+import EmptyList from "~/components/EmptyList.vue";
 
 // Define page metadata
 definePageMeta({
-  layout      : "admin",
-  middleware  : "auth",
+  layout: "admin",
+  middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",
 });
 
 // Reactive state variables
-const list      = ref([]);
-const loading   = ref(true);
-const action    = ref("list");
-const {$notify} = useNuxtApp();
+const list = ref([]);
+const loading = ref(true);
+const action = ref("list");
+const { $notify } = useNuxtApp();
 
 // Toggle between different actions (add, edit, list)
 // const toggleAction = () => {
@@ -126,47 +120,36 @@ const {$notify} = useNuxtApp();
 //   }
 // };
 
-
 // Fetch the list of units
 const getSettings = async () => {
   loading.value = true;
 
-  await useAPI('settings', {
-    method    : 'get',
-    onResponse: ({response}) => {
-      // set data to list and stop loading
-      list.value = [];
-
-      response._data.list.forEach((item) => {
-        item.editLoading = false;
-        list.value.push(item);
-      })
-
-      loading.value = false;
-    }
-  });
+  try {
+    const data = await useApiService.get("settings");
+    // set data to list and stop loading
+    list.value = [];
+    data.list.forEach((item) => {
+      item.editLoading = false;
+      list.value.push(item);
+    });
+    loading.value = false;
+  } catch (error) {
+    loading.value = false;
+  }
 };
 
 const edit = async (item) => {
   item.editLoading = true;
 
-  await useAPI('settings/' + item._id, {
-    method    : 'put',
-    body      : {
-      value: item.value
-    },
-    onResponse: ({response}) => {
-      if (response.status === 200) {
-        $notify('عملیات با موفقیت انجام شد', 'success');
-      } else {
-        $notify('مشکلی در انجام عملیات بوجود آمد. لطفا مجددا تلاش کنید', 'error');
-      }
-
-      item.editLoading = false;
-    }
-  });
+  try {
+    await useApiService.put("settings/" + item._id, { value: item.value });
+    $notify("عملیات با موفقیت انجام شد", "success");
+  } catch (error) {
+    $notify("مشکلی در انجام عملیات بوجود آمد. لطفا مجددا تلاش کنید", "error");
+  } finally {
+    item.editLoading = false;
+  }
 };
-
 
 // On component mount, initialize user and fetch units
 onMounted(() => {
@@ -176,7 +159,4 @@ onMounted(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>

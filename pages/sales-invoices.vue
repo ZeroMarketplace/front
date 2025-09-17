@@ -1,6 +1,5 @@
 <template>
   <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
-
     <!--    Title And Action    -->
     <v-col cols="12">
       <v-row>
@@ -27,11 +26,10 @@
 
         <!--     Action       -->
         <v-col class="text-end" cols="3">
-          <v-btn class="bg-secondary"
-                 size="small"
-                 @click="toggleAction"
-                 icon>
-            <v-icon v-if="action === 'list'">mdi-receipt-text-plus-outline</v-icon>
+          <v-btn class="bg-secondary" size="small" @click="toggleAction" icon>
+            <v-icon v-if="action === 'list'"
+              >mdi-receipt-text-plus-outline</v-icon
+            >
             <v-icon v-if="action === 'edit'">mdi-receipt-text-outline</v-icon>
             <v-icon v-if="action === 'add'">mdi-receipt-text-outline</v-icon>
           </v-btn>
@@ -41,30 +39,32 @@
     </v-col>
 
     <!--    Add Sales Invoice   -->
-    <v-col v-show="(action === 'add' || action === 'edit')" cols="12">
+    <v-col v-show="action === 'add' || action === 'edit'" cols="12">
       <AddSalesInvoice
-          ref="addSalesInvoice"
-          @exit="toggleAction"
-          @refresh="getSalesInvoices"/>
+        ref="addSalesInvoice"
+        @exit="toggleAction"
+        @refresh="getSalesInvoices"
+      />
     </v-col>
 
     <!--    sales-invoices List   -->
     <v-col v-show="action === 'list'" class="pb-16" cols="12">
-
       <!--    loading      -->
-      <Loading :loading="loading"/>
+      <Loading :loading="loading" />
 
       <!--    List      -->
-      <v-data-table class="mt-n5"
-                    v-if="list.length"
-                    :loading="loading"
-                    :headers="listHeaders"
-                    :items="list"
-                    :items-per-page="perPage"
-                    :pageCount="pageCount"
-                    @update:options="setListOptions"
-                    sticky
-                    show-current-page>
+      <v-data-table
+        class="mt-n5"
+        v-if="list.length"
+        :loading="loading"
+        :headers="listHeaders"
+        :items="list"
+        :items-per-page="perPage"
+        :pageCount="pageCount"
+        @update:options="setListOptions"
+        sticky
+        show-current-page
+      >
         <template v-slot:item._customer="{ item }">
           {{ item._customer.fullName }}
         </template>
@@ -73,115 +73,119 @@
         </template>
         <template v-slot:item.operation="{ item }">
           <!--  Delete   -->
-          <v-btn class="mx-2"
-                 color="red"
-                 size="25"
-                 @click="setDelete(item)"
-                 icon>
+          <v-btn
+            class="mx-2"
+            color="red"
+            size="25"
+            @click="setDelete(item)"
+            icon
+          >
             <v-icon size="15">mdi-delete-outline</v-icon>
           </v-btn>
 
           <!--  Edit   -->
-          <v-btn class="mx-2"
-                 color="secondary"
-                 size="25"
-                 @click="setEdit(item)"
-                 icon>
+          <v-btn
+            class="mx-2"
+            color="secondary"
+            size="25"
+            @click="setEdit(item)"
+            icon
+          >
             <v-icon size="15">mdi-pencil</v-icon>
           </v-btn>
 
           <!--  Edit   -->
-          <v-btn class="mx-2"
-                 color="blue"
-                 size="25"
-                 @click="setSettlement(item)"
-                 icon>
+          <v-btn
+            class="mx-2"
+            color="blue"
+            size="25"
+            @click="setSettlement(item)"
+            icon
+          >
             <v-icon size="15">mdi-cash-fast</v-icon>
           </v-btn>
         </template>
 
         <!--      Pagination      -->
         <template v-slot:bottom>
-          <v-pagination class="mt-5"
-                        active-color="secondary"
-                        v-model="page"
-                        :length="pageCount"
-                        rounded="circle">
+          <v-pagination
+            class="mt-5"
+            active-color="secondary"
+            v-model="page"
+            :length="pageCount"
+            rounded="circle"
+          >
           </v-pagination>
         </template>
       </v-data-table>
 
-
       <!--    Empty List Alert      -->
-      <EmptyList :list="list" :loading="loading"/>
-
+      <EmptyList :list="list" :loading="loading" />
     </v-col>
-
   </v-row>
 </template>
 
 <script setup>
 // Importing components
-import AddSalesInvoice                   from "~/components/sales-invoices/AddSalesInvoice.vue";
-import {ref, onMounted, watch, nextTick} from "vue";
-import {useNuxtApp}                      from "#app";
-import {useAPI}                          from '~/composables/useAPI';
-import Loading                           from "~/components/Loading.vue";
-import EmptyList                         from "~/components/EmptyList.vue";
-import {formatters}                      from "~/utils/formatters";
+import AddSalesInvoice from "~/components/sales-invoices/AddSalesInvoice.vue";
+import { ref, onMounted, watch, nextTick } from "vue";
+import { useNuxtApp } from "#app";
+import Loading from "~/components/Loading.vue";
+import EmptyList from "~/components/EmptyList.vue";
+import { formatters } from "~/utils/formatters";
 
 // Define page metadata
 definePageMeta({
-  layout      : "admin",
-  middleware  : "auth",
+  layout: "admin",
+  middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",
 });
 
 // Reactive state
-const action          = ref("list");
-const loading         = ref(true);
-const list            = ref([]);
-const listHeaders     = ref([
+const action = ref("list");
+const loading = ref(true);
+const list = ref([]);
+const listHeaders = ref([
   {
-    title   : "کد فاکتور",
-    align   : "center",
-    key     : "code",
+    title: "کد فاکتور",
+    align: "center",
+    key: "code",
     sortable: true,
   },
   {
-    title   : "مشتری",
-    align   : "center",
-    key     : "_customer",
+    title: "مشتری",
+    align: "center",
+    key: "_customer",
     sortable: false,
   },
   {
-    title   : "تاریخ",
-    key     : "dateTimeJalali",
-    align   : "center",
+    title: "تاریخ",
+    key: "dateTimeJalali",
+    align: "center",
     sortable: true,
   },
   {
-    title   : "مبلغ (تومان)",
-    key     : "total",
-    align   : "center",
+    title: "مبلغ (تومان)",
+    key: "total",
+    align: "center",
     sortable: true,
   },
   {
-    title   : "عملیات",
-    align   : "center",
-    key     : "operation",
+    title: "عملیات",
+    align: "center",
+    key: "operation",
     sortable: false,
   },
 ]);
-const listTotal       = ref(0);
-const page            = ref(1);
-const perPage         = ref(10);
-const pageCount       = ref(1);
-const sortColumn      = ref("");
-const sortDirection   = ref("");
+const listTotal = ref(0);
+const page = ref(1);
+const perPage = ref(10);
+const pageCount = ref(1);
+const sortColumn = ref("");
+const sortDirection = ref("");
 const addSalesInvoice = ref(null);
-const {$notify}       = useNuxtApp();
+const { $notify } = useNuxtApp();
 
 // Methods
 // Toggle between page actions
@@ -199,24 +203,16 @@ const deleteInvoice = async (item) => {
   item.deleteLoading = true;
 
   // send the request
-  await useAPI('sales-invoices/' + item._id, {
-    method    : 'delete',
-    onResponse: async ({response}) => {
-      if (response.status === 200) {
-        $notify("عملیات با موفقت انجام شد", "success");
-
-        // Refresh list
-        await getSalesInvoices();
-      } else {
-        // Show error
-        $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
-      }
-    }
-  });
+  try {
+    await useApiService.remove("sales-invoices/" + item._id);
+    $notify("عملیات با موفقت انجام شد", "success");
+    await getSalesInvoices();
+  } catch (error) {
+    $notify("مشکلی در عملیات پیش آمد؛ لطفا دوباره تلاش کنید", "error");
+  }
 
   // stop loading
   item.deleteLoading = false;
-
 };
 
 const filter = () => {
@@ -237,26 +233,21 @@ const getSalesInvoices = async () => {
   // start loading
   loading.value = true;
 
-  await useAPI('sales-invoices?' + filter(), {
-    method    : 'get',
-    onResponse: async ({response}) => {
-      if (response.status === 200) {
-        // set the list
-        list.value = [];
-        response._data.list.forEach((item) => {
-          item.setEditLoading       = false;
-          item.setSettlementLoading = false;
-          item.deleteLoading        = false;
-          list.value.push(item);
-        });
-
-        // set list total
-        listTotal.value = response._data.total;
-        // calc and set page count
-        pageCount.value = Math.ceil(listTotal.value / perPage.value);
-      }
-    }
-  });
+  try {
+    const data = await useApiService.get("sales-invoices?" + filter());
+    // set the list
+    list.value = [];
+    data.list.forEach((item) => {
+      item.setEditLoading = false;
+      item.setSettlementLoading = false;
+      item.deleteLoading = false;
+      list.value.push(item);
+    });
+    // set list total
+    listTotal.value = data.total;
+    // calc and set page count
+    pageCount.value = Math.ceil(listTotal.value / perPage.value);
+  } catch (error) {}
 
   // stop loading
   loading.value = false;
@@ -302,7 +293,7 @@ const setListOptions = (val) => {
 onMounted(() => {
   nextTick(() => {
     getSalesInvoices();
-  })
+  });
 });
 
 // Watchers
@@ -311,7 +302,4 @@ watch(page, (val, oldVal) => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
