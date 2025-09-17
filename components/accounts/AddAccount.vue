@@ -107,16 +107,17 @@ definePageMeta({
 
 const form = ref({
   title: "",
-  type: "cash",
+  type: 1,
   balance: "",
   description: "",
 });
 
 const types = [
-  { title: "صندوق", value: "cash" },
-  { title: "بانک", value: "bank" },
-  { title: "هزینه", value: "expense" },
-  { title: "درآمد", value: "income" },
+  { title: "صندوق", value: 1 },
+  { title: "بانک", value: 2 },
+  { title: "هزینه", value: 3 },
+  { title: "درآمد", value: 4 },
+  { title: "سیستم", value: 5 },
 ];
 
 const action = ref("add");
@@ -128,7 +129,7 @@ const emit = defineEmits(["exit", "refresh"]);
 const reset = () => {
   form.value = {
     title: "",
-    type: "cash",
+    type: 1,
     balance: "",
     description: "",
   };
