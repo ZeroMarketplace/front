@@ -24,8 +24,8 @@
         size="small"
         v-for="option in options"
         :key="option.value"
-        :color="modelValue === option.value ? '#64DD17' : '#C4C4C4'"
-        @click="$emit('update:modelValue', option.value)"
+        :color="modelValue === option.title ? '#64DD17' : '#C4C4C4'"
+        @click="$emit('update:modelValue', option.title)"
         class="ma-1 text-white rounded-lg"
       >
         {{ option.title }}
