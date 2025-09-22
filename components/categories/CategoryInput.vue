@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick } from "vue";
-import { debounce } from "lodash";
+import _ from "lodash";
 
 // State variables
 const searchQuery = ref("");
@@ -98,7 +98,7 @@ const reFormatCategories = (list) => {
 };
 
 // Debounced fetch function
-const debouncedFetchItems = debounce((query, page) => {
+const debouncedFetchItems = _.debounce((query, page) => {
   fetchItems(query, page);
 }, 300);
 

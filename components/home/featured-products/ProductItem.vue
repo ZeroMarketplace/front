@@ -29,8 +29,12 @@
           </div>
         </nuxt-link>
         <div class="featured-product-price-row">
-          <span class="featured-product-price">450,000</span>
-          <span class="featured-product-currency">تومان</span>
+          <span class="featured-product-price" v-if="displayPrice">
+            {{ displayPrice.toLocaleString() }}
+          </span>
+          <span class="featured-product-currency" v-if="displayPrice"
+            >تومان</span
+          >
         </div>
         <div class="featured-product-counter-row">
           <button class="featured-product-add-btn">
@@ -49,9 +53,44 @@ type Product = {
   title?: string;
   name?: string;
   files?: string[];
+  price?: {
+    consumer?: number;
+    store?: number;
+  };
+  variants?: Array<{
+    _id: string;
+    code: number;
+    title: string;
+    price?: {
+      consumer?: number;
+      store?: number;
+    };
+    properties?: Array<{
+      _property: string;
+      value: number;
+      _id: string;
+    }>;
+  }>;
 };
 
-defineProps<{ product: Product }>();
+const props = defineProps<{ product: Product }>();
+
+const displayPrice = computed(() => {
+  if (props.product?.variants?.length) {
+    const variantWithPrice = props.product.variants.find(
+      (v) => v?.price && (v.price.consumer || v.price.store)
+    );
+    if (variantWithPrice?.price) {
+      return variantWithPrice.price.consumer ?? variantWithPrice.price.store;
+    }
+  }
+
+  if (props.product?.price) {
+    return props.product.price.consumer ?? props.product.price.store;
+  }
+
+  return null;
+});
 </script>
 
 <style scoped>

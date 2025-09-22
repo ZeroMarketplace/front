@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref, watch, onMounted, defineModel, reactive, nextTick } from "vue";
-import { debounce } from "lodash";
+import _ from "lodash";
 import UserInsertDialog from "~/components/users/UserInsertDialog.vue";
 
 const props = defineProps({
@@ -135,7 +135,7 @@ const fetchItems = async (query = "", page = 1) => {
 };
 
 // Debounced fetch function
-const debouncedFetchItems = debounce((query, page) => {
+const debouncedFetchItems = _.debounce((query, page) => {
   fetchItems(query, page);
 }, 800);
 

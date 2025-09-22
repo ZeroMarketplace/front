@@ -177,7 +177,11 @@ const selectedCodesByPropertyId = computed(() => {
   for (const prop of variantProperties.value) {
     const selectedValue = getSelectedVariantValue(prop);
     if (selectedValue == null) continue;
-    const match = (prop.values || []).find((v) => v.value === selectedValue);
+
+    const isColor = propertyIsColorLike(prop);
+    const match = (prop.values || []).find((v) =>
+      isColor ? v.value === selectedValue : v.title === selectedValue
+    );
     if (!match || match.code == null) continue;
     const key = prop._id || prop.id || prop._property || "";
     if (!key) continue;
@@ -192,13 +196,23 @@ const selectedVariant = computed(() => {
   const codesByProp = selectedCodesByPropertyId.value;
   const matchesSelection = (variant) => {
     if (!variant?.properties?.length) return false;
-    // Only require match for properties that have a selected code
+
     for (const vp of variant.properties) {
       const key = vp._property;
-      if (!(key in codesByProp)) continue; // ignore unselected properties
+      if (!(key in codesByProp)) continue;
       const selectedCode = codesByProp[key];
       if (Number(vp.value) !== Number(selectedCode)) return false;
     }
+
+    for (const propKey in codesByProp) {
+      const hasMatchingProperty = variant.properties.some(
+        (vp) =>
+          vp._property === propKey &&
+          Number(vp.value) === Number(codesByProp[propKey])
+      );
+      if (!hasMatchingProperty) return false;
+    }
+
     return true;
   };
   return variants.find(matchesSelection) || null;
@@ -242,7 +256,7 @@ const selectDefaultVariantFromProduct = () => {
       if (!key) continue;
       selectedValuesByPropertyId.value = {
         ...selectedValuesByPropertyId.value,
-        [key]: opt.value,
+        [key]: opt.title,
       };
     }
   }
