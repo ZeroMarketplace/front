@@ -3,7 +3,9 @@
     <div>
       <h4 class="product-tabs-title text-center text-h6">بر اساس دسته بندی</h4>
     </div>
-    <home-product-categories-category-tabs></home-product-categories-category-tabs>
+    <home-product-categories-category-tabs
+      @category-change="handleCategoryChange"
+    ></home-product-categories-category-tabs>
     <div class="products-slider-outer py-10">
       <div
         class="products-slider-header flex-column flex-sm-row justify-center justify-sm-space-between px-10 mb-7"
@@ -52,7 +54,28 @@
         <button class="tab-products-next-nav-btn">
           <v-icon class="">mdi-arrow-left</v-icon>
         </button>
-        <Swiper
+
+        <div v-if="productsLoading" class="products-loading">
+          <div class="loading-grid">
+            <div v-for="i in 6" :key="i" class="product-loading-item">
+              <div class="loading-skeleton-image"></div>
+              <div class="loading-skeleton-text-container">
+                <div class="loading-skeleton-text-title"></div>
+                <div class="loading-skeleton-text-price"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="productsError" class="products-error">
+          <p>{{ productsError }}</p>
+          <button @click="refreshProductsManual()" class="retry-products-btn">
+            تلاش مجدد
+          </button>
+        </div>
+
+        <swiper
+          v-else-if="products.length > 0"
           :modules="[SwiperNavigation]"
           :breakpoints="config.breakpoints"
           class="products-swiper py-2 px-2"
@@ -64,7 +87,11 @@
           <swiper-slide v-for="product in products" :key="product._id">
             <ProductItem :product="product" />
           </swiper-slide>
-        </Swiper>
+        </swiper>
+
+        <div v-else class="products-empty">
+          <p>هیچ محصولی یافت نشد</p>
+        </div>
       </div>
     </div>
   </div>
@@ -73,6 +100,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import ProductItem from "~/components/home/products/ProductItem.vue";
+import { get } from "~/composables/useApiService";
 
 const filterOptions = [
   "مرتبط‌ترین",
@@ -86,16 +114,86 @@ const selectedFilter = ref(0);
 
 type Product = {
   _id: string;
-  title?: string;
-  name?: string;
-  files?: string[];
+  name: string;
+  title: string;
+  code: number;
+  files: string[];
+  dimensions?: {
+    length: number;
+    width: number;
+  };
+  _categories: string[];
+  _brand: string;
+  _unit: string;
+  barcode?: string;
+  iranCode?: string;
+  weight?: number;
+  tags?: string;
+  properties?: Array<{
+    title: string;
+    value: string;
+  }>;
+  variants?: Array<{
+    code: number;
+    properties: Array<{
+      _property: string;
+      value: number;
+      _id: string;
+    }>;
+    title: string;
+    _id: string;
+    price?: {
+      consumer: number;
+      store: number;
+    };
+  }>;
+  content?: string;
+  status: number;
+  _user: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  createdAtJalali: string;
+  updatedAtJalali: string;
 };
 
-const { data: products } = await useAsyncData<Product[]>(
-  "products-home-latest",
-  () => useApiService.get("products/home/latest"),
-  { default: () => [] }
+const selectedCategoryId = ref<string | null>(null);
+const {
+  data: productsData,
+  error: productsError,
+  pending: productsLoading,
+  refresh: refreshProducts,
+} = await useAsyncData<Product[]>(
+  () =>
+    selectedCategoryId.value
+      ? `products-category-${selectedCategoryId.value}`
+      : "products-empty",
+  async () => {
+    if (!selectedCategoryId.value) {
+      return [] as Product[];
+    }
+    return await useApiService.get<Product[]>(`products/category`, {
+      categoryId: selectedCategoryId.value,
+    });
+  },
+  {
+    default: () => [] as Product[],
+    watch: [selectedCategoryId],
+    immediate: false,
+  }
 );
+
+const products = computed(() => productsData.value || ([] as Product[]));
+
+const handleCategoryChange = (categoryId: string) => {
+  selectedCategoryId.value = categoryId;
+};
+
+const refreshProductsManual = () => {
+  if (productsData.value) {
+    refreshProducts();
+  }
+};
 
 const config = ref({
   auto: {
@@ -222,5 +320,106 @@ const config = ref({
 }
 .products-swiper {
   padding: 0 24px;
+}
+
+.products-loading {
+  padding: 24px;
+}
+
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.product-loading-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loading-skeleton-image {
+  width: 100%;
+  height: 150px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+.loading-skeleton-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loading-skeleton-text-title {
+  width: 80%;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.loading-skeleton-text-price {
+  width: 60%;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.products-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.products-error p {
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.retry-products-btn {
+  background: #e91e63;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.retry-products-btn:hover {
+  background: #c2185b;
+}
+
+.products-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.products-empty p {
+  font-size: 1rem;
 }
 </style>
