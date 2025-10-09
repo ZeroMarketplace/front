@@ -1,6 +1,7 @@
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { LightTheme, DarkTheme } from '~/theme/LightTheme'
 
 export default defineNuxtPlugin(nuxtApp => {
 
@@ -10,8 +11,11 @@ export default defineNuxtPlugin(nuxtApp => {
         components,
         directives,
         theme:{
-            defaultTheme:'zeroLight',
+            defaultTheme:'LightTheme',
             themes: {
+                LightTheme,
+                DarkTheme,
+                // Keep the original theme for backward compatibility
                 zeroLight: {
                     dark: false,
                     colors: {

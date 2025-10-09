@@ -136,7 +136,7 @@ import { formatters } from "~/utils/formatters";
 
 // Define page metadata
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",
