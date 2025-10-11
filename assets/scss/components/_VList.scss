@@ -1,0 +1,38 @@
+.v-list.theme-list {
+    .v-list-item:hover>.v-list-item__overlay {
+        opacity: 1;
+        z-index: 1;
+    }
+
+    .v-list-item--variant-text {
+        .v-list-item__overlay {
+            background: rgb(var(--v-theme-bglight));
+        }
+    }
+
+    .v-list-item__prepend,
+    .v-list-item__content {
+        z-index: 2;
+    }
+
+    .v-list-item__overlay {
+        background-color: rgb(var(--v-theme-bglight));
+    }
+
+    .mail-items {
+        min-height: 40px !important;
+        margin-bottom: 5px !important;
+    }
+
+ 
+}
+
+.dropdown-box {
+    .v-list.theme-list {
+        .v-list-item:hover>.v-list-item__overlay {
+            opacity: 1;
+            z-index: 1;
+            background-color: rgb(var(--v-theme-lightprimary), 0.4);
+        }
+    }
+}

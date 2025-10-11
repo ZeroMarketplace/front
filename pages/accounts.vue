@@ -185,7 +185,7 @@ import { ref, onMounted, nextTick } from "vue";
 import { useNuxtApp } from "#app";
 
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",

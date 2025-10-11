@@ -149,7 +149,7 @@ import EmptyList from "~/components/EmptyList.vue";
 
 // Page meta for layout, middleware, and role
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",

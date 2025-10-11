@@ -88,7 +88,7 @@ import EmptyList from "~/components/EmptyList.vue";
 
 // Page metadata configuration
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",

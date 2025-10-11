@@ -1,0 +1,218 @@
+// .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > td,
+// .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > th,
+.v-table .v-table__wrapper>table>thead>tr:last-child>th {
+     //border-bottom: thin solid rgba(var(--v-border-color), 1) !important;
+     font-weight: 600;
+}
+
+.v-table>.v-table__wrapper>table>tbody>tr>th,
+.v-table>.v-table__wrapper>table>thead>tr>th {
+
+     font-weight: 600;
+     padding: 0 12px;
+}
+
+.border-table {
+
+     .v-table .v-table__wrapper>table>tbody>tr:not(:last-child)>td,
+     .v-table .v-table__wrapper>table>tbody>tr:not(:last-child)>th,
+     .v-table .v-table__wrapper>table>thead>tr:last-child>th {
+          border-bottom: thin solid rgba(var(--v-border-color), 1) !important;
+     }
+
+     .v-table .v-table__wrapper>table>tbody>tr>td {
+          padding: 12px;
+     }
+
+     .v-table .v-table__wrapper>table>thead>tr:last-child>th {
+          font-weight: 600;
+          color: inherit !important;
+     }
+}
+
+.v-table {
+     &.v-theme--dark {
+          background: rgb(var(--v-theme-darkbg));
+          color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+     }
+}
+
+.vertical-table {
+     .v-table {
+          border: thin solid rgba(var(--v-border-color), 1) !important;
+          border-top: 0 !important;
+     }
+
+     .v-table .v-table__wrapper>table>tbody>tr>td,
+     .v-table .v-table__wrapper>table>tbody>tr:not(:last-child)>th {
+          border-top: thin solid rgba(var(--v-border-color), 1) !important;
+     }
+
+     .v-table .v-table__wrapper>table>tbody>tr>td {
+          font-weight: 400;
+     }
+
+     .v-table>.v-table__wrapper>table>tbody>tr>th {
+          border-right: thin solid rgba(var(--v-border-color), 1) !important;
+     }
+}
+
+
+
+.border-all-table {
+
+     .v-table .v-table__wrapper>table>tbody>tr>td,
+     .v-table .v-table__wrapper>table>tbody>tr>th,
+     .v-table .v-table__wrapper>table>thead>tr:last-child>th {
+          border: thin solid rgba(var(--v-border-color), 1) !important;
+     }
+
+     .v-table .v-table__wrapper>table>tbody>tr>td {
+          padding: 12px;
+     }
+
+     .v-table .v-table__wrapper>table>thead>tr:last-child>th {
+          font-weight: 600;
+          color: inherit !important;
+     }
+
+     .v-table .v-table__wrapper>table>tbody>tr:nth-of-type(odd)>* {
+          background-color: rgba(var(--v-theme-lightsecondary), 0.5);
+     }
+}
+
+.v-data-table {
+     th.v-data-table__th {
+          font-size: 16px;
+          color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+     }
+
+     td.v-data-table__td {
+          font-size: 14px;
+          text-wrap: nowrap;
+     }
+
+     .v-data-table-footer {
+          padding: 15px 8px;
+     }
+
+     .v-data-table-header__sort-badge {
+          background-color: rgb(var(--v-theme-borderColor)) !important;
+     }
+
+     .tdhead {
+          font-size: 16px;
+     }
+}
+
+@media screen and (max-width:767px) {
+     .v-data-table-footer {
+          justify-content: center;
+     }
+}
+
+.vue3-easy-data-table {
+     border: none !important;
+}
+
+.vue3-easy-data-table__header tr {
+     font-size: 16px !important;
+     font-weight: 600 !important;
+}
+
+.vue3-easy-data-table__body td,
+.vue3-easy-data-table__header th {
+     border-bottom: thin solid rgba(var(--v-border-color), 1) !important;
+}
+
+.easy-checkbox {
+     label {
+          &::before {
+               width: 16px !important;
+               height: 16px !important;
+               background: #fff;
+               border: 1px solid rgba(0, 0, 0, 0.3) !important;
+               border-radius: 3px !important;
+          }
+
+          &::after {
+               width: 10px !important;
+               height: 4px !important;
+          }
+     }
+}
+
+.crud-tbl{
+     .v-toolbar{
+          background:transparent;
+          .v-toolbar__content{
+               border-radius: 7px;
+          }
+     }
+}
+
+.v-table {
+
+
+     &.ticket-table {
+ 
+         table {
+             thead {
+                 th {
+                     font-weight: 600 !important;
+                 }
+             }
+ 
+             tbody {
+                 tr {
+ 
+                     td {
+                         padding: 16px 16px !important;
+                     }
+                 }
+             }
+         }
+ 
+     }
+ 
+     &.invoice-table {
+         .v-table__wrapper {
+             table {
+                 thead {
+                     th {
+                         font-weight: 600 !important;
+                         padding: 0px 24px !important;
+ 
+                         &:first-child {
+                             padding-left: 0 !important;
+                         }
+ 
+                         &:last-child {
+                             padding-right: 0 !important;
+                         }
+ 
+                     }
+                 }
+ 
+                 tbody {
+                     tr {
+ 
+                         td {
+                             padding: 8px 24px !important;
+ 
+                             &:first-child {
+                                 padding-left: 0 !important;
+                             }
+ 
+                             &:last-child {
+                                 padding-right: 0 !important;
+                             }
+                         }
+                     }
+                 }
+             }
+         }
+ 
+ 
+     }
+ }

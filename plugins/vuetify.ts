@@ -1,17 +1,20 @@
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { LightTheme, DarkTheme } from '~/theme/LightTheme'
 
 export default defineNuxtPlugin(nuxtApp => {
 
     const vuetify = createVuetify({
         ssr: true,
-        rtl: true,
         components,
         directives,
-        theme:{
-            defaultTheme:'zeroLight',
+        theme: {
+            defaultTheme: 'LightTheme',
             themes: {
+                LightTheme,
+                DarkTheme,
+                // Keep the original theme for backward compatibility
                 zeroLight: {
                     dark: false,
                     colors: {
@@ -25,9 +28,8 @@ export default defineNuxtPlugin(nuxtApp => {
                         info: '#2196F3',
                         success: '#4CAF50',
                         warning: '#FB8C00',
-                        pink:'#EC407A',
+                        pink: '#EC407A',
                     },
-                    cspNonce: 'dQw4w9WgXcQ'
                 },
             }
         },

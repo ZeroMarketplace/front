@@ -1,0 +1,264 @@
+// Banner
+.bannerTitle {
+    font-size: 52px;
+}
+
+@media (max-width: 767px) {
+    .revotion .bannerTitle {
+        font-size: 30px;
+        line-height: 35px;
+    }
+}
+
+.bannerSlider {
+    padding: 25.6px;
+    min-width: 2000px;
+    height: calc(100vh - 100px);
+    max-height: 790px;
+    overflow: hidden;
+    border-radius: 7px;
+}
+
+.animateUp {
+    animation: 35s linear 0s infinite normal none running slideup;
+}
+
+@keyframes slideup {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(0px, -100%, 0px);
+    }
+}
+
+.animateDown {
+    animation: 35s linear 0s infinite normal none running slideDown;
+}
+
+@keyframes slideDown {
+    0% {
+        transform: translate3d(0, -100%, 0);
+    }
+    100% {
+        transform: translate3d(0px, 0, 0px);
+    }
+}
+
+//
+// Sections common
+//
+
+.sectionTitle {
+    font-size: 25px;
+    line-height: 30px;
+}
+
+@media (min-width: 1200px) {
+    .sectionTitle {
+        font-size: 36px;
+        line-height: 43px;
+    }
+}
+
+//
+// frameworks
+//
+.slider-group {
+    animation: slide 45s linear infinite;
+}
+
+@keyframes slide {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+//
+// support
+//
+.ticket {
+    &::before{
+    content: "";
+    position: absolute;
+    left: -170px;
+    bottom: -100px;
+    width: 302px;
+    height: 269px;
+    z-index: -1;
+    background-image: url('@/assets/images/landingpage/background/shape-3.png');
+    background-repeat: no-repeat;
+    }
+
+    &::after{
+        content: "";
+        position: absolute;
+        top: -140px;
+        right: -180px;
+        width: 302px;
+        height: 269px;
+        z-index: -1;
+        background-image: url('@/assets/images/landingpage/background/shape-3.png');
+        background-repeat: no-repeat;
+        }
+}
+
+
+.btn-custom-md {
+    height: 53px !important;
+    padding: 0 48px !important;
+}
+
+.btn-custom-lg {
+    height: 48px !important;
+    padding: 0 25px !important;
+}
+
+.btn-custom {
+    height: 53px;
+    padding: 0 31px;
+    &.lp-btn-shadow {
+        box-shadow: rgb(0 0 0 / 8%) 0px 12px 40px -8px;
+    }
+}
+
+.chip-custom {
+    font-weight: 600;
+    padding: 5px 25px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+}
+
+#app.lp-wraper {
+    padding: 0;
+}
+
+.lp-wraper {
+    overflow: hidden;
+    margin-top: 50px;
+
+    .maxWidth {
+        max-width: 1200px !important ;
+        margin: 0 auto;
+    }
+
+    .v-app-bar{
+        &.v-toolbar{
+            box-shadow: none !important;
+            max-width: 100%;
+        }
+    }
+    
+    .carousel__pagination {
+        .carousel__pagination-button {
+            padding: 6px;
+            &::after {
+                height: 12px;
+                width: 12px;
+                border-radius: 50%;
+                background-color: transparent;
+                background-color: rgb(var(--v-theme-grey100));
+                opacity: 0.25;
+            }
+            &:hover {
+                &::after {
+                    background-color:rgb(var(--v-theme-primary));
+                    opacity: 1;
+                }
+            }
+        }
+        .carousel__pagination-button--active {
+            &::after {
+                background-color:rgb(var(--v-theme-primary));
+                opacity: 1;
+            }
+        }
+    }
+
+    .carousel {
+        z-index: 2;
+    }
+
+    .v-app-bar.v-toolbar{
+        top:0 !important;
+        background-color: rgb(var(--v-theme-containerBg));
+    }
+   
+}
+
+@media screen and (max-width: 600px) {
+    .m-btn-full {
+        width: 100%;
+    }
+}
+
+.v-btn--size-default {
+    &.nav-links {
+        font-size: $font-size-root !important;
+        .v-btn__overlay {
+            display: none;
+        }
+        &:hover {
+            color: rgb(var(--v-theme-primary)) !important;
+        }
+    }
+}
+
+
+.row-up {
+    z-index: 1;
+    position: relative;
+}
+.prev-btn{
+    margin: 0 100px;
+}
+.lh-0{
+    line-height: 0;
+}
+.review-box{
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+
+    .v-rating{
+        .v-btn--icon.v-btn--density-compact {
+            width: auto;
+        }
+    }
+
+}
+
+.build-app{
+    &:after{
+        content: "";
+        position: absolute;
+        right: -20px;
+        bottom: 0;
+        top: -70px;
+        background-image: url('@/assets/images/landingpage/background/school.png');
+        background-repeat: no-repeat;
+        width: 100%;
+        max-width: 600px;
+        background-position: right;
+
+        @media screen and (max-width:1024px) {
+            bottom: -58px;
+         }
+        @media screen and (max-width:768px) {
+           display: none;
+        }
+    }
+    
+}
+
+@media screen and (max-width:768px) {
+    .review-box{
+        .text-h1{
+            font-size: 25px !important;
+            line-height: inherit;
+        }
+    }
+ }

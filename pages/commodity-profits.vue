@@ -103,7 +103,7 @@ import EmptyList from "~/components/EmptyList.vue";
 import { formatters } from "~/utils/formatters";
 
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",

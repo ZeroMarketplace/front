@@ -183,7 +183,7 @@ import EmptyList from "~/components/EmptyList.vue";
 
 // Define page meta
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",
