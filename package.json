@@ -16,7 +16,7 @@
     "lodash": "^4.17.21",
     "nuxt-swiper": "^1.2.2",
     "persian-date": "^1.1.0",
-    "pinia": "^3.0.3",
+    "pinia": "^2.2.8",
     "pinia-plugin-persistedstate": "^3.2.1",
     "plyr": "^3.7.8",
     "sass": "^1.63.6",
