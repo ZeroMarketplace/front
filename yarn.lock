@@ -273,6 +273,18 @@
   resolved "https://registry.npmjs.org/@fastify/busboy/-/busboy-3.2.0.tgz"
   integrity sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA==
 
+"@iconify/types@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@iconify/types/-/types-2.0.0.tgz"
+  integrity sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==
+
+"@iconify/vue@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/@iconify/vue/-/vue-5.0.0.tgz"
+  integrity sha512-C+KuEWIF5nSBrobFJhT//JS87OZ++QDORB6f2q2Wm6fl2mueSTpFBeBsveK0KW9hWiZ4mNiPjsh6Zs4jjdROSg==
+  dependencies:
+    "@iconify/types" "^2.0.0"
+
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
   resolved "https://registry.npmjs.org/@ioredis/commands/-/commands-1.2.0.tgz"
@@ -917,6 +929,45 @@
   resolved "https://registry.npmjs.org/@speed-highlight/core/-/core-1.2.7.tgz"
   integrity sha512-0dxmVj4gxg3Jg879kvFS/msl4s9F3T9UXC1InxgOf7t5NvcPD97u/WTA5vL/IxWHMn7qSxBozqrnnE2wvl1m8g==
 
+"@svgdotjs/svg.draggable.js@^3.0.4":
+  version "3.0.6"
+  resolved "https://registry.npmjs.org/@svgdotjs/svg.draggable.js/-/svg.draggable.js-3.0.6.tgz"
+  integrity sha512-7iJFm9lL3C40HQcqzEfezK2l+dW2CpoVY3b77KQGqc8GXWa6LhhmX5Ckv7alQfUXBuZbjpICZ+Dvq1czlGx7gA==
+
+"@svgdotjs/svg.filter.js@^3.0.8":
+  version "3.0.9"
+  resolved "https://registry.npmjs.org/@svgdotjs/svg.filter.js/-/svg.filter.js-3.0.9.tgz"
+  integrity sha512-/69XMRCDoam2HgC4ldHIaDgeQf1ViHIsa0Ld4uWgiXtZ+E24DWHe/9Ib6kbNiZ7WRIdlVokUDR1Fg0kjIpkfbw==
+  dependencies:
+    "@svgdotjs/svg.js" "^3.2.4"
+
+"@svgdotjs/svg.js@^3.2.4":
+  version "3.2.5"
+  resolved "https://registry.npmjs.org/@svgdotjs/svg.js/-/svg.js-3.2.5.tgz"
+  integrity sha512-/VNHWYhNu+BS7ktbYoVGrCmsXDh+chFMaONMwGNdIBcFHrWqk2jY8fNyr3DLdtQUIalvkPfM554ZSFa3dm3nxQ==
+
+"@svgdotjs/svg.resize.js@^2.0.2":
+  version "2.0.5"
+  resolved "https://registry.npmjs.org/@svgdotjs/svg.resize.js/-/svg.resize.js-2.0.5.tgz"
+  integrity sha512-4heRW4B1QrJeENfi7326lUPYBCevj78FJs8kfeDxn5st0IYPIRXoTtOSYvTzFWgaWWXd3YCDE6ao4fmv91RthA==
+
+"@svgdotjs/svg.select.js@^4.0.1":
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/@svgdotjs/svg.select.js/-/svg.select.js-4.0.3.tgz"
+  integrity sha512-qkMgso1sd2hXKd1FZ1weO7ANq12sNmQJeGDjs46QwDVsxSRcHmvWKL2NDF7Yimpwf3sl5esOLkPqtV2bQ3v/Jg==
+
+"@tabler/icons-vue@^3.35.0":
+  version "3.35.0"
+  resolved "https://registry.npmjs.org/@tabler/icons-vue/-/icons-vue-3.35.0.tgz"
+  integrity sha512-m5ugq8mWYfTzx0opMcX49ADFxr3xu0IhJaOddw8Djlhx30pBOPWwOiIUBMAqlgP9TFHAysdwqrq50hBw5DxPSQ==
+  dependencies:
+    "@tabler/icons" "3.35.0"
+
+"@tabler/icons@3.35.0":
+  version "3.35.0"
+  resolved "https://registry.npmjs.org/@tabler/icons/-/icons-3.35.0.tgz"
+  integrity sha512-yYXe+gJ56xlZFiXwV9zVoe3FWCGuZ/D7/G4ZIlDtGxSx5CGQK110wrnT29gUj52kEZoxqF7oURTk97GQxELOFQ==
+
 "@trysound/sax@0.2.0":
   version "0.2.0"
   resolved "https://registry.npmjs.org/@trysound/sax/-/sax-0.2.0.tgz"
@@ -1131,7 +1182,7 @@
     "@vue/compiler-dom" "3.5.14"
     "@vue/shared" "3.5.14"
 
-"@vue/devtools-api@^6.6.3", "@vue/devtools-api@^6.6.4":
+"@vue/devtools-api@^6.6.4":
   version "6.6.4"
   resolved "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.6.4.tgz"
   integrity sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==
@@ -1142,6 +1193,13 @@
   integrity sha512-b2Xx0KvXZObePpXPYHvBRRJLDQn5nhKjXh7vUhMEtWxz1AYNFOVIsh5+HLP8xDGL7sy+Q7hXeUxPHB/KgbtsPw==
   dependencies:
     "@vue/devtools-kit" "^7.7.6"
+
+"@vue/devtools-api@^7.7.2":
+  version "7.7.7"
+  resolved "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-7.7.7.tgz"
+  integrity sha512-lwOnNBH2e7x1fIIbVT7yF5D+YWhqELm55/4ZKf45R9T8r9dE2AIOy8HKjfqzGsoTHFbWbr337O4E0A0QADnjBg==
+  dependencies:
+    "@vue/devtools-kit" "^7.7.7"
 
 "@vue/devtools-core@^7.7.6":
   version "7.7.6"
@@ -1155,12 +1213,12 @@
     pathe "^2.0.3"
     vite-hot-client "^2.0.4"
 
-"@vue/devtools-kit@^7.7.6":
-  version "7.7.6"
-  resolved "https://registry.npmjs.org/@vue/devtools-kit/-/devtools-kit-7.7.6.tgz"
-  integrity sha512-geu7ds7tem2Y7Wz+WgbnbZ6T5eadOvozHZ23Atk/8tksHMFOFylKi1xgGlQlVn0wlkEf4hu+vd5ctj1G4kFtwA==
+"@vue/devtools-kit@^7.7.6", "@vue/devtools-kit@^7.7.7":
+  version "7.7.7"
+  resolved "https://registry.npmjs.org/@vue/devtools-kit/-/devtools-kit-7.7.7.tgz"
+  integrity sha512-wgoZtxcTta65cnZ1Q6MbAfePVFxfM+gq0saaeytoph7nEa7yMXoi6sCPy4ufO111B9msnw0VOWjPEFCXuAKRHA==
   dependencies:
-    "@vue/devtools-shared" "^7.7.6"
+    "@vue/devtools-shared" "^7.7.7"
     birpc "^2.3.0"
     hookable "^5.5.3"
     mitt "^3.0.1"
@@ -1168,10 +1226,10 @@
     speakingurl "^14.0.1"
     superjson "^2.2.2"
 
-"@vue/devtools-shared@^7.7.6":
-  version "7.7.6"
-  resolved "https://registry.npmjs.org/@vue/devtools-shared/-/devtools-shared-7.7.6.tgz"
-  integrity sha512-yFEgJZ/WblEsojQQceuyK6FzpFDx4kqrz2ohInxNj5/DnhoX023upTv4OD6lNPLAA5LLkbwPVb10o/7b+Y4FVA==
+"@vue/devtools-shared@^7.7.6", "@vue/devtools-shared@^7.7.7":
+  version "7.7.7"
+  resolved "https://registry.npmjs.org/@vue/devtools-shared/-/devtools-shared-7.7.7.tgz"
+  integrity sha512-+udSj47aRl5aKb0memBvcUG9koarqnxNM5yjuREvqwK6T3ap4mn3Zqqc17QrBFTqSMjr3HK1cvStEZpMDpfdyw==
   dependencies:
     rfdc "^1.4.1"
 
@@ -1267,6 +1325,11 @@
     "@whatwg-node/promise-helpers" "^1.2.2"
     tslib "^2.6.3"
 
+"@yr/monotone-cubic-spline@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@yr/monotone-cubic-spline/-/monotone-cubic-spline-1.0.3.tgz"
+  integrity sha512-FQXkOta0XBSUPHndIKON2Y9JeQz5ZeMqLYZVVK93FliNBFm7LNMIZmY6FrMEB9XPcDbE2bekMbZD6kzDkxwYjA==
+
 abbrev@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmjs.org/abbrev/-/abbrev-3.0.1.tgz"
@@ -1345,6 +1408,18 @@ anymatch@^3.1.3:
   dependencies:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
+
+apexcharts@>=4.0.0:
+  version "5.3.5"
+  resolved "https://registry.npmjs.org/apexcharts/-/apexcharts-5.3.5.tgz"
+  integrity sha512-I04DY/WBZbJgJD2uixeV5EzyiL+J5LgKQXEu8rctqAwyRmKv44aDVeofJoLdTJe3ao4r2KEQfCgtVzXn6pqirg==
+  dependencies:
+    "@svgdotjs/svg.draggable.js" "^3.0.4"
+    "@svgdotjs/svg.filter.js" "^3.0.8"
+    "@svgdotjs/svg.js" "^3.2.4"
+    "@svgdotjs/svg.resize.js" "^2.0.2"
+    "@svgdotjs/svg.select.js" "^4.0.1"
+    "@yr/monotone-cubic-spline" "^1.0.3"
 
 "aproba@^1.0.3 || ^2.0.0":
   version "2.0.0"
@@ -1483,13 +1558,21 @@ autoprefixer@^10.4.21:
     picocolors "^1.1.1"
     postcss-value-parser "^4.2.0"
 
-axios@^1.7.7:
-  version "1.9.0"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.9.0.tgz"
-  integrity sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==
+axios-mock-adapter@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/axios-mock-adapter/-/axios-mock-adapter-2.1.0.tgz"
+  integrity sha512-AZUe4OjECGCNNssH8SOdtneiQELsqTsat3SQQCWLPjN436/H+L9AjWfV7bF+Zg/YL9cgbhrz5671hoh+Tbn98w==
+  dependencies:
+    fast-deep-equal "^3.1.3"
+    is-buffer "^2.0.5"
+
+axios@^1.12.2, "axios@>= 0.17.0":
+  version "1.12.2"
+  resolved "https://registry.npmjs.org/axios/-/axios-1.12.2.tgz"
+  integrity sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==
   dependencies:
     follow-redirects "^1.15.6"
-    form-data "^4.0.0"
+    form-data "^4.0.4"
     proxy-from-env "^1.1.0"
 
 b4a@^1.6.4:
@@ -2619,6 +2702,11 @@ extract-zip@^2.0.1:
   optionalDependencies:
     "@types/yauzl" "^2.9.1"
 
+fast-deep-equal@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
+  integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
+
 fast-fifo@^1.2.0, fast-fifo@^1.3.2:
   version "1.3.2"
   resolved "https://registry.npmjs.org/fast-fifo/-/fast-fifo-1.3.2.tgz"
@@ -2729,14 +2817,15 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.6"
     signal-exit "^4.0.1"
 
-form-data@^4.0.0:
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/form-data/-/form-data-4.0.2.tgz"
-  integrity sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==
+form-data@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.npmjs.org/form-data/-/form-data-4.0.4.tgz"
+  integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     es-set-tostringtag "^2.1.0"
+    hasown "^2.0.2"
     mime-types "^2.1.12"
 
 formdata-polyfill@^4.0.10:
@@ -3218,6 +3307,11 @@ is-arrayish@^0.3.1:
   version "0.3.2"
   resolved "https://registry.npmjs.org/is-arrayish/-/is-arrayish-0.3.2.tgz"
   integrity sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==
+
+is-buffer@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.npmjs.org/is-buffer/-/is-buffer-2.0.5.tgz"
+  integrity sha512-i2R6zNFDwgEHJyQUtJEk0XFi1i0dPFn/oqjK3/vPCcDeJvW5NQ83V8QbicfF1SupOaB0h8ntgBC2YiE7dfyctQ==
 
 is-builtin-module@^3.1.0:
   version "3.2.1"
@@ -4615,13 +4709,12 @@ pinia-plugin-persistedstate@^3.2.1:
   resolved "https://registry.npmjs.org/pinia-plugin-persistedstate/-/pinia-plugin-persistedstate-3.2.3.tgz"
   integrity sha512-Cm819WBj/s5K5DGw55EwbXDtx+EZzM0YR5AZbq9XE3u0xvXwvX2JnWoFpWIcdzISBHqy9H1UiSIUmXyXqWsQRQ==
 
-pinia@^2.0.0, pinia@^2.1.4:
-  version "2.3.1"
-  resolved "https://registry.npmjs.org/pinia/-/pinia-2.3.1.tgz"
-  integrity sha512-khUlZSwt9xXCaTbbxFYBKDc/bWAGWJjOgvxETwkTN7KRm66EeT1ZdZj6i2ceh9sP2Pzqsbc704r2yngBrxBVug==
+pinia@^2.0.0, pinia@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.npmjs.org/pinia/-/pinia-3.0.3.tgz"
+  integrity sha512-ttXO/InUULUXkMHpTdp9Fj4hLpD/2AoJdmAbAeW2yu1iy1k+pkFekQXw5VpC0/5p51IOR/jDaDRfRWRnMMsGOA==
   dependencies:
-    "@vue/devtools-api" "^6.6.3"
-    vue-demi "^0.14.10"
+    "@vue/devtools-api" "^7.7.2"
 
 pkg-types@^1.0.3:
   version "1.3.1"
@@ -5644,6 +5737,18 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+svg-pan-zoom@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.npmjs.org/svg-pan-zoom/-/svg-pan-zoom-3.6.2.tgz"
+  integrity sha512-JwnvRWfVKw/Xzfe6jriFyfey/lWJLq4bUh2jwoR5ChWQuQoOH8FEh1l/bEp46iHHKHEJWIyFJETbazraxNWECg==
+
+svgmap@^2.14.0:
+  version "2.14.0"
+  resolved "https://registry.npmjs.org/svgmap/-/svgmap-2.14.0.tgz"
+  integrity sha512-+Vklx4DO1uv1SFq6wnJWl/dRjX4uRT9CcsIHuADxAcZ+h5X1OSyDVbNdIu837fx5TtYYuaGRhWuFCXIioN/1ww==
+  dependencies:
+    svg-pan-zoom "^3.6.2"
+
 svgo@^3.3.2:
   version "3.3.2"
   resolved "https://registry.npmjs.org/svgo/-/svgo-3.3.2.tgz"
@@ -6159,11 +6264,6 @@ vue-bundle-renderer@^2.1.1:
   dependencies:
     ufo "^1.5.4"
 
-vue-demi@^0.14.10:
-  version "0.14.10"
-  resolved "https://registry.npmjs.org/vue-demi/-/vue-demi-0.14.10.tgz"
-  integrity sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==
-
 vue-devtools-stub@^0.1.0:
   version "0.1.0"
   resolved "https://registry.npmjs.org/vue-devtools-stub/-/vue-devtools-stub-0.1.0.tgz"
@@ -6176,7 +6276,7 @@ vue-router@^4.4.0, vue-router@^4.5.1:
   dependencies:
     "@vue/devtools-api" "^6.6.4"
 
-"vue@^2.7.0 || ^3.2.25", "vue@^2.7.0 || ^3.5.11", vue@^3.0.*, vue@^3.0.0, "vue@^3.0.0-0 || ^2.6.0", vue@^3.2.0, vue@^3.2.25, vue@^3.3.4, vue@^3.4, vue@^3.4.26, vue@^3.5.0, vue@^3.5.14, vue@>=3.5.13, vue@3.5.14:
+"vue@^2.7.0 || ^3.2.25", "vue@^2.7.0 || ^3.5.11", vue@^3.0.*, vue@^3.0.0, vue@^3.2.0, vue@^3.2.25, vue@^3.3.4, vue@^3.4, vue@^3.4.26, vue@^3.5.0, vue@^3.5.14, vue@>=3, vue@>=3.0.0, vue@>=3.0.1, vue@>=3.5.13, vue@3.5.14:
   version "3.5.14"
   resolved "https://registry.npmjs.org/vue/-/vue-3.5.14.tgz"
   integrity sha512-LbOm50/vZFG6Mhy6KscQYXZMQ0LMCC/y40HDJPPvGFQ+i/lUH+PJHR6C3assgOQiXdl6tAfsXHbXYVBZZu65ew==
@@ -6186,6 +6286,11 @@ vue-router@^4.4.0, vue-router@^4.5.1:
     "@vue/runtime-dom" "3.5.14"
     "@vue/server-renderer" "3.5.14"
     "@vue/shared" "3.5.14"
+
+vue3-apexcharts@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/vue3-apexcharts/-/vue3-apexcharts-1.8.0.tgz"
+  integrity sha512-5tSD4mXTBbIJ9ir+58qHE6oNtIe0RNgqIRYMKpcsIaxkKtwUww4JhvPkpUFlmiW4OJbbdklgjleXq1lfcM4gdA==
 
 vue3-otp-input@^0.4.1:
   version "0.4.4"

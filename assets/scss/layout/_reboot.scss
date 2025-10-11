@@ -1,0 +1,226 @@
+.h-100 {
+    height: 100%;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.h-100vh {
+    height: 100vh;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-3 {
+    gap: 16px;
+}
+
+.gap-4 {
+    gap: 24px;
+}
+
+.text-white {
+    color: rgb(255, 255, 255) !important;
+}
+
+// border
+.border-bottom {
+    border-bottom: 1px solid rgba(var(--v-theme-borderColor));
+}
+
+.opacity-1 {
+    opacity: 1 !important;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.z-auto.v-card {
+    z-index: auto;
+}
+
+.obj-cover {
+    object-fit: cover;
+}
+.index-2{
+    z-index: 2;
+}
+
+.v-badge--dot {
+    &.small-badge {
+        .v-badge__badge {
+            height: 5px;
+            width: 5px;
+        }
+    }
+}
+
+
+
+
+.notify {
+    .heartbit {
+        position: absolute;
+        top: -5px;
+        right: -2px;
+        height: 18px;
+        width: 18px;
+        z-index: 10;
+        border: 2px solid rgba(var(--v-theme-success));
+        border-radius: 70px;
+        animation: heartbit 1s ease-out;
+        -moz-animation: heartbit 1s ease-out;
+        -moz-animation-iteration-count: infinite;
+        -o-animation: heartbit 1s ease-out;
+        -o-animation-iteration-count: infinite;
+        -webkit-animation: heartbit 1s ease-out;
+        -webkit-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+    }
+    .point {
+        width: 4px;
+        height: 4px;
+        border-radius: 30px;
+        position: absolute;
+        right: 5px;
+        top: 2px;
+        background-color:rgba(var(--v-theme-success));
+        position: absolute;
+    }
+
+}
+
+
+@keyframes heartbit {
+    0% {
+        -moz-transform: scale(0);
+        opacity: 0
+    }
+
+    25% {
+        -moz-transform: scale(.1);
+        opacity: 0.1
+    }
+
+    50% {
+        -moz-transform: scale(.5);
+        opacity: 0.3
+    }
+
+    75% {
+        -moz-transform: scale(.8);
+        opacity: 0.5
+    }
+
+    100% {
+        -moz-transform: scale(1);
+        opacity: 0
+    }
+}
+
+
+@-moz-keyframes heartbit {
+    0% {
+        -moz-transform: scale(0);
+        opacity: 0
+    }
+
+    25% {
+        -moz-transform: scale(.1);
+        opacity: 0.1
+    }
+
+    50% {
+        -moz-transform: scale(.5);
+        opacity: 0.3
+    }
+
+    75% {
+        -moz-transform: scale(.8);
+        opacity: 0.5
+    }
+
+    100% {
+        -moz-transform: scale(1);
+        opacity: 0
+    }
+}
+
+@-webkit-keyframes heartbit {
+    0% {
+        -webkit-transform: scale(0);
+        opacity: 0
+    }
+
+    25% {
+        -webkit-transform: scale(.1);
+        opacity: 0.1
+    }
+
+    50% {
+        -webkit-transform: scale(.5);
+        opacity: 0.3
+    }
+
+    75% {
+        -webkit-transform: scale(.8);
+        opacity: 0.5
+    }
+
+    100% {
+        -webkit-transform: scale(1);
+        opacity: 0
+    }
+}
+.list-search{
+    .mdi-magnify{
+        margin-top: 5px;
+    }
+
+}
+
+
+//Date time picker
+input[type="date"],
+input[type="time"] {
+    display: block !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    display: block !important;
+}
+
+.ProseMirror {
+    min-height: 150px;
+}
+
+.upload-btn-wrapper {
+    width: 150px;
+    height: 140px;
+    margin: 0 auto;
+    box-shadow: 0 0.5rem 1.5rem 0.5rem rgba(0, 0, 0, 0.075);
+
+    input[type=file] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.bg-transparent {
+    background-color: transparent !important;
+}
+
+@media screen and (max-width:1368px) and (min-width:1200px) {
+    .space-20 {
+        padding: 30px 20px !important;
+    }
+}

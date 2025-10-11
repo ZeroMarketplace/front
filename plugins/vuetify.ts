@@ -7,11 +7,10 @@ export default defineNuxtPlugin(nuxtApp => {
 
     const vuetify = createVuetify({
         ssr: true,
-        rtl: true,
         components,
         directives,
-        theme:{
-            defaultTheme:'LightTheme',
+        theme: {
+            defaultTheme: 'LightTheme',
             themes: {
                 LightTheme,
                 DarkTheme,
@@ -29,9 +28,8 @@ export default defineNuxtPlugin(nuxtApp => {
                         info: '#2196F3',
                         success: '#4CAF50',
                         warning: '#FB8C00',
-                        pink:'#EC407A',
+                        pink: '#EC407A',
                     },
-                    cspNonce: 'dQw4w9WgXcQ'
                 },
             }
         },

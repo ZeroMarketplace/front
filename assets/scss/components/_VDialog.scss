@@ -1,0 +1,7 @@
+.v-dialog{
+    .v-toolbar__content{
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        background-color: rgb(var(--v-theme-primary)) !important;
+    }
+}

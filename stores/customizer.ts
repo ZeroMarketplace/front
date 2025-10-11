@@ -9,6 +9,7 @@ interface StateType {
   inputBg: boolean;
   boxed: boolean;
   setBorderCard: boolean;
+  setRTLLayout: boolean
 }
 
 export const useCustomizerStore = defineStore('customizer', {
@@ -21,6 +22,7 @@ export const useCustomizerStore = defineStore('customizer', {
     inputBg: false,
     boxed: true,
     setBorderCard: false,
+    setRTLLayout: false
   }),
   getters: {},
   actions: {
