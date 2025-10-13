@@ -37,7 +37,7 @@ const userRole = computed(() => {
                         <img src="@/assets/images/profile/user6.jpg" width="50" :alt="userName" />
                     </v-avatar>
                     <div class="ml-md-4 d-md-block d-none">
-                        <h6 class="text-h6 d-flex align-center text-black font-weight-semibold">{{ userName }}</h6>
+                        <h6 class="text-body-2 d-flex align-center text-black font-weight-semibold">{{ userName }}</h6>
                         <span class="text-subtitle-2 font-weight-medium text-grey100">{{ userRole }}</span>
                     </div>
                 </div>

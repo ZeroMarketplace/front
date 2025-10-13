@@ -12,7 +12,7 @@ import { Icon } from '@iconify/vue';
         <template v-slot:activator="{ props }">
             <div class="" v-bind="props">
                 <div class="hidden-md-and-down">
-                    <div class="d-flex align-center flex-fill border border-borderColor header-search rounded-pill px-5 " style="border: 1px solid #DEE6F4 !important;">
+                    <div class="d-flex align-center flex-fill border border-borderColor header-search rounded-pill px-5 ">
                         <Icon icon="solar:magnifer-linear" height="22" width="22" />
                         <v-text-field variant="plain" density="compact"
                             class="position-relative pt-0 ml-3 custom-placeholer-color" placeholder="Try to searching ..."

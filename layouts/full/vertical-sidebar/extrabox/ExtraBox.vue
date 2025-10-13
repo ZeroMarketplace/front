@@ -99,7 +99,7 @@ const logout = () => {
                 <img src="@/assets/images/profile/user6.jpg" width="50" :alt="displayName" />
             </v-avatar>
             <div>
-                <h6 class="text-h6 d-flex align-center font-weight-semibold">{{ displayName }}</h6>
+                <h6 class="text-body-2 d-flex align-center font-weight-semibold">{{ displayName }}</h6>
                 <span class="text-subtitle-2 font-weight-medium text-grey100">{{ displayRole }}</span>
             </div>
             <div>

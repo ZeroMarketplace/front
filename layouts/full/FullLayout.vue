@@ -6,6 +6,7 @@ import HorizontalSidebar from './horizontal-sidebar/HorizontalSidebar.vue';
 import Customizer from './customizer/Customizer.vue';
 import { useCustomizerStore } from '../../stores/customizer';
 import { IconSettings as SettingsIcon } from '@tabler/icons-vue';
+
 const customizer = useCustomizerStore();
 </script>
 
@@ -80,5 +81,7 @@ const customizer = useCustomizerStore();
         </v-app>
     </v-locale-provider> -->
 </template>
-<style lang="">
+<style lang="scss" >
+@import '../../assets/scss/layout/rtl';
+@import '../../assets/scss/layout/topbar';
 </style>
