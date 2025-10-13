@@ -45,9 +45,9 @@ function handleScroll() {
 <template>
     <div class="container">
         <div class="maxWidth">
-            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky' : ''">
+            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky mx-4' : ''" >
                 <v-btn
-                    class="hidden-md-and-down custom-hover-primary"
+                    class="hidden-md-and-down custom-hover-primary "
                     icon
                     variant="text"
                     size="small"
@@ -59,7 +59,7 @@ function handleScroll() {
                     <Icon icon="solar:list-bold-duotone" height="24" width="24" />
                 </v-btn>
 
-                <div class="hidden-md-and-up me-md-4 me-0">
+                <div class="hidden-md-and-up me-md-8 me-4">
                     <Searchbar />
                 </div>
 
@@ -142,3 +142,12 @@ function handleScroll() {
         </div>
     </div>
 </template>
+<style lang="scss">
+.v-toolbar.v-app-bar{
+    max-width: calc(100% - 350px) !important;
+}
+.v-menu.mobile_popup .v-overlay__content{
+    max-width: 100% !important;
+    margin: 0;
+}
+</style>

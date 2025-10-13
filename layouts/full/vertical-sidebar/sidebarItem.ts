@@ -18,9 +18,10 @@ export interface menu {
 
 const sidebarItem: menu[] = [
     // Dashboard
+    { header: 'داشبورد' },
     {
         title: 'داشبورد',
-        icon: 'view-dashboard',
+        icon: 'screencast-2-linear',
         to: '/admin-dashboard',
         BgColor: 'primary',
     },
@@ -28,8 +29,8 @@ const sidebarItem: menu[] = [
     // Transactions (معامله)
     {
         title: 'معامله',
-        icon: 'swap-horizontal',
-        BgColor: 'pink',
+        icon: 'chart-line-duotone',
+        BgColor: 'error',
         children: [
             {
                 title: 'فاکتور فروش',
@@ -87,7 +88,7 @@ const sidebarItem: menu[] = [
     // People/Contacts (اشخاص)
     {
         title: 'اشخاص',
-        icon: 'account-group',
+        icon: 'home-angle-linear',
         BgColor: 'warning',
         children: [
             {
@@ -114,9 +115,10 @@ const sidebarItem: menu[] = [
     },
     
     // Products (کالا)
+    { header: 'کالا' },
     {
         title: 'کالا',
-        icon: 'package-variant',
+        icon: 'phone-line-duotone',
         BgColor: 'success',
         children: [
             {
@@ -155,7 +157,7 @@ const sidebarItem: menu[] = [
     // Warehouse (انبار)
     {
         title: 'انبار',
-        icon: 'warehouse',
+        icon: 'align-vertical-spacing-line-duotone',
         BgColor: 'secondary',
         children: [
             {
@@ -192,10 +194,11 @@ const sidebarItem: menu[] = [
     },
 
     // Settings (تنظیمات)
+    { header: 'تنظیمات' },
     {
         title: 'تنظیمات',
-        icon: 'cog-outline',
-        BgColor: 'secondary-darken-1',
+        icon: 'smart-speaker-minimalistic-line-duotone',
+        BgColor: 'pink-darken-1',
         children: [
             {
                 title: 'تعریف واحدها',
@@ -218,7 +221,7 @@ const sidebarItem: menu[] = [
     // Bank/Cash (بانک / صندوق‌ها)
     {
         title: 'بانک / صندوق‌ها',
-        icon: 'bank',
+        icon: 'chat-round-unread-line-duotone',
         BgColor: 'info',
         children: [
             {
@@ -277,7 +280,7 @@ const sidebarItem: menu[] = [
     // Expense/Income (هزینه / درآمد)
     {
         title: 'هزینه / درآمد',
-        icon: 'cash-multiple',
+        icon: 'user-rounded-line-duotone',
         BgColor: 'primary',
         children: [
             {
@@ -314,10 +317,11 @@ const sidebarItem: menu[] = [
     },
     
     // Accounting (حسابداری)
+    { header: 'حسابداری' },
     {
         title: 'حسابداری',
-        icon: 'calculator',
-        BgColor: 'ping',
+        icon: 'bill-check-outline',
+        BgColor: 'success',
         children: [
             {
                 title: 'گزارش تفصیلی سود و زیان',
@@ -342,640 +346,5 @@ const sidebarItem: menu[] = [
         ]
     },
 ];
-// const sidebarItem: menu[] = [
-//   {
-//     title: "Dashboard2",
-//     icon: "screencast-2-linear",
-//     BgColor: "primary",
-//   },
-//   {
-//     title: "Dashboard 2",
-//     icon: "chart-line-duotone",
-//     BgColor: "success",
-//   },
-//   {
-//     title: "Front Pages",
-//     icon: "home-angle-linear",
-//     BgColor: "warning",
-//     children: [
-//       {
-//         title: "Homepage",
-//       },
-//       {
-//         title: "About Us",
-//       },
-//       {
-//         title: "Blog",
-//       },
-//       {
-//         title: "Blog Details",
-//       },
-//       {
-//         title: "Contact Us",
-//       },
-//       {
-//         title: "Portfolio",
-//       },
-//       {
-//         title: "Pricing",
-//       },
-//     ],
-//   },
-
-//   { header: "Apps" },
-//   {
-//     title: "Contact",
-//     icon: "phone-line-duotone",
-//     BgColor: "secondary",
-//   },
-
-//   {
-//     title: "Blog",
-//     icon: "align-vertical-spacing-line-duotone",
-//     BgColor: "warning",
-//     children: [
-//       {
-//         title: "Posts",
-//       },
-//       {
-//         title: "Detail",
-//       },
-//     ],
-//   },
-//   {
-//     title: "E-Commerce",
-//     icon: "smart-speaker-minimalistic-line-duotone",
-//     BgColor: "indigo",
-//     children: [
-//       {
-//         title: "Shop One",
-//       },
-//       {
-//         title: "Shop Two",
-//       },
-//       {
-//         title: "Details One",
-//       },
-//       {
-//         title: "Details Two",
-//       },
-//       {
-//         title: "List",
-//       },
-//       {
-//         title: "Checkout",
-//       },
-//       {
-//         title: "Add Product",
-//       },
-//       {
-//         title: "Edit Product",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Chats",
-//     icon: "chat-round-unread-line-duotone",
-//     BgColor: "primary",
-//   },
-//   {
-//     title: "User Profile",
-//     icon: "user-rounded-line-duotone",
-//     BgColor: "error",
-//     children: [
-//       {
-//         title: "Profile One",
-//       },
-//       {
-//         title: "Profile Two",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Invoice",
-//     icon: "bill-check-outline",
-//     BgColor: "success",
-//     children: [
-//       {
-//         title: "List",
-//       },
-//       {
-//         title: "Details",
-//       },
-//       {
-//         title: "Create",
-//       },
-//       {
-//         title: "Edit",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Notes",
-//     icon: "notification-unread-line-duotone",
-//     BgColor: "secondary",
-//   },
-//   {
-//     title: "Calendar",
-//     icon: "calendar-line-duotone",
-//     BgColor: "info",
-//   },
-//   {
-//     title: "Email",
-//     BgColor: "error",
-//     icon: "letter-linear",
-//   },
-//   {
-//     title: "Kanban",
-//     icon: "widget-4-linear",
-//     BgColor: "warning",
-//   },
-//   {
-//     title: "Tickets",
-//     icon: "ticker-star-outline",
-//     BgColor: "primary",
-//   },
-//   { header: "Pages" },
-//   {
-//     title: "Pricing",
-//     icon: "tag-price-line-duotone",
-//     BgColor: "warning",
-//   },
-//   {
-//     title: "FAQ",
-//     icon: "question-circle-line-duotone",
-//     BgColor: "error",
-//   },
-//   {
-//     title: "Account Setting",
-//     icon: "settings-minimalistic-line-duotone",
-//     BgColor: "success",
-//   },
-//   {
-//     title: "Landing Page",
-//     icon: "layers-minimalistic-line-duotone",
-//     BgColor: "info",
-//   },
-//   {
-//     title: "Gallery Lightbox",
-//     icon: "gallery-minimalistic-outline",
-//     BgColor: "warning",
-//   },
-//   {
-//     title: "Search Results",
-//     icon: "calendar-search-line-duotone",
-//     BgColor: "success",
-//   },
-//   {
-//     title: "Social Contacts",
-//     icon: "socket-outline",
-//     BgColor: "primary",
-//   },
-//   {
-//     title: "Treeview",
-//     icon: "transmission-line-duotone",
-//     BgColor: "error",
-//   },
-
-//   {
-//     title: "Widget",
-//     icon: "widget-add-line-duotone",
-//     BgColor: "primary",
-//     children: [
-//       {
-//         title: "Cards",
-//       },
-//       {
-//         title: "Banners",
-//       },
-//       {
-//         title: "Charts",
-//       },
-//     ],
-//   },
-
-//   { header: "School Pages" },
-//   {
-//     title: "Teachers",
-//     icon: "square-academic-cap-linear",
-//     BgColor: "success",
-//     children: [
-//       {
-//         title: "All Teachers",
-//       },
-//       {
-//         title: "Teachers Details",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Exam",
-//     icon: "notebook-minimalistic-outline",
-//     BgColor: "warning",
-//     children: [
-//       {
-//         title: "Exam Schedule",
-//       },
-//       {
-//         title: "Exam Result",
-//       },
-//       {
-//         title: "Exam Result Details",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Students",
-//     icon: "case-broken",
-//     BgColor: "error",
-//     children: [
-//       {
-//         title: "All Students",
-//       },
-//       {
-//         title: "Students Details",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Classes",
-//     icon: "smart-home-broken",
-//     BgColor: "indigo",
-//   },
-//   {
-//     title: "Attendance",
-//     icon: "diploma-linear",
-//     BgColor: "info",
-//   },
-//   { header: "UI" },
-//   {
-//     title: "Ui Elements",
-//     icon: "code-scan-line-duotone",
-//     BgColor: "primary",
-//     children: [
-//       {
-//         title: "Alert",
-//       },
-//       {
-//         title: "Accordion",
-//       },
-//       {
-//         title: "Avatar",
-//       },
-//       {
-//         title: "Chip",
-//       },
-//       {
-//         title: "Dialog",
-//       },
-//       {
-//         title: "List",
-//       },
-//       {
-//         title: "Menus",
-//       },
-//       {
-//         title: "Rating",
-//       },
-//       {
-//         title: "Tabs",
-//       },
-//       {
-//         title: "Tooltip",
-//       },
-//       {
-//         title: "Typography",
-//       },
-//     ],
-//   },
-
-//   { header: "Forms" },
-//   {
-//     title: "Form Elements",
-//     icon: "widget-3-line-duotone",
-//     BgColor: "secondary",
-//     children: [
-//       {
-//         title: "Autocomplete",
-//       },
-//       {
-//         title: "Combobox",
-//       },
-//       {
-//         title: "Button",
-//       },
-//       {
-//         title: "Checkbox",
-//       },
-//       {
-//         title: "Custom Inputs",
-//       },
-//       {
-//         title: "File Inputs",
-//       },
-//       {
-//         title: "Radio",
-//       },
-//       {
-//         title: "Date Time",
-//       },
-//       {
-//         title: "Select",
-//       },
-//       {
-//         title: "Slider",
-//       },
-//       {
-//         title: "Switch",
-//       },
-//       {
-//         title: "Time Picker",
-//       },
-//       {
-//         title: "Stepper",
-//       },
-//     ],
-//   },
-
-//   {
-//     title: "Form Input",
-//     icon: "book-minimalistic-outline",
-//     BgColor: "success",
-//     children: [
-//       {
-//         title: "Form Layout",
-//       },
-//       {
-//         title: "Form Horizontal",
-//       },
-//       {
-//         title: "Form Vertical",
-//       },
-//       {
-//         title: "Form Custom",
-//       },
-//       {
-//         title: "Form Validation",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Editor",
-//     icon: "gallery-edit-line-duotone",
-//     BgColor: "warning",
-//   },
-
-//   { header: "Tables" },
-//   {
-//     title: "Basic Table",
-//     icon: "tablet-line-duotone",
-//     BgColor: "info",
-//   },
-//   {
-//     title: "Dark Table",
-//     icon: "bedside-table-2-linear",
-//     BgColor: "success",
-//   },
-//   {
-//     title: "Density Table",
-//     icon: "password-minimalistic-input-linear",
-//     BgColor: "error",
-//   },
-//   {
-//     title: "Fixed Header Table",
-//     icon: "align-left-line-duotone",
-//     BgColor: "indigo",
-//   },
-//   {
-//     title: "Height Table",
-//     icon: "bookmark-square-minimalistic-outline",
-//     BgColor: "warning",
-//   },
-//   {
-//     title: "Editable Table",
-//     icon: "pen-new-square-broken",
-//     BgColor: "success",
-//   },
-
-//   { header: "Data Tables" },
-//   {
-//     title: "Basic Table",
-//     icon: "database-outline",
-//     BgColor: "primary",
-//   },
-//   {
-//     title: "Header Table",
-//     icon: "clapperboard-text-broken",
-//     BgColor: "secondary",
-//   },
-//   {
-//     title: "Selection Table",
-//     icon: "documents-minimalistic-linear",
-//     BgColor: "success",
-//   },
-//   {
-//     title: "Sorting Table",
-//     icon: "sort-from-bottom-to-top-linear",
-//     BgColor: "error",
-//   },
-//   {
-//     title: "Pagination Table",
-//     icon: "programming-linear",
-//     BgColor: "warning",
-//   },
-//   {
-//     title: "Filtering Table",
-//     icon: "filter-outline",
-//     BgColor: "indigo",
-//   },
-//   {
-//     title: "Grouping Table",
-//     icon: "users-group-rounded-line-duotone",
-//     BgColor: "info",
-//   },
-//   {
-//     title: "Table Slots",
-//     icon: "server-line-duotone",
-//     BgColor: "error",
-//   },
-//   {
-//     title: "CRUD Table",
-//     icon: "medal-star-square-outline",
-//     BgColor: "success",
-//   },
-
-//   { header: "Charts" },
-//   {
-//     title: "Apex Charts",
-//     icon: "pie-chart-2-linear",
-//     BgColor: "primary",
-//     children: [
-//       {
-//         title: "Line",
-//       },
-//       {
-//         title: "Gredient",
-//       },
-//       {
-//         title: "Area",
-//       },
-//       {
-//         title: "Candlestick",
-//       },
-//       {
-//         title: "Column",
-//       },
-//       {
-//         title: "Doughnut & Pie",
-//       },
-//       {
-//         title: "Radialbar & Radar",
-//       },
-//     ],
-//   },
-
-//   { header: "Authentication" },
-
-//   {
-//     title: "Login",
-//     icon: "login-2-line-duotone",
-//     BgColor: "warning",
-//     children: [
-//       {
-//         title: "Side Login",
-//       },
-//       {
-//         title: "Boxed Login",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Register",
-//     icon: "user-plus-line-duotone",
-//     BgColor: "error",
-//     children: [
-//       {
-//         title: "Side Register",
-//       },
-//       {
-//         title: "Boxed Register",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Forgot Password",
-//     icon: "forbidden-line-duotone",
-//     BgColor: "indigo",
-//     children: [
-//       {
-//         title: "Side Forgot Password",
-//       },
-//       {
-//         title: "Boxed Forgot Password",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Two Steps",
-//     icon: "users-group-two-rounded-line-duotone",
-//     BgColor: "info",
-//     children: [
-//       {
-//         title: "Side Two Steps",
-//       },
-//       {
-//         title: "Boxed Two Steps",
-//       },
-//     ],
-//   },
-
-//   {
-//     title: "Error",
-//     icon: "bug-line-duotone",
-//     BgColor: "error",
-//   },
-//   {
-//     title: "Maintenance",
-//     icon: "settings-line-duotone",
-//     BgColor: "primary",
-//   },
-//   { header: "Icons" },
-//   {
-//     title: "Tabler Icons",
-//     BgColor: "success",
-//     icon: "sticker-smile-circle-2-line-duotone",
-//   },
-//   {
-//     title: "Solar Icons",
-//     BgColor: "primary",
-//     icon: "sticker-smile-circle-2-line-duotone",
-//   },
-
-//   { header: "Others" },
-//   {
-//     title: "Menu Level",
-//     icon: "double-alt-arrow-down-bold-duotone",
-//     BgColor: "secondary",
-//     children: [
-//       {
-//         title: "Level 1",
-//       },
-//       {
-//         title: "Level 1",
-//         children: [
-//           {
-//             title: "Level 2",
-//           },
-//           {
-//             title: "Level 2",
-//             children: [
-//               {
-//                 title: "Level 3",
-//               },
-//               {
-//                 title: "Level 3",
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     title: "Disabled",
-//     icon: "forbidden-circle-line-duotone",
-//     BgColor: "success",
-//     disabled: true,
-//   },
-//   {
-//     title: "Sub Caption",
-//     BgColor: "warning",
-//     icon: "square-academic-cap-line-duotone",
-//     subCaption: "This is the subtitle",
-//   },
-//   {
-//     title: "Chip",
-//     icon: "archive-check-line-duotone",
-//     chip: "9",
-//     BgColor: "error",
-//     chipColor: "error",
-//     chipBgColor: "error",
-//     chipVariant: "flat",
-//   },
-//   {
-//     title: "Outlined",
-//     icon: "smile-circle-line-duotone",
-//     chip: "outline",
-//     chipColor: "indigo",
-//     chipVariant: "outlined",
-//     BgColor: "indigo",
-//   },
-//   {
-//     title: "External Link",
-//     icon: "link-bold-duotone",
-//     BgColor: "info",
-//     type: "external",
-//   },
-// ];
 
 export default sidebarItem;
