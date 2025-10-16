@@ -302,7 +302,9 @@ export default {
           user.value = {
             authenticated: true,
             token        : response.token,
-            role         : response.role
+            role         : response.role,
+            phone        : this.form.phoneNumber,
+            username     : response.username || this.form.phoneNumber
           };
 
           // redirect to dashboard

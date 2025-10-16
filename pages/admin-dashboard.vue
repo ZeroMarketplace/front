@@ -1,24 +1,11 @@
-<template>
-  <v-row class="bg-white mr-4 mr-md-1 ml-4 rounded-lg pb-16">
-    Dashboard
-  </v-row>
-</template>
-
-<script>
-
+<script setup lang="ts">
 definePageMeta({
-  layout: "admin",
-  middleware: 'auth',
-  requiresAuth: true,
-  requiresRole: 'admin'
+    layout: 'admin',
 });
-export default {
-  data() {
-    return {}
-  }
-}
 </script>
 
-<style scoped>
+<template>
+    <div>
 
-</style>
+    </div>
+</template>

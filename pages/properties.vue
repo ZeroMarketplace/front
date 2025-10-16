@@ -153,7 +153,7 @@ import Loading from "~/components/Loading.vue";
 import EmptyList from "~/components/EmptyList.vue";
 
 definePageMeta({
-  layout: "admin",
+  layout: "admin-spike",
   middleware: "auth",
   requiresAuth: true,
   requiresRole: "admin",

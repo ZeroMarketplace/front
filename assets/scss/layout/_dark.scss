@@ -1,0 +1,60 @@
+// theme : dark
+div[class*='v-theme--DARK_'] {
+    .smallCap {
+        color: rgb(var(--v-theme-textSecondary));
+    }
+
+    .elevation-10 {
+        box-shadow: none !important;
+    }
+
+    #vector-map .dxm-layers path {
+        fill: #7C8FAC !important;
+    }
+
+    .svgMap-map-wrapper {
+        .svgMap-country {
+            stroke: #c6bfbf;
+            fill: #c9d6de !important;
+
+            &#svgMap-map-country-IN {
+                fill: #46caeb !important;
+            }
+
+            &#svgMap-map-country-AF {
+                fill: #4bd08b !important;
+            }
+
+            &#svgMap-map-country-US {
+                fill: #0085db !important;
+            }
+        }
+
+        .svgMap-map-controls-zoom {
+            background: #c9d6de !important;
+        }
+
+    }
+
+    .easy-checkbox {
+        label {
+            &::before {
+                background: inherit;
+                border: 1px solid #465670 !important;
+            }
+
+            &::after {
+                width: 10px !important;
+                height: 4px !important;
+            }
+        }
+
+    }
+
+    .previous-page__click-button .arrow,
+    .next-page__click-button .arrow {
+        border-top: 2px solid #ddd !important;
+        border-left: 2px solid #ddd !important;
+    }
+
+}

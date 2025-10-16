@@ -16,7 +16,7 @@
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات فاکتور</v-label>
-    <v-row class="mx-5">
+    <v-row >
       <!--   User   -->
       <v-col class="mt-md-0" cols="12" md="4">
         <UserInput

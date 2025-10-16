@@ -71,7 +71,7 @@ export default {
     }
   },
   methods: {
-    logout() {
+    async logout() {
       const user = useCookie('user');
       const token = useCookie('token');
       
@@ -81,7 +81,8 @@ export default {
       const userStore = useUserStore();
       userStore.$reset();
       
-      this.$router.push('/login');
+      // Force a full page reload to clear all state
+      await navigateTo('/login', { external: true });
     }
   }
 }
