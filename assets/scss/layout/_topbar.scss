@@ -1,4 +1,7 @@
 .verticalLayout {
+    // Fixed header container
+
+
     .v-app-bar {
         .v-toolbar__content {
             padding: 0 20px;
@@ -13,33 +16,42 @@
         }
 
         &.v-toolbar {
-            top: 20px !important;
+            position: relative !important;
+            top: 0 !important;
             background-color: rgba(var(--v-theme-background));
             z-index: 2;
             max-width: 1300px;
             margin: 0 auto;
-            left: 290px !important;
-            right: 0;
+            left: 0 !important;
+            right: 0 !important;
             border-radius: 15px;
             // box-shadow: 0 2px 6px rgba(37, 83, 185, 0.1) !important;
         }
 
         &.sticky {
-            top: 0 !important
+            border-radius: 0 0 15px 15px;
         }
     }
 
-    &.mini-sidebar {
-        .v-app-bar {
-            &.v-toolbar {
-                inset-inline-start: 85px !important;
-                @media screen and (max-width:1279px) {
-                    left: 0px !important;
-                }
-            }
+    &.sticky-header {
+        .full-header {
+            top: 0 !important;
         }
-        .full-header .v-app-bar.v-toolbar{
-            max-width: calc(100% - 75px - 60px) !important;
+    }
+
+    .v-main {
+        padding-top: 95px !important;
+    }
+
+    &.mini-sidebar {
+        .full-header {
+            left: 85px !important;
+            max-width: calc(100% - 85px - 60px);
+            
+            @media screen and (max-width:1279px) {
+                left: 0 !important;
+                max-width: calc(100% - 40px);
+            }
         }
     }
 }
@@ -111,7 +123,6 @@
         &.mini-sidebar {
             .v-navigation-drawer.v-navigation-drawer--left {
                 &.v-navigation-drawer--active {
-                    width: 270px !important;
                     margin-left: 0 !important;
                     margin-top: 0 !important;
                 }

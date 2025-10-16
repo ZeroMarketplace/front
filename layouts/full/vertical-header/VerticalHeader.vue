@@ -34,18 +34,20 @@ onBeforeMount(() => {
 });
 const stickyHeader = ref(false);
 function handleScroll() {
-    if (window.pageYOffset) {
+    if (window.pageYOffset > 20) {
         stickyHeader.value = true;
+        document.body.classList.add('sticky-header');
     } else {
         stickyHeader.value = false;
+        document.body.classList.remove('sticky-header');
     }
 }
 </script>
 
 <template>
-    <div class="container">
+    <div class="container mt-6">
         <div class="maxWidth">
-            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky mx-4' : ''" >
+            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky' : ''" >
                 <v-btn
                     class="hidden-md-and-down custom-hover-primary "
                     icon
@@ -143,11 +145,13 @@ function handleScroll() {
     </div>
 </template>
 <style lang="scss">
-.v-toolbar.v-app-bar{
-    max-width: calc(100% - 350px) !important;
-}
 .v-menu.mobile_popup .v-overlay__content{
     max-width: 100% !important;
     margin: 0;
+}
+.verticalLayout .v-app-bar.v-toolbar{
+    max-width: 100% !important;
+    margin: 0;
+    padding: auto;
 }
 </style>
