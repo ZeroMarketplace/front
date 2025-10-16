@@ -102,7 +102,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const sidebarMenu = ref(sidebarItem);
 
-const logout = () => {
+const logout = async () => {
   const user = useCookie('user');
   const token = useCookie('token');
   
@@ -110,7 +110,9 @@ const logout = () => {
   token.value = null;
   
   userStore.$reset();
-  router.push('/login');
+  
+  // Use navigateTo with external option to force a full page reload
+  await navigateTo('/login', { external: true });
 };
 </script>
 

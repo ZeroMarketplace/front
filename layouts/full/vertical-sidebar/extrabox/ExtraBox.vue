@@ -77,7 +77,7 @@ onMounted(() => {
     updateUserInfo();
 });
 
-const logout = () => {
+const logout = async () => {
     const userCookie = useCookie('user');
     const token = useCookie('token');
     
@@ -88,7 +88,8 @@ const logout = () => {
         localStorage.removeItem('user');
     }
     
-    router.push('/login');
+    // Force a full page reload to clear all state
+    await navigateTo('/login', { external: true });
 };
 </script>
 
