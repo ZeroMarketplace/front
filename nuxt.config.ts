@@ -87,4 +87,19 @@ export default defineNuxtConfig({
       SOCKET_URL: process.env.SOCKET_URL,
     },
   },
+
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: 'http://localhost:5000/api',
+        changeOrigin: true,
+      },
+    },
+  },
+
+  routeRules: {
+    '/api/**': {
+      proxy: 'http://localhost:5000/api/**',
+    },
+  },
 });
