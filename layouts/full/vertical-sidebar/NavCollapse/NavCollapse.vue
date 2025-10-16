@@ -25,7 +25,7 @@ const props = defineProps({ item: Object, level: Number });
                             </span>
                             <span class="icon-box" v-else>
                                 <ClientOnly>
-                                    <Icon :icon="'solar:' + item.icon" height="24" width="24" :level="level" :class="'position-relative z-index-2 texthover-' + item.BgColor" />
+                                    <Icon :icon="item.icon" height="24" width="24" :level="level" :class="'position-relative z-index-2 texthover-' + item.BgColor" />
                                 </ClientOnly>
                             </span>
                         </div>
