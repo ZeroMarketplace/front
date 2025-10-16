@@ -49,7 +49,7 @@ function handleScroll() {
         <div class="maxWidth">
             <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky' : ''" >
                 <v-btn
-                    class="hidden-md-and-down custom-hover-primary "
+                    class="hidden-md-and-down custom-hover-primary"
                     icon
                     variant="text"
                     size="small"
@@ -82,32 +82,32 @@ function handleScroll() {
                 <!-- ---------------------------------------------- -->
                 <!-- translate -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <Searchbar />
-                </div>
-                <div class=" me-sm-4 me-0">
+                </div> -->
+                <!-- <div class=" me-sm-4 me-0">
                     <ThemeToggler />
-                </div>
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                </div> -->
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <LanguageDD />
-                </div>
+                </div> -->
 
                 <!-- ---------------------------------------------- -->
                 <!-- ShoppingCart -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <v-btn icon variant="text" to="/ecommerce/checkout" class="custom-hover-primary" size="small">
                         <v-badge color="primary" :content="getCart?.length" offset-x="-4" offset-y="-6">
                             <Icon icon="solar:cart-3-line-duotone" height="24" width="24" />
                         </v-badge>
                     </v-btn>
-                </div>
+                </div> -->
                 <!-- ---------------------------------------------- -->
                 <!-- Notification -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <NotificationDD />
-                </div>
+                </div> -->
                 <!-- ---------------------------------------------- -->
                 <!-- User Profile -->
                 <!-- ---------------------------------------------- -->
