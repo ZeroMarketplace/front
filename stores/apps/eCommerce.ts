@@ -3,7 +3,9 @@ import { defineStore } from 'pinia';
 import axios from '@/utils/axios';
 // types
 import type { ProductStateProps } from '@/types/apps/EcommerceType';
-import { filter, map, sum } from 'lodash';
+import filter from 'lodash/filter';
+import map from 'lodash/map';
+import sum from 'lodash/sum';
 
 export const useEcomStore = defineStore('eCommerceone',{
     
