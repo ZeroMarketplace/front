@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
-import logo from '@/assets/images/logos/logo-dark.svg';
 </script>
 <template>
     <div class="logo">
         <RouterLink to="/">
-            <img :src="logo" alt="home" />
+            <img src="/img/logo.png" width="50" height="50" alt="Logo" style="object-fit: contain;">
         </RouterLink>
     </div>
 </template>
