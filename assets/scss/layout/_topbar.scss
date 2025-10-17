@@ -1,7 +1,4 @@
 .verticalLayout {
-    // Fixed header container
-
-
     .v-app-bar {
         .v-toolbar__content {
             padding: 0 20px;
@@ -16,42 +13,33 @@
         }
 
         &.v-toolbar {
-            position: relative !important;
-            top: 0 !important;
+            top: 20px !important;
             background-color: rgba(var(--v-theme-background));
             z-index: 2;
             max-width: 1300px;
             margin: 0 auto;
-            left: 0 !important;
-            right: 0 !important;
+            left: 290px !important;
+            right: 0;
             border-radius: 15px;
-            // box-shadow: 0 2px 6px rgba(37, 83, 185, 0.1) !important;
+            box-shadow: 0 2px 6px rgba(37, 83, 185, 0.1) !important;
         }
 
         &.sticky {
-            border-radius: 0 0 15px 15px;
+            top: 0 !important
         }
-    }
-
-    &.sticky-header {
-        .full-header {
-            top: 0 !important;
-        }
-    }
-
-    .v-main {
-        padding-top: 95px !important;
     }
 
     &.mini-sidebar {
-        .full-header {
-            left: 85px !important;
-            max-width: calc(100% - 85px - 60px);
-            
-            @media screen and (max-width:1279px) {
-                left: 0 !important;
-                max-width: calc(100% - 40px);
+        .v-app-bar {
+            &.v-toolbar {
+                inset-inline-start: 85px !important;
+                @media screen and (max-width:1279px) {
+                    left: 0px !important;
+                }
             }
+        }
+        .full-header .v-app-bar.v-toolbar{
+            max-width: calc(100% - 75px - 60px) !important;
         }
     }
 }
@@ -82,34 +70,37 @@
     }
 }
 
-// .full-header {
-//     .v-app-bar.v-toolbar {
-//         max-width: calc((100% - 270px) - 60px) !important;
-//     }
+.full-header {
+    .v-app-bar.v-toolbar {
+        max-width: calc((100% - 270px) - 60px) !important;
+    }
 
+    .v-toolbar__content {
+        max-width: 100%;
+    }
 
-//     .horizontal-header {
-//         &.v-app-bar {
-//             &.v-toolbar {
-//                 max-width: 100% !important;
-//             }
+    .horizontal-header {
+        &.v-app-bar {
+            &.v-toolbar {
+                max-width: 100% !important;
+            }
 
-//             .v-toolbar__content {
-//                 width: 100% !important;
-//                 max-width: 100% !important;
-//             }
-//         }
-//     }
-// }
+            .v-toolbar__content {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    }
+}
 
-// @media screen and (max-width:1600px) and (min-width:1280px) {
-//     .verticalLayout {
-//         .v-app-bar.v-toolbar {
-//             max-width: calc((100% - 270px) - 60px) !important;
-//         }
-//     }
+@media screen and (max-width:1600px) and (min-width:1280px) {
+    .verticalLayout {
+        .v-app-bar.v-toolbar {
+            max-width: calc((100% - 270px) - 60px) !important;
+        }
+    }
 
-// }
+}
 
 @media screen and (max-width:1279px) {
 
@@ -123,6 +114,7 @@
         &.mini-sidebar {
             .v-navigation-drawer.v-navigation-drawer--left {
                 &.v-navigation-drawer--active {
+                    width: 270px !important;
                     margin-left: 0 !important;
                     margin-top: 0 !important;
                 }

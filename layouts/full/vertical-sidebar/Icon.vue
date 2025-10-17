@@ -6,19 +6,19 @@ const props = defineProps({ item: Object, level: Number });
 
 <template>
   <template v-if="level > 0">
-    <component
-      :icon="'solar:' + item"
-      size="14"
-      stroke-width="1.5"
+    <Icon
+      :icon="item"
+      :width="14"
+      :height="14"
       class="iconClass"
-    ></component>
+    />
   </template>
   <template v-else>
-    <component
-      :icon="'solar:' + item"
-      size="24"
-      stroke-width="1.5"
+    <Icon
+      :icon="item"
+      :width="24"
+      :height="24"
       class="iconClass"
-    ></component>
+    />
   </template>
 </template>

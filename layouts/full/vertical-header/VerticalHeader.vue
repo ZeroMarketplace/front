@@ -34,22 +34,20 @@ onBeforeMount(() => {
 });
 const stickyHeader = ref(false);
 function handleScroll() {
-    if (window.pageYOffset > 20) {
+    if (window.pageYOffset) {
         stickyHeader.value = true;
-        document.body.classList.add('sticky-header');
     } else {
         stickyHeader.value = false;
-        document.body.classList.remove('sticky-header');
     }
 }
 </script>
 
 <template>
-    <div class="container mt-6">
+    <div class="container">
         <div class="maxWidth">
-            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky' : ''" >
+            <v-app-bar elevation="0" :priority="priority" height="75" id="top" :class="stickyHeader ? 'sticky' : ''">
                 <v-btn
-                    class="hidden-md-and-down custom-hover-primary "
+                    class="hidden-md-and-down custom-hover-primary"
                     icon
                     variant="text"
                     size="small"
@@ -61,9 +59,9 @@ function handleScroll() {
                     <Icon icon="solar:list-bold-duotone" height="24" width="24" />
                 </v-btn>
 
-                <div class="hidden-md-and-up me-md-8 me-4">
+                <!-- <div class="hidden-md-and-up me-md-4 me-0">
                     <Searchbar />
-                </div>
+                </div> -->
 
                 <!-- ---------------------------------------------- -->
                 <!-- Search part -->
@@ -82,32 +80,32 @@ function handleScroll() {
                 <!-- ---------------------------------------------- -->
                 <!-- translate -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <Searchbar />
-                </div>
-                <div class=" me-sm-4 me-0">
+                </div> -->
+                <!-- <div class=" me-sm-4 me-0">
                     <ThemeToggler />
                 </div>
                 <div class="hidden-sm-and-down me-sm-4 me-4">
                     <LanguageDD />
-                </div>
+                </div> -->
 
                 <!-- ---------------------------------------------- -->
                 <!-- ShoppingCart -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <v-btn icon variant="text" to="/ecommerce/checkout" class="custom-hover-primary" size="small">
                         <v-badge color="primary" :content="getCart?.length" offset-x="-4" offset-y="-6">
                             <Icon icon="solar:cart-3-line-duotone" height="24" width="24" />
                         </v-badge>
                     </v-btn>
-                </div>
+                </div> -->
                 <!-- ---------------------------------------------- -->
                 <!-- Notification -->
                 <!-- ---------------------------------------------- -->
-                <div class="hidden-sm-and-down me-sm-4 me-4">
+                <!-- <div class="hidden-sm-and-down me-sm-4 me-4">
                     <NotificationDD />
-                </div>
+                </div> -->
                 <!-- ---------------------------------------------- -->
                 <!-- User Profile -->
                 <!-- ---------------------------------------------- -->
@@ -118,7 +116,7 @@ function handleScroll() {
 
 
                 <!-----Mobile header------>
-                <v-menu :close-on-content-click="false" class="mobile_popup">
+                <!-- <v-menu :close-on-content-click="false" class="mobile_popup">
                     <template v-slot:activator="{ props }">
                         <v-btn icon class="hidden-md-and-up  custom-hover-primary" flat v-bind="props" size="small">
                             <DotsIcon stroke-width="2" size="24" class="text-primary" />
@@ -134,24 +132,12 @@ function handleScroll() {
                                     <Icon icon="solar:cart-3-line-duotone" height="24" width="24" />
                                 </v-badge>
                             </v-btn>
-                            <!-- <MessagesDD /> -->
                             <NotificationDD />
                             <ProfileDD />
                         </div>
                     </v-sheet>
-                </v-menu>
+                </v-menu> -->
             </v-app-bar>
         </div>
     </div>
 </template>
-<style lang="scss">
-.v-menu.mobile_popup .v-overlay__content{
-    max-width: 100% !important;
-    margin: 0;
-}
-.verticalLayout .v-app-bar.v-toolbar{
-    max-width: 100% !important;
-    margin: 0;
-    padding: auto;
-}
-</style>

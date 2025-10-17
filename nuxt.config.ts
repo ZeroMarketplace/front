@@ -79,12 +79,28 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     TOKEN_SECRET: process.env.TOKEN_SECRET,
+    BACKEND_URL: process.env.BACKEND_URL,
 
     // Keys within public, will be also exposed to the client-side
     public: {
       API_BASE_URL: process.env.API_BASE_URL,
       STATICS_URL: process.env.STATICS_URL,
       SOCKET_URL: process.env.SOCKET_URL,
+    },
+  },
+
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: `${process.env.BACKEND_URL}/api`,
+        changeOrigin: true,
+      },
+    },
+  },
+
+  routeRules: {
+    '/api/**': {
+      proxy: `${process.env.BACKEND_URL}/api/**`,
     },
   },
 });

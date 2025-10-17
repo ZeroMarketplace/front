@@ -13,7 +13,7 @@ export interface menu {
   disabled?: boolean;
   type?: string;
   subCaption?: string;
-    color?: string;
+  color?: string;
 }
 
 const sidebarItem: menu[] = [
@@ -21,7 +21,7 @@ const sidebarItem: menu[] = [
     { header: 'داشبورد' },
     {
         title: 'داشبورد',
-        icon: 'screencast-2-linear',
+        icon: 'tabler:layout-dashboard-filled',
         to: '/admin-dashboard',
         BgColor: 'primary',
     },
@@ -29,57 +29,57 @@ const sidebarItem: menu[] = [
     // Transactions (معامله)
     {
         title: 'معامله',
-        icon: 'chart-line-duotone',
+        icon: 'tabler:chart-line',
         BgColor: 'error',
         children: [
             {
                 title: 'فاکتور فروش',
-                icon: 'receipt',
+                icon: 'tabler:receipt',
                 to: '/sales-invoices'
             },
             {
                 title: 'فاکتور خرید',
-                icon: 'receipt-text',
+                icon: 'tabler:receipt-2',
                 to: '/purchase-invoices'
             },
             {
                 title: 'برگشت از فروش',
-                icon: 'keyboard-return',
+                icon: 'tabler:arrow-back-up',
                 to: '/sales-returns'
             },
             {
                 title: 'برگشت از خرید',
-                icon: 'undo-variant',
+                icon: 'tabler:arrow-forward-up',
                 to: '/purchase-returns'
             },
             {
                 title: 'سفارش',
-                icon: 'cart-outline',
+                icon: 'tabler:shopping-cart',
                 to: '/orders'
             },
             {
                 title: 'گزارش فروش‌ها',
-                icon: 'chart-line',
+                icon: 'tabler:chart-line',
                 to: '/reports/sales'
             },
             {
                 title: 'گزارش خریدها',
-                icon: 'chart-bar',
+                icon: 'tabler:chart-bar',
                 to: '/reports/purchases'
             },
             {
                 title: 'گزارش برگشت از فروش',
-                icon: 'file-chart',
+                icon: 'tabler:file-chart',
                 to: '/reports/sales-returns'
             },
             {
                 title: 'گزارش برگشت از خرید',
-                icon: 'file-chart-outline',
+                icon: 'tabler:file-analytics',
                 to: '/reports/purchase-returns'
             },
             {
                 title: 'گزارش سفارش',
-                icon: 'clipboard-text',
+                icon: 'tabler:clipboard-text',
                 to: '/reports/orders'
             },
         ]
@@ -88,27 +88,27 @@ const sidebarItem: menu[] = [
     // People/Contacts (اشخاص)
     {
         title: 'اشخاص',
-        icon: 'home-angle-linear',
-        BgColor: 'warning',
+        icon: 'tabler:users',
+        BgColor: 'success',
         children: [
             {
                 title: 'تعریف اشخاص',
-                icon: 'account-plus',
+                icon: 'tabler:user-plus',
                 to: '/contacts'
             },
             {
                 title: 'تسویه حساب اشخاص',
-                icon: 'cash-check',
+                icon: 'tabler:cash',
                 to: '/contacts/settlements'
             },
             {
                 title: 'گزارش لیست مشتریان',
-                icon: 'format-list-bulleted',
+                icon: 'tabler:list',
                 to: '/reports/customers'
             },
             {
                 title: 'گزارش تفصیلی مشتری',
-                icon: 'file-document-outline',
+                icon: 'tabler:file-text',
                 to: '/reports/customer-details'
             },
         ]
@@ -118,37 +118,37 @@ const sidebarItem: menu[] = [
     { header: 'کالا' },
     {
         title: 'کالا',
-        icon: 'phone-line-duotone',
-        BgColor: 'success',
+        icon: 'tabler:package',
+        BgColor: 'info',
         children: [
             {
                 title: 'تعریف کالا',
-                icon: 'plus-box',
+                icon: 'tabler:square-plus',
                 to: '/products'
             },
             {
                 title: 'تعریف دسته‌بندی کالا',
-                icon: 'file-tree',
+                icon: 'tabler:category',
                 to: '/categories'
             },
             {
                 title: 'گزارش موجودی کالا',
-                icon: 'clipboard-list',
+                icon: 'tabler:clipboard-list',
                 to: '/inventories'
             },
             {
                 title: 'گزارش کاردکس کالا',
-                icon: 'book-open-variant',
+                icon: 'tabler:book',
                 to: '/reports/product-ledger'
             },
             {
                 title: 'گزارش ماهیانه کالا',
-                icon: 'calendar-month',
+                icon: 'tabler:calendar-month',
                 to: '/reports/monthly-products'
             },
             {
                 title: 'گزارش لیست کالا',
-                icon: 'format-list-checkbox',
+                icon: 'tabler:list-check',
                 to: '/reports/products-list'
             },
         ]
@@ -157,37 +157,37 @@ const sidebarItem: menu[] = [
     // Warehouse (انبار)
     {
         title: 'انبار',
-        icon: 'align-vertical-spacing-line-duotone',
+        icon: 'tabler:building-warehouse',
         BgColor: 'secondary',
         children: [
             {
                 title: 'تعریف انبار',
-                icon: 'home-plus',
+                icon: 'tabler:home-plus',
                 to: '/warehouses'
             },
             {
                 title: 'عملیات انبار',
-                icon: 'cog',
+                icon: 'tabler:settings',
                 to: '/warehouse-operations'
             },
             {
                 title: 'گزارش موجودی کالا',
-                icon: 'clipboard-list-outline',
+                icon: 'tabler:clipboard-list',
                 to: '/reports/warehouse-inventory'
             },
             {
                 title: 'گزارش ارزش ریالی کالا',
-                icon: 'currency-usd',
+                icon: 'tabler:currency-dollar',
                 to: '/reports/inventory-value'
             },
             {
                 title: 'گزارش کاردکس کالا',
-                icon: 'book-open-page-variant',
+                icon: 'tabler:book-2',
                 to: '/reports/warehouse-ledger'
             },
             {
                 title: 'گزارش ماهیانه کالا',
-                icon: 'calendar-range',
+                icon: 'tabler:calendar',
                 to: '/reports/warehouse-monthly'
             },
         ]
@@ -197,22 +197,22 @@ const sidebarItem: menu[] = [
     { header: 'تنظیمات' },
     {
         title: 'تنظیمات',
-        icon: 'smart-speaker-minimalistic-line-duotone',
-        BgColor: 'pink-darken-1',
+        icon: 'tabler:settings',
+        BgColor: 'info',
         children: [
             {
                 title: 'تعریف واحدها',
-                icon: 'scale-balance',
+                icon: 'tabler:scale',
                 to: '/units'
             },
             {
                 title: 'تعریف برند',
-                icon: 'tag',
+                icon: 'tabler:tag',
                 to: '/brands'
             },
             {
                 title: 'ویژگی‌ها',
-                icon: 'format-list-bulleted-square',
+                icon: 'tabler:list-details',
                 to: '/properties'
             },
         ]
@@ -221,57 +221,57 @@ const sidebarItem: menu[] = [
     // Bank/Cash (بانک / صندوق‌ها)
     {
         title: 'بانک / صندوق‌ها',
-        icon: 'chat-round-unread-line-duotone',
-        BgColor: 'info',
+        icon: 'tabler:building-bank',
+        BgColor: 'primary',
         children: [
             {
                 title: 'تعریف بانک',
-                icon: 'bank-plus',
+                icon: 'tabler:building-bank',
                 to: '/accounts'
             },
             {
                 title: 'تعریف صندوق',
-                icon: 'cash-register',
+                icon: 'tabler:cash-register',
                 to: '/cash-registers'
             },
             {
                 title: 'واریز به بانک',
-                icon: 'bank-transfer-in',
+                icon: 'tabler:arrow-down-circle',
                 to: '/bank-deposits'
             },
             {
                 title: 'انتقال از صندوق به صندوق',
-                icon: 'swap-horizontal-circle',
+                icon: 'tabler:arrows-exchange',
                 to: '/cash-transfers'
             },
             {
                 title: 'انتقال از بانک به صندوق',
-                icon: 'bank-transfer-out',
+                icon: 'tabler:arrow-right-circle',
                 to: '/bank-to-cash'
             },
             {
                 title: 'انتقال از بانک به بانک',
-                icon: 'bank-transfer',
+                icon: 'tabler:transfer',
                 to: '/bank-to-bank'
             },
             {
                 title: 'گزارش موجودی بانک‌ها',
-                icon: 'chart-box',
+                icon: 'tabler:chart-dots',
                 to: '/reports/bank-balance'
             },
             {
                 title: 'گزارش موجودی صندوق‌ها',
-                icon: 'chart-box-outline',
+                icon: 'tabler:chart-area',
                 to: '/reports/cash-balance'
             },
             {
                 title: 'گزارش تفصیلی صندوق',
-                icon: 'file-document',
+                icon: 'tabler:file-description',
                 to: '/reports/cash-details'
             },
             {
                 title: 'گزارش تفصیلی بانک',
-                icon: 'file-document-outline',
+                icon: 'tabler:file-invoice',
                 to: '/reports/bank-details'
             }
         ]
@@ -280,37 +280,37 @@ const sidebarItem: menu[] = [
     // Expense/Income (هزینه / درآمد)
     {
         title: 'هزینه / درآمد',
-        icon: 'user-rounded-line-duotone',
-        BgColor: 'primary',
+        icon: 'tabler:coin',
+        BgColor: 'error',
         children: [
             {
                 title: 'تعریف هزینه',
-                icon: 'cash-minus',
+                icon: 'tabler:cash-off',
                 to: '/add-and-subtract'
             },
             {
                 title: 'تعریف درآمد',
-                icon: 'cash-plus',
+                icon: 'tabler:cash',
                 to: '/income-types'
             },
             {
                 title: 'ثبت هزینه',
-                icon: 'minus-circle',
+                icon: 'tabler:circle-minus',
                 to: '/expenses'
             },
             {
                 title: 'ثبت درآمد',
-                icon: 'plus-circle',
+                icon: 'tabler:circle-plus',
                 to: '/incomes'
             },
             {
                 title: 'گزارش هزینه‌ها',
-                icon: 'chart-line-variant',
+                icon: 'tabler:trending-down',
                 to: '/reports/expenses'
             },
             {
                 title: 'گزارش درآمدها',
-                icon: 'chart-areaspline',
+                icon: 'tabler:trending-up',
                 to: '/reports/incomes'
             },
         ]
@@ -320,27 +320,27 @@ const sidebarItem: menu[] = [
     { header: 'حسابداری' },
     {
         title: 'حسابداری',
-        icon: 'bill-check-outline',
+        icon: 'tabler:calculator',
         BgColor: 'success',
         children: [
             {
                 title: 'گزارش تفصیلی سود و زیان',
-                icon: 'file-chart',
+                icon: 'tabler:file-chart',
                 to: '/commodity-profits'
             },
             {
                 title: 'گزارش سود گروه‌ها',
-                icon: 'chart-pie',
+                icon: 'tabler:chart-pie',
                 to: '/reports/group-profits'
             },
             {
                 title: 'گزارش سود و زیان کالا',
-                icon: 'chart-timeline-variant',
+                icon: 'tabler:chart-line',
                 to: '/reports/product-profits'
             },
             {
                 title: 'گزارش آماری',
-                icon: 'chart-bar-stacked',
+                icon: 'tabler:chart-bar',
                 to: '/reports/statistics'
             },
         ]

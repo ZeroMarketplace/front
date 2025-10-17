@@ -31,7 +31,7 @@ const userRole = computed(() => {
     <!-- ---------------------------------------------- -->
     <v-menu :close-on-content-click="true" class="profile_popup">
         <template v-slot:activator="{ props }">
-            <div class=" text-left px-0 cursor-pointer" variant="text" v-bind="props">
+            <div class=" text-left px-4 cursor-pointer" variant="text" v-bind="props">
                 <div class="d-flex align-center">
                     <v-avatar size="50">
                         <img src="@/assets/images/profile/user6.jpg" width="50" :alt="userName" />
