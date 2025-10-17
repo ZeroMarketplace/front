@@ -58,6 +58,12 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.*.local
+
+# Config files with sensitive data
+config.local.ts
+config.local.js
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
