@@ -89,7 +89,7 @@ const sidebarItem: menu[] = [
     {
         title: 'اشخاص',
         icon: 'tabler:users',
-        BgColor: 'warning',
+        BgColor: 'success',
         children: [
             {
                 title: 'تعریف اشخاص',
@@ -119,7 +119,7 @@ const sidebarItem: menu[] = [
     {
         title: 'کالا',
         icon: 'tabler:package',
-        BgColor: 'success',
+        BgColor: 'info',
         children: [
             {
                 title: 'تعریف کالا',
@@ -198,7 +198,7 @@ const sidebarItem: menu[] = [
     {
         title: 'تنظیمات',
         icon: 'tabler:settings',
-        BgColor: 'pink-darken-1',
+        BgColor: 'info',
         children: [
             {
                 title: 'تعریف واحدها',
@@ -222,7 +222,7 @@ const sidebarItem: menu[] = [
     {
         title: 'بانک / صندوق‌ها',
         icon: 'tabler:building-bank',
-        BgColor: 'info',
+        BgColor: 'primary',
         children: [
             {
                 title: 'تعریف بانک',
@@ -281,7 +281,7 @@ const sidebarItem: menu[] = [
     {
         title: 'هزینه / درآمد',
         icon: 'tabler:coin',
-        BgColor: 'primary',
+        BgColor: 'error',
         children: [
             {
                 title: 'تعریف هزینه',
