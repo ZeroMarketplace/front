@@ -22,7 +22,7 @@ export const useCustomizerStore = defineStore('customizer', {
     inputBg: false,
     boxed: true,
     setBorderCard: false,
-    setRTLLayout: false
+    setRTLLayout: true
   }),
   getters: {},
   actions: {
