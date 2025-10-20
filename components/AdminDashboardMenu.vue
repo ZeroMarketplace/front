@@ -3,7 +3,8 @@
     <!-- Logo -->
     <div class="pa-5 text-center">
       <NuxtLink to="/">
-        <img src="/img/logo.png" width="110" height="50" alt="Logo">
+        <v-img src="/img/logo.svg" width="50" height="50" alt="Logo" style="object-fit: contain;" />
+
       </NuxtLink>
     </div>
 

@@ -27,14 +27,15 @@
         <NuxtLink to="/">
           <v-img
             class="mt-n2 w-75 d-none d-md-inline-block"
-            src="/img/logo.png"
+            src="/img/TypoLogo.svg"
             max-height="60"
+            max-width="75"
           >
           </v-img>
         </NuxtLink>
 
-        <NuxtLink class="d-inline-block mx-2 w-50" to="/">
-          <img class="mt-n2 d-md-none" width="108" src="/img/logo.png" />
+        <NuxtLink class="d-inline-block mx-2 w-50 h-8" to="/">
+          <v-img class="d-md-none" max-width="40" max-height="50" src="/img/logo.svg" />
         </NuxtLink>
 
         <!--        <h2 class="d-none d-md-inline font-weight-bold">فروشگاه زیرو</h2>-->
