@@ -26,7 +26,7 @@
     <v-row class="mt-5 mx-16">
       <!--   Logo and Description   -->
       <v-col class="px-md-5" cols="12" md="4">
-        <v-img class="mb-5 w-50" src="/img/logo.png" max-height="60"> </v-img>
+        <v-img class="mb-5 w-50" src="/img/logo.svg" max-height="60"> </v-img>
         <div class="text-wrap text-justify w-100">
           <v-label class="my-2"
             >اصفهان، سمیرم، فتح‌آباد، خ شهید اشتری، پلاک 25</v-label
