@@ -14,14 +14,15 @@ const customizer = useCustomizerStore();
   <!-----RTL LAYOUT------->
   <v-locale-provider v-if="customizer.setRTLLayout" rtl>
     <v-app
-      :theme="customizer.actTheme"
-      :class="[
-        customizer.actTheme,
-        customizer.mini_sidebar ? 'mini-sidebar' : '',
-        customizer.setHorizontalLayout ? 'horizontalLayout' : 'verticalLayout',
-        customizer.setBorderCard ? 'cardBordered' : '',
-      ]"
+    :theme="customizer.actTheme"
+    :class="[
+      customizer.actTheme,
+      customizer.mini_sidebar ? 'mini-sidebar' : '',
+      customizer.setHorizontalLayout ? 'horizontalLayout' : 'verticalLayout',
+      customizer.setBorderCard ? 'cardBordered' : '',
+    ]"
     >
+    <v-theme-provider theme="spikeLight">
       <!---Customizer location left side--->
       <v-navigation-drawer
         app
@@ -58,8 +59,12 @@ const customizer = useCustomizerStore();
           </v-container>
         </div>
       </v-main>
+    </v-theme-provider>
     </v-app>
   </v-locale-provider>
+
+
+
 </template>
 <style lang="scss">
 @import "../../assets/scss/layout/_rtl";
