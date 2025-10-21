@@ -22,6 +22,7 @@
               :readonly="loading"
               @submit.prevent="submit"
               ref="loginForm"
+              validate-on="submit lazy"
             >
               <!-- Step 1 -->
               <v-window-item :value="1">
