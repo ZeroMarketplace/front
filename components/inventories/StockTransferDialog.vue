@@ -29,6 +29,7 @@
           :readonly="loading"
           @submit.prevent="submit"
           ref="stockTransferForm"
+          validate-on="submit lazy"
         >
           <v-row>
             <!--   source Warehouse   -->

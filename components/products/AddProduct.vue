@@ -1,5 +1,5 @@
 <template>
-  <v-form :readonly="loading" @submit.prevent="submit" ref="addProductForm">
+  <v-form :readonly="loading" @submit.prevent="submit" ref="addProductForm" validate-on="submit lazy">
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات کلی</v-label>

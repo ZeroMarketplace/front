@@ -13,7 +13,7 @@
       </v-card-title>
 
       <!--  Add Contact Form  -->
-      <v-form ref="addContactForm" @submit.prevent="submit">
+      <v-form ref="addContactForm" @submit.prevent="submit" validate-on="submit lazy">
         <!--    Avatar And firstName And lastName     -->
         <!--        <v-row class="mx-5">-->
 
