@@ -1,25 +1,9 @@
 <template>
-  <v-autocomplete
-    :items="items"
-    :loading="true"
-    :search-input="searchQuery"
-    :hide-no-data="true"
-    item-value="_id"
-    item-title="title"
-    label="دسته‌بندی"
-    density="compact"
-    variant="outlined"
-    @scroll:bottom="loadMoreItems"
-    @update:model-value="handleItemSelect"
-    @update:search="handleSearchUpdate"
-  >
+  <v-autocomplete :items="items" :loading="true" :search-input="searchQuery" :hide-no-data="true" item-value="_id"
+    item-title="title" label="دسته‌بندی" density="comfortable" variant="outlined" color="primary" hide-details
+    @scroll:bottom="loadMoreItems" @update:model-value="handleItemSelect" @update:search="handleSearchUpdate">
     <template v-slot:loader>
-      <v-progress-circular
-        v-if="isFetchingMore"
-        indeterminate
-        color="primary"
-        size="20"
-      ></v-progress-circular>
+      <v-progress-circular v-if="isFetchingMore" indeterminate color="primary" size="20"></v-progress-circular>
     </template>
   </v-autocomplete>
 </template>

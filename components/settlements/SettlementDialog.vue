@@ -49,6 +49,7 @@
           :readonly="loading"
           @submit.prevent="submit"
           ref="settlementForm"
+          validate-on="submit lazy"
         >
           <!--   Settlement Form    -->
           <v-window-item :value="1">

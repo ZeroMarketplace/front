@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="submit" ref="addCategoryForm">
+  <v-form @submit.prevent="submit" ref="addCategoryForm" validate-on="submit lazy">
     <!--    Parent      -->
     <v-chip
       v-if="form._parent"

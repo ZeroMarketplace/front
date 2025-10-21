@@ -1,9 +1,10 @@
 <template>
   <v-form
     class="mx-5"
-    validate-on="lazy"
+    validate-on="submit lazy"
     @submit.prevent="submit"
     ref="addBrandForm"
+
   >
     <v-row class="mt-2">
       <!--      Title      -->

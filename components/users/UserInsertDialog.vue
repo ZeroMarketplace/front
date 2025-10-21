@@ -34,6 +34,7 @@
           :readonly="loading"
           @submit.prevent="submit"
           ref="userInsertForm"
+          validate-on="submit lazy"
         >
           <v-row>
             <v-col class="" cols="12">
@@ -124,8 +125,8 @@ const exit = () => {
   emit("exit");
 };
 const submit = async () => {
-  await userInsertForm.value.validate();
-  if (userInsertForm.value.isValid) {
+  await userInsertForm?.value?.validate();
+  if (userInsertForm?.value?.isValid) {
     const [firstName, ...lastNameParts] = form.value.name.split(" ");
     const lastName = lastNameParts.join(" ");
 

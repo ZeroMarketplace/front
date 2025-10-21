@@ -379,7 +379,7 @@
           </div>
 
           <!--     Form     -->
-          <v-form class="w-100" @submit.prevent="sendTextMessage">
+          <v-form class="w-100" @submit.prevent="sendTextMessage" validate-on="submit lazy">
             <v-text-field
               class="elevation-0"
               :rounded="smAndDown ? 0 : formTop.action ? 'b-gl' : 'md'"
