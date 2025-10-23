@@ -150,10 +150,10 @@
 
         <!-- Action Buttons -->
         <div class="d-flex justify-end ga-3">
-          <v-btn color="success" variant="flat" rounded="pill" type="submit" :loading="loading">
+          <v-btn color="success" variant="flat" rounded="pill" type="submit" :loading="loading" class="text-white">
             ذخیره فاکتور
           </v-btn>
-          <v-btn color="error" variant="flat" rounded="pill" to="/purchase-invoices">
+          <v-btn color="error" variant="flat" rounded="pill" to="/purchase-invoices" class="text-white">
             انصراف
           </v-btn>
         </div>

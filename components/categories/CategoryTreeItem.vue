@@ -2,44 +2,23 @@
   <div class="category-tree-item">
     <div class="category-item bg-bglight rounded-lg pa-4 mb-2 d-flex align-center">
       <!-- Expand/Collapse Button -->
-      <v-btn
-        v-if="item.children && item.children.length"
-        icon
-        size="small"
-        variant="text"
-        @click="expanded = !expanded"
-        class="me-2"
-      >
-        <Icon
-          :icon="expanded ? 'solar:alt-arrow-down-linear' : 'solar:alt-arrow-right-linear'"
-          height="20"
-        />
+      <v-btn v-if="item.children && item.children.length" icon size="small" variant="text" @click="expanded = !expanded"
+        class="me-2">
+        <Icon :icon="expanded ? 'solar:alt-arrow-down-linear' : 'solar:alt-arrow-right-linear'" height="20" />
       </v-btn>
       <div v-else class="me-2" style="width: 40px"></div>
 
       <!-- Category Title -->
       <div class="flex-grow-1">
         <span class="text-14 font-weight-semibold">{{ item.title }}</span>
-        <v-chip
-          v-if="item.profitPercent"
-          size="x-small"
-          class="ms-2"
-          color="info"
-          variant="flat"
-        >
+        <v-chip v-if="item.profitPercent" size="x-small" class="ms-2" color="info" variant="flat">
           سود: {{ item.profitPercent }}%
         </v-chip>
       </div>
 
       <!-- Status Chip -->
-      <v-chip
-        rounded="pill"
-        :color="item.status === 1 ? 'success' : 'error'"
-        variant="flat"
-        size="small"
-        label
-        class="me-3"
-      >
+      <v-chip rounded="pill" :color="item.status === 1 ? 'success' : 'error'" variant="flat" size="small" label
+        class="me-3">
         {{ item.status === 1 ? 'فعال' : 'غیرفعال' }}
       </v-chip>
 
@@ -53,48 +32,49 @@
           <v-tooltip activator="parent" location="bottom">افزودن زیردسته</v-tooltip>
         </RouterLink>
 
-        <!-- Edit -->
-        <RouterLink :to="`/categories/edit/${item._id}`">
-          <v-avatar color="lightsuccess" size="32">
-            <Icon icon="solar:pen-linear" class="text-success" height="18" />
-          </v-avatar>
-          <v-tooltip activator="parent" location="bottom">ویرایش دسته‌بندی</v-tooltip>
-        </RouterLink>
+        <!-- Three-dots menu -->
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn icon variant="text" v-bind="props" size="small">
+              <Icon icon="solar:menu-dots-bold" height="20" />
+            </v-btn>
+          </template>
+          <v-list density="compact" min-width="200">
+            <v-list-item @click="$router.push(`/categories/edit/${item._id}`)">
+              <template v-slot:prepend>
+                <Icon icon="solar:pen-linear" height="18" class="text-success me-3" />
+              </template>
+              <v-list-item-title>ویرایش</v-list-item-title>
+            </v-list-item>
 
-        <!-- Toggle Status -->
-        <RouterLink to="" @click.stop="$emit('toggle-status', item)">
-          <v-avatar :color="item.status === 1 ? 'lightwarning' : 'lightinfo'" size="32">
-            <Icon
-              :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
-              :class="item.status === 1 ? 'text-warning' : 'text-info'"
-              height="18"
-            />
-          </v-avatar>
-          <v-tooltip activator="parent" location="bottom">
-            {{ item.status === 1 ? 'غیرفعال کردن' : 'فعال کردن' }}
-          </v-tooltip>
-        </RouterLink>
+            <v-list-item @click="$emit('toggle-status', item)">
+              <template v-slot:prepend>
+                <Icon :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'" height="18"
+                  :class="item.status === 1 ? 'text-warning me-3' : 'text-info me-3'" />
+              </template>
+              <v-list-item-title>
+                {{ item.status === 1 ? 'غیرفعال کردن' : 'فعال کردن' }}
+              </v-list-item-title>
+            </v-list-item>
 
-        <!-- Delete -->
-        <RouterLink to="" @click.stop="$emit('delete', item._id)" class="cursor-pointer">
-          <v-avatar color="lighterror" size="32">
-            <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error" height="18" />
-          </v-avatar>
-          <v-tooltip activator="parent" location="bottom">حذف دسته‌بندی</v-tooltip>
-        </RouterLink>
+            <v-divider />
+
+            <v-list-item @click="$emit('delete', item._id)" class="text-error">
+              <template v-slot:prepend>
+                <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
+              </template>
+              <v-list-item-title>حذف</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </div>
 
     <!-- Children (Recursive) -->
     <div v-if="expanded && item.children && item.children.length" class="children-container ms-8">
-      <CategoryTreeItem
-        v-for="child in item.children"
-        :key="child._id"
-        :item="child"
-        @toggle-status="$emit('toggle-status', $event)"
-        @delete="$emit('delete', $event)"
-        @add-child="$emit('add-child', $event)"
-      />
+      <CategoryTreeItem v-for="child in item.children" :key="child._id" :item="child"
+        @toggle-status="$emit('toggle-status', $event)" @delete="$emit('delete', $event)"
+        @add-child="$emit('add-child', $event)" />
     </div>
   </div>
 </template>
