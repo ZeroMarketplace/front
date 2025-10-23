@@ -27,10 +27,10 @@
         </div>
 
         <div class="d-flex align-center justify-end ga-3">
-          <v-btn flat color="success" type="submit" :loading="submitting" class="mt-6" rounded="pill">
+          <v-btn flat color="success" type="submit" :loading="submitting" class="mt-6 text-white" rounded="pill">
             ذخیره تغییرات
           </v-btn>
-          <v-btn flat color="error" to="/categories" class="mt-6" rounded="pill">
+          <v-btn flat color="error" to="/categories" class="mt-6 text-white" rounded="pill">
             انصراف
           </v-btn>
         </div>

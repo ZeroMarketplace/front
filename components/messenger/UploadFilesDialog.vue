@@ -35,7 +35,7 @@
           <v-btn color="secondary" @click="submit">ارسال</v-btn>
 
           <!--     cancel     -->
-          <v-btn class="mx-2" @click="closeDialog" variant="outlined"
+          <v-btn class="mx-2 text-white" @click="closeDialog" variant="outlined"
             >انصراف
           </v-btn>
         </div>

@@ -35,7 +35,7 @@
           <v-btn flat color="primary" type="submit" :loading="loading" class="mt-6" rounded="pill">
             ذخیره دسته‌بندی
           </v-btn>
-          <v-btn flat color="error" to="/categories" class="mt-6" rounded="pill">
+          <v-btn flat color="error" to="/categories" class="mt-6 text-white" rounded="pill">
             انصراف
           </v-btn>
         </div>

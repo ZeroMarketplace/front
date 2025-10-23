@@ -5,19 +5,12 @@
       <div class="overflow-x-responsive">
         <v-row class="d-flex flex-nowrap">
           <v-col cols="12" md="3" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'all' },
-              ]"
-              @click="setStatusFilter('all')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'all' },
+            ]" @click="setStatusFilter('all')">
               <v-avatar size="56" class="border border-md border-primary">
-                <Icon
-                  icon="solar:document-text-linear"
-                  height="25"
-                  class="text-primary"
-                />
+                <Icon icon="solar:document-text-linear" height="25" class="text-primary" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">همه فاکتورها</h6>
@@ -26,19 +19,12 @@
             </div>
           </v-col>
           <v-col cols="12" md="3" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'Approved' },
-              ]"
-              @click="setStatusFilter('Approved')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'Approved' },
+            ]" @click="setStatusFilter('Approved')">
               <v-avatar size="56" class="border border-md border-success">
-                <Icon
-                  icon="solar:check-circle-linear"
-                  height="25"
-                  class="text-success"
-                />
+                <Icon icon="solar:check-circle-linear" height="25" class="text-success" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">تایید شده</h6>
@@ -47,19 +33,12 @@
             </div>
           </v-col>
           <v-col cols="12" md="3" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'Pending Approval' },
-              ]"
-              @click="setStatusFilter('Pending Approval')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'Pending Approval' },
+            ]" @click="setStatusFilter('Pending Approval')">
               <v-avatar size="56" class="border border-md border-warning">
-                <Icon
-                  icon="solar:clock-circle-linear"
-                  height="25"
-                  class="text-warning"
-                />
+                <Icon icon="solar:clock-circle-linear" height="25" class="text-warning" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">در انتظار</h6>
@@ -68,19 +47,12 @@
             </div>
           </v-col>
           <v-col cols="12" md="3" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'Paid' },
-              ]"
-              @click="setStatusFilter('Paid')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'Paid' },
+            ]" @click="setStatusFilter('Paid')">
               <v-avatar size="56" class="border border-md border-info">
-                <Icon
-                  icon="solar:wallet-money-linear"
-                  height="25"
-                  class="text-info"
-                />
+                <Icon icon="solar:wallet-money-linear" height="25" class="text-info" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">پرداخت شده</h6>
@@ -94,25 +66,14 @@
       <!-- Search and Actions -->
       <div class="d-sm-flex justify-space-between align-center my-7">
         <v-sheet width="255" class="mb-lg-0 mb-4">
-          <v-text-field
-            v-model="searchValue"
-            label="جستجوی فاکتور"
-            variant="outlined"
-            hide-details
-            class="w-100"
-            density="compact"
-          >
+          <v-text-field v-model="searchValue" label="جستجوی فاکتور" variant="outlined" hide-details class="w-100"
+            density="compact">
             <template v-slot:prepend-inner>
               <Icon icon="solar:magnifer-linear" height="18" width="25" />
             </template>
           </v-text-field>
         </v-sheet>
-        <v-btn
-          color="primary"
-          rounded="pill"
-          flat
-          to="/purchase-invoices/create"
-        >
+        <v-btn color="primary" rounded="pill" flat to="/purchase-invoices/create">
           فاکتور جدید
         </v-btn>
       </div>
@@ -125,13 +86,13 @@
         <template v-slot:default>
           <thead>
             <tr>
-              <th class="text-14 text-no-wrap">کد فاکتور</th>
-              <th class="text-14 text-no-wrap">تامین کننده</th>
-              <th class="text-14 text-no-wrap">تاریخ</th>
-              <th class="text-14 text-no-wrap">مبلغ (تومان)</th>
-              <th class="text-14 text-no-wrap">انبار</th>
-              <th class="text-14 text-no-wrap">وضعیت</th>
-              <th class="text-14 text-no-wrap text-center">عملیات</th>
+              <th class="text-subtitle-1 font-weight-semibold">کد فاکتور</th>
+              <th class="text-subtitle-1 font-weight-semibold">تامین کننده</th>
+              <th class="text-subtitle-1 font-weight-semibold">تاریخ</th>
+              <th class="text-subtitle-1 font-weight-semibold">مبلغ (تومان)</th>
+              <th class="text-subtitle-1 font-weight-semibold">انبار</th>
+              <th class="text-subtitle-1 font-weight-semibold">وضعیت</th>
+              <th class="text-subtitle-1 font-weight-semibold text-center">عملیات</th>
             </tr>
           </thead>
           <tbody>
@@ -142,13 +103,8 @@
               <td class="text-14">{{ formatters.price(item.total) }}</td>
               <td class="text-14">{{ item._warehouse?.title || "-" }}</td>
               <td>
-                <v-chip
-                  rounded="pill"
-                  :color="getStatusColor(item.status)"
-                  variant="flat"
-                  size="small"
-                  label
-                >
+                <v-chip class="spike-chip" rounded="pill" :color="getStatusColor(item.status)" variant="tonal"
+                  size="small" label>
                   {{ getStatusLabel(item.status) }}
                 </v-chip>
               </td>
@@ -156,32 +112,16 @@
                 <div class="d-flex ga-3 align-center justify-center">
                   <RouterLink :to="`/purchase-invoices/edit/${item._id}`">
                     <v-avatar color="lightsuccess" size="32">
-                      <Icon
-                        icon="solar:pen-linear"
-                        class="text-success"
-                        height="18"
-                      />
+                      <Icon icon="solar:pen-linear" class="text-success" height="18" />
                     </v-avatar>
-                    <v-tooltip activator="parent" location="bottom"
-                      >ویرایش فاکتور</v-tooltip
-                    >
+                    <v-tooltip activator="parent" location="bottom">ویرایش فاکتور</v-tooltip>
                   </RouterLink>
 
-                  <RouterLink
-                    to=""
-                    @click.stop="handleDeleteInvoice(item._id)"
-                    class="cursor-pointer"
-                  >
+                  <RouterLink to="" @click.stop="handleDeleteInvoice(item._id)" class="cursor-pointer">
                     <v-avatar color="lighterror" size="32">
-                      <Icon
-                        icon="solar:trash-bin-minimalistic-linear"
-                        class="text-error"
-                        height="18"
-                      />
+                      <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error" height="18" />
                     </v-avatar>
-                    <v-tooltip activator="parent" location="bottom"
-                      >حذف فاکتور</v-tooltip
-                    >
+                    <v-tooltip activator="parent" location="bottom">حذف فاکتور</v-tooltip>
                   </RouterLink>
                 </div>
               </td>
@@ -191,14 +131,8 @@
       </v-table>
 
       <!-- Pagination -->
-      <v-pagination
-        v-if="pageCount > 1"
-        class="mt-5"
-        active-color="secondary"
-        v-model="page"
-        :length="pageCount"
-        rounded="circle"
-      />
+      <v-pagination v-if="pageCount > 1" class="mt-5" active-color="secondary" v-model="page" :length="pageCount"
+        rounded="circle" />
 
       <!-- Empty List Alert -->
       <EmptyList :list="filteredList" :loading="loading" />
@@ -213,22 +147,10 @@
         <h5 class="text-16">آیا از حذف این فاکتور اطمینان دارید؟</h5>
       </v-card-text>
       <v-card-actions>
-        <v-btn
-          color="primary"
-          class="px-4"
-          variant="flat"
-          rounded="pill"
-          @click="confirmDelete"
-        >
+        <v-btn color="primary" class="px-4" variant="flat" rounded="pill" @click="confirmDelete">
           بله، حذف شود
         </v-btn>
-        <v-btn
-          color="error"
-          variant="flat"
-          rounded="pill"
-          class="px-4"
-          @click="showConfirmation = false"
-        >
+        <v-btn color="error" variant="flat" rounded="pill" class="px-4 text-white" @click="showConfirmation = false">
           انصراف
         </v-btn>
       </v-card-actions>

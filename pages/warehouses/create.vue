@@ -26,7 +26,7 @@
           <v-btn flat color="primary" type="submit" :loading="loading" class="mt-6" rounded="pill">
             ذخیره انبار
           </v-btn>
-          <v-btn flat color="error" to="/warehouses" class="mt-6" rounded="pill">
+          <v-btn flat color="error" to="/warehouses" class="mt-6 text-white" rounded="pill">
             انصراف
           </v-btn>
         </div>
