@@ -111,7 +111,7 @@
         <v-btn color="primary" class="px-4" variant="flat" rounded="pill" @click="confirmDelete">
           بله، حذف شود
         </v-btn>
-        <v-btn color="error" variant="flat" rounded="pill" class="px-4" @click="showConfirmation = false">
+        <v-btn color="error" variant="flat" rounded="pill" class="px-4 text-white" @click="showConfirmation = false">
           انصراف
         </v-btn>
       </v-card-actions>

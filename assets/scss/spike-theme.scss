@@ -50,29 +50,39 @@ $bgdark: #111c2d;
 
 // Spike Table Styles
 .spike-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  
   .v-table {
-    border: 1px solid $borderColor;
-    border-radius: 8px;
+    background: white !important;
     
     thead tr th {
+      background-color: $bglight !important;
       font-weight: 600 !important;
       font-size: 14px !important;
       color: $textPrimary !important;
       border-bottom: 1px solid $borderColor !important;
       padding: 16px !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
     }
     
-    tbody tr td {
-      padding: 16px !important;
-      border-bottom: 1px solid $borderColor !important;
-      
-      &:last-child {
-        border-bottom: none;
+    tbody tr {
+      &:hover {
+        background-color: $hoverColor !important;
       }
-    }
-    
-    tbody tr:last-child td {
-      border-bottom: none !important;
+      
+      td {
+        padding: 16px !important;
+        border-bottom: 1px solid $borderColor !important;
+        font-size: 14px !important;
+        color: $textPrimary !important;
+      }
+      
+      &:last-child td {
+        border-bottom: none !important;
+      }
     }
   }
 }
@@ -85,6 +95,18 @@ $bgdark: #111c2d;
   
   &.elevation-10 {
     box-shadow: 0 7px 30px rgba(90, 114, 123, 0.11) !important;
+  }
+}
+
+// Spike Chip Styles
+.spike-chip {
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  
+  &.v-chip--variant-tonal {
+    .v-chip__underlay {
+      opacity: 0.12 !important;
+    }
   }
 }
 
@@ -223,12 +245,25 @@ $bgdark: #111c2d;
 // Month table specific styles (from Spike)
 .month-table {
   thead tr th {
-    background-color: $bglight;
+    background-color: $bglight !important;
+    font-weight: 600 !important;
+    color: $textPrimary !important;
   }
   
-  tbody tr.month-item {
+  tbody tr {
     &:hover {
-      background-color: $hoverColor;
+      background-color: $hoverColor !important;
+    }
+    
+    &.month-item {
+      td {
+        padding: 16px !important;
+        border-bottom: 1px solid $borderColor !important;
+      }
+      
+      &:hover {
+        background-color: $hoverColor !important;
+      }
     }
   }
 }

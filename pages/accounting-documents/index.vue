@@ -5,19 +5,12 @@
       <div class="overflow-x-responsive">
         <v-row class="d-flex flex-nowrap">
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'all' },
-              ]"
-              @click="setStatusFilter('all')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'all' },
+            ]" @click="setStatusFilter('all')">
               <v-avatar size="56" class="border border-md border-primary">
-                <Icon
-                  icon="solar:document-linear"
-                  height="25"
-                  class="text-primary"
-                />
+                <Icon icon="solar:document-linear" height="25" class="text-primary" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">همه اسناد</h6>
@@ -26,19 +19,12 @@
             </div>
           </v-col>
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'active' },
-              ]"
-              @click="setStatusFilter('active')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'active' },
+            ]" @click="setStatusFilter('active')">
               <v-avatar size="56" class="border border-md border-success">
-                <Icon
-                  icon="solar:check-circle-linear"
-                  height="25"
-                  class="text-success"
-                />
+                <Icon icon="solar:check-circle-linear" height="25" class="text-success" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">فعال</h6>
@@ -47,19 +33,12 @@
             </div>
           </v-col>
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'inactive' },
-              ]"
-              @click="setStatusFilter('inactive')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'inactive' },
+            ]" @click="setStatusFilter('inactive')">
               <v-avatar size="56" class="border border-md border-error">
-                <Icon
-                  icon="solar:close-circle-linear"
-                  height="25"
-                  class="text-error"
-                />
+                <Icon icon="solar:close-circle-linear" height="25" class="text-error" />
               </v-avatar>
               <div>
                 <h6 class="text-h6">غیرفعال</h6>
@@ -73,26 +52,14 @@
       <!-- Search and Actions -->
       <div class="d-sm-flex justify-space-between align-center my-7">
         <v-sheet width="255" class="mb-lg-0 mb-4">
-          <v-text-field
-            v-model="searchValue"
-            label="جستجوی سند"
-            variant="outlined"
-            hide-details
-            class="w-100"
-            density="compact"
-          >
+          <v-text-field v-model="searchValue" label="جستجوی سند" variant="outlined" hide-details class="w-100"
+            density="compact">
             <template v-slot:prepend-inner>
               <Icon icon="solar:magnifer-linear" height="18" width="25" />
             </template>
           </v-text-field>
         </v-sheet>
-        <v-btn
-          color="primary"
-          rounded="pill"
-          flat
-          to="/accounting-documents/create"
-          >سند جدید</v-btn
-        >
+        <v-btn color="primary" rounded="pill" flat to="/accounting-documents/create">سند جدید</v-btn>
       </div>
 
       <Loading :loading="loading" />
@@ -101,11 +68,11 @@
         <template v-slot:default>
           <thead>
             <tr>
-              <th class="text-14 text-no-wrap">کد سند</th>
-              <th class="text-14 text-no-wrap">تاریخ</th>
-              <th class="text-14 text-no-wrap">مبلغ (تومان)</th>
-              <th class="text-14 text-no-wrap">وضعیت</th>
-              <th class="text-14 text-no-wrap text-center">عملیات</th>
+              <th class="text-subtitle-1 font-weight-semibold">کد سند</th>
+              <th class="text-subtitle-1 font-weight-semibold">تاریخ</th>
+              <th class="text-subtitle-1 font-weight-semibold">مبلغ (تومان)</th>
+              <th class="text-subtitle-1 font-weight-semibold">وضعیت</th>
+              <th class="text-subtitle-1 font-weight-semibold text-center">عملیات</th>
             </tr>
           </thead>
           <tbody>
@@ -114,13 +81,8 @@
               <td class="text-14">{{ item.dateTimeJalali }}</td>
               <td class="text-14">{{ formatters.price(item.total) }}</td>
               <td>
-                <v-chip
-                  rounded="pill"
-                  :color="item.status === 1 ? 'success' : 'error'"
-                  variant="flat"
-                  size="small"
-                  label
-                >
+                <v-chip class="spike-chip" rounded="pill" :color="item.status === 1 ? 'success' : 'error'"
+                  variant="tonal" size="small" label>
                   {{ item.status === 1 ? "فعال" : "غیرفعال" }}
                 </v-chip>
               </td>
@@ -128,27 +90,15 @@
                 <div class="d-flex ga-3 align-center justify-center">
                   <RouterLink :to="`/accounting-documents/edit/${item._id}`">
                     <v-avatar color="lightsuccess" size="32">
-                      <Icon
-                        icon="solar:pen-linear"
-                        class="text-success"
-                        height="18"
-                      />
+                      <Icon icon="solar:pen-linear" class="text-success" height="18" />
                     </v-avatar>
-                    <v-tooltip activator="parent" location="bottom"
-                      >ویرایش</v-tooltip
-                    >
+                    <v-tooltip activator="parent" location="bottom">ویرایش</v-tooltip>
                   </RouterLink>
                   <RouterLink to="" @click.stop="handleDelete(item._id)">
                     <v-avatar color="lighterror" size="32">
-                      <Icon
-                        icon="solar:trash-bin-minimalistic-linear"
-                        class="text-error"
-                        height="18"
-                      />
+                      <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error" height="18" />
                     </v-avatar>
-                    <v-tooltip activator="parent" location="bottom"
-                      >حذف</v-tooltip
-                    >
+                    <v-tooltip activator="parent" location="bottom">حذف</v-tooltip>
                   </RouterLink>
                 </div>
               </td>
@@ -157,14 +107,8 @@
         </template>
       </v-table>
 
-      <v-pagination
-        v-if="pageCount > 1"
-        class="mt-5"
-        active-color="secondary"
-        v-model="page"
-        :length="pageCount"
-        rounded="circle"
-      />
+      <v-pagination v-if="pageCount > 1" class="mt-5" active-color="secondary" v-model="page" :length="pageCount"
+        rounded="circle" />
       <EmptyList :list="filteredList" :loading="loading" />
     </v-card-item>
   </v-card>
@@ -172,26 +116,13 @@
   <v-dialog v-model="showConfirmation" max-width="500px">
     <v-card>
       <v-card-title class="pa-4 bg-primary">حذف سند حسابداری</v-card-title>
-      <v-card-text class="pt-4"
-        ><h5 class="text-16">آیا از حذف این سند اطمینان دارید؟</h5></v-card-text
-      >
+      <v-card-text class="pt-4">
+        <h5 class="text-16">آیا از حذف این سند اطمینان دارید؟</h5>
+      </v-card-text>
       <v-card-actions>
-        <v-btn
-          color="primary"
-          class="px-4"
-          variant="flat"
-          rounded="pill"
-          @click="confirmDelete"
-          >بله، حذف شود</v-btn
-        >
-        <v-btn
-          color="error"
-          variant="flat"
-          rounded="pill"
-          class="px-4"
-          @click="showConfirmation = false"
-          >انصراف</v-btn
-        >
+        <v-btn color="primary" class="px-4" variant="flat" rounded="pill" @click="confirmDelete">بله، حذف شود</v-btn>
+        <v-btn color="error" variant="flat" rounded="pill" class="px-4 text-white"
+          @click="showConfirmation = false">انصراف</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

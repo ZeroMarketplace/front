@@ -1,14 +1,7 @@
 .month-table {
-
-    td,
-    th {
-        border-bottom: 0 !important;
-    }
-
     &.custom-px-0 {
         thead {
             tr {
-
                 th:first-child {
                     padding-left: 0 !important;
                 }
@@ -27,17 +20,6 @@
             td:last-child {
                 padding-right: 0 !important;
             }
-        }
-    }
-
-    tr.month-item {
-        td {
-            padding-top: 12px !important;
-            padding-bottom: 12px !important;
-        }
-
-        &:hover {
-            background: transparent !important;
         }
     }
 }
