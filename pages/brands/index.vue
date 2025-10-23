@@ -87,30 +87,49 @@
                 </v-chip>
               </td>
               <td>
-                <div class="d-flex ga-3 align-center justify-center">
-                  <RouterLink :to="`/brands/edit/${item._id}`">
-                    <v-avatar color="lightsuccess" size="32">
-                      <Icon icon="solar:pen-linear" class="text-success" height="18" />
-                    </v-avatar>
-                    <v-tooltip activator="parent" location="bottom">ویرایش برند</v-tooltip>
-                  </RouterLink>
-
-                  <RouterLink to="" @click.stop="handleToggleStatus(item)">
-                    <v-avatar :color="item.status === 1 ? 'lightwarning' : 'lightprimary'" size="32">
-                      <Icon :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
-                        :class="item.status === 1 ? 'text-warning' : 'text-primary'" height="18" />
-                    </v-avatar>
-                    <v-tooltip activator="parent" location="bottom">
-                      {{ item.status === 1 ? 'غیرفعال کردن' : 'فعال کردن' }}
-                    </v-tooltip>
-                  </RouterLink>
-
-                  <RouterLink to="" @click.stop="handleDeleteBrand(item._id)" class="cursor-pointer">
-                    <v-avatar color="lighterror" size="32">
-                      <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error" height="18" />
-                    </v-avatar>
-                    <v-tooltip activator="parent" location="bottom">حذف برند</v-tooltip>
-                  </RouterLink>
+                <div class="text-center">
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        icon
+                        variant="text"
+                        v-bind="props"
+                        size="small"
+                      >
+                        <Icon icon="solar:menu-dots-bold" height="20" />
+                      </v-btn>
+                    </template>
+                    <v-list density="compact" min-width="200">
+                      <v-list-item @click="$router.push(`/brands/edit/${item._id}`)">
+                        <template v-slot:prepend>
+                          <Icon icon="solar:pen-linear" height="18" class="text-success me-3" />
+                        </template>
+                        <v-list-item-title>ویرایش</v-list-item-title>
+                      </v-list-item>
+                      
+                      <v-list-item @click="handleToggleStatus(item)">
+                        <template v-slot:prepend>
+                          <Icon 
+                            :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
+                            height="18" 
+                            :class="item.status === 1 ? 'text-warning me-3' : 'text-primary me-3'" 
+                          />
+                        </template>
+                        <v-list-item-title>
+                          {{ item.status === 1 ? 'غیرفعال کردن' : 'فعال کردن' }}
+                        </v-list-item-title>
+                      </v-list-item>
+                      
+                      <v-divider />
+                      
+                      <v-list-item @click="handleDeleteBrand(item._id)" class="text-error">
+                        <template v-slot:prepend>
+                          <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
+                        </template>
+                        <v-list-item-title>حذف</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </div>
               </td>
             </tr>

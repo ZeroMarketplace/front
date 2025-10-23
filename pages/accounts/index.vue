@@ -112,38 +112,50 @@
                                 </v-chip>
                             </td>
                             <td>
-                                <div class="d-flex ga-3 align-center justify-center">
-                                    <RouterLink :to="`/accounts/edit/${item._id}`" v-if="item.type !== 'system'">
-                                        <v-avatar color="lightsuccess" size="32">
-                                            <Icon icon="solar:pen-linear" class="text-success" height="18" />
-                                        </v-avatar>
-                                        <v-tooltip activator="parent" location="bottom">
-                                            ویرایش
-                                        </v-tooltip>
-                                    </RouterLink>
-
-                                    <RouterLink to="" @click.stop="handleSetDefault(item)"
-                                        v-if="item.type !== 'system'">
-                                        <v-avatar :color="item.defaultFor ? 'lightwarning' : 'lightprimary'" size="32">
-                                            <Icon :icon="item.defaultFor ? 'solar:star-bold' : 'solar:star-linear'"
-                                                :class="item.defaultFor ? 'text-warning' : 'text-primary'"
-                                                height="18" />
-                                        </v-avatar>
-                                        <v-tooltip activator="parent" location="bottom">
-                                            {{ item.defaultFor ? 'حذف پیش‌فرض' : 'تنظیم پیش‌فرض' }}
-                                        </v-tooltip>
-                                    </RouterLink>
-
-                                    <RouterLink to="" @click.stop="handleDelete(item._id)"
-                                        v-if="item.type !== 'system'">
-                                        <v-avatar color="lighterror" size="32">
-                                            <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error"
-                                                height="18" />
-                                        </v-avatar>
-                                        <v-tooltip activator="parent" location="bottom">
-                                            حذف
-                                        </v-tooltip>
-                                    </RouterLink>
+                                <div class="text-center">
+                                    <v-menu v-if="item.type !== 'system'">
+                                        <template v-slot:activator="{ props }">
+                                            <v-btn
+                                                icon
+                                                variant="text"
+                                                v-bind="props"
+                                                size="small"
+                                            >
+                                                <Icon icon="solar:menu-dots-bold" height="20" />
+                                            </v-btn>
+                                        </template>
+                                        <v-list density="compact" min-width="200">
+                                            <v-list-item @click="$router.push(`/accounts/edit/${item._id}`)">
+                                                <template v-slot:prepend>
+                                                    <Icon icon="solar:pen-linear" height="18" class="text-success me-3" />
+                                                </template>
+                                                <v-list-item-title>ویرایش</v-list-item-title>
+                                            </v-list-item>
+                                            
+                                            <v-list-item @click="handleSetDefault(item)">
+                                                <template v-slot:prepend>
+                                                    <Icon 
+                                                        :icon="item.defaultFor ? 'solar:star-bold' : 'solar:star-linear'"
+                                                        height="18" 
+                                                        :class="item.defaultFor ? 'text-warning me-3' : 'text-primary me-3'" 
+                                                    />
+                                                </template>
+                                                <v-list-item-title>
+                                                    {{ item.defaultFor ? 'حذف پیش‌فرض' : 'تنظیم پیش‌فرض' }}
+                                                </v-list-item-title>
+                                            </v-list-item>
+                                            
+                                            <v-divider />
+                                            
+                                            <v-list-item @click="handleDelete(item._id)" class="text-error">
+                                                <template v-slot:prepend>
+                                                    <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
+                                                </template>
+                                                <v-list-item-title>حذف</v-list-item-title>
+                                            </v-list-item>
+                                        </v-list>
+                                    </v-menu>
+                                    <span v-else class="text-grey">سیستمی</span>
                                 </div>
                             </td>
                         </tr>

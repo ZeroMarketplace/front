@@ -109,20 +109,38 @@
                 </v-chip>
               </td>
               <td>
-                <div class="d-flex ga-3 align-center justify-center">
-                  <RouterLink :to="`/purchase-invoices/edit/${item._id}`">
-                    <v-avatar color="lightsuccess" size="32">
-                      <Icon icon="solar:pen-linear" class="text-success" height="18" />
-                    </v-avatar>
-                    <v-tooltip activator="parent" location="bottom">ویرایش فاکتور</v-tooltip>
-                  </RouterLink>
+                <div class="text-center">
+                  <v-menu>
+                    <template v-slot:activator="{ props }">
+                      <v-btn icon variant="text" v-bind="props" size="small">
+                        <Icon icon="solar:menu-dots-bold" height="20" />
+                      </v-btn>
+                    </template>
+                    <v-list density="compact" min-width="200">
+                      <v-list-item @click="$router.push(`/purchase-invoices/edit/${item._id}`)">
+                        <template v-slot:prepend>
+                          <Icon icon="solar:pen-linear" height="18" class="text-success me-3" />
+                        </template>
+                        <v-list-item-title>ویرایش</v-list-item-title>
+                      </v-list-item>
 
-                  <RouterLink to="" @click.stop="handleDeleteInvoice(item._id)" class="cursor-pointer">
-                    <v-avatar color="lighterror" size="32">
-                      <Icon icon="solar:trash-bin-minimalistic-linear" class="text-error" height="18" />
-                    </v-avatar>
-                    <v-tooltip activator="parent" location="bottom">حذف فاکتور</v-tooltip>
-                  </RouterLink>
+                      <v-list-item @click="$router.push(`/purchase-invoices/${item._id}`)">
+                        <template v-slot:prepend>
+                          <Icon icon="solar:eye-linear" height="18" class="text-info me-3" />
+                        </template>
+                        <v-list-item-title>مشاهده</v-list-item-title>
+                      </v-list-item>
+
+                      <v-divider />
+
+                      <v-list-item @click="handleDeleteInvoice(item._id)" class="text-error">
+                        <template v-slot:prepend>
+                          <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
+                        </template>
+                        <v-list-item-title>حذف</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
                 </div>
               </td>
             </tr>
