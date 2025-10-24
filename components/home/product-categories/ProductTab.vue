@@ -4,36 +4,22 @@
       <h4 class="product-tabs-title text-center text-h6">بر اساس دسته بندی</h4>
     </div>
     <home-product-categories-category-tabs
-      @category-change="handleCategoryChange"
-    ></home-product-categories-category-tabs>
+      @category-change="handleCategoryChange"></home-product-categories-category-tabs>
     <div class="products-slider-outer py-10">
-      <div
-        class="products-slider-header flex-column flex-sm-row justify-center justify-sm-space-between px-10 mb-7"
-      >
+      <div class="products-slider-header flex-column flex-sm-row justify-center justify-sm-space-between px-10 mb-7">
         <v-menu offset-y>
           <template #activator="{ props }">
-            <div
-              class="products-slider-header-right cursor-pointer"
-              v-bind="props"
-            >
-              <v-icon size="small" class="filter-icon ml-1"
-                >mdi-filter-outline</v-icon
-              >
+            <div class="products-slider-header-right cursor-pointer" v-bind="props">
+              <v-icon size="small" class="filter-icon ml-1">mdi-filter-outline</v-icon>
               <span class="d-flex align-center">
                 {{ filterOptions[selectedFilter] }}
-                <v-icon size="small" color="#2323237D" class="mr-10"
-                  >mdi-chevron-down</v-icon
-                >
+                <v-icon size="small" color="#2323237D" class="mr-10">mdi-chevron-down</v-icon>
               </span>
             </div>
           </template>
           <v-list>
-            <v-list-item
-              v-for="(item, idx) in filterOptions"
-              :key="item"
-              @click="selectedFilter = idx"
-              :class="['filter-menu-item', { active: selectedFilter === idx }]"
-            >
+            <v-list-item v-for="(item, idx) in filterOptions" :key="item" @click="selectedFilter = idx"
+              :class="['filter-menu-item', { active: selectedFilter === idx }]">
               <span>{{ item }}</span>
             </v-list-item>
           </v-list>
@@ -41,9 +27,7 @@
         <nuxt-link to="/product" class="d-flex align-center">
           <span class="show-more pt-4 pt-sm-0">
             مشاهده همه
-            <v-icon size="small" color="#2323237D" class="pr-4"
-              >mdi-arrow-left</v-icon
-            >
+            <v-icon size="small" color="#2323237D" class="pr-4">mdi-arrow-left</v-icon>
           </span>
         </nuxt-link>
       </div>
@@ -55,43 +39,54 @@
           <v-icon class="">mdi-arrow-left</v-icon>
         </button>
 
-        <div v-if="productsLoading" class="products-loading">
-          <div class="loading-grid">
-            <div v-for="i in 6" :key="i" class="product-loading-item">
-              <div class="loading-skeleton-image"></div>
-              <div class="loading-skeleton-text-container">
-                <div class="loading-skeleton-text-title"></div>
-                <div class="loading-skeleton-text-price"></div>
+        <ClientOnly>
+          <div v-if="productsLoading" class="products-loading">
+            <div class="loading-grid">
+              <div v-for="i in 6" :key="i" class="product-loading-item">
+                <div class="loading-skeleton-image"></div>
+                <div class="loading-skeleton-text-container">
+                  <div class="loading-skeleton-text-title"></div>
+                  <div class="loading-skeleton-text-price"></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div v-else-if="productsError" class="products-error">
-          <p>{{ productsError }}</p>
-          <button @click="refreshProductsManual()" class="retry-products-btn">
-            تلاش مجدد
-          </button>
-        </div>
+          <div v-else-if="productsError" class="products-error">
+            <p>{{ productsError }}</p>
+            <button @click="refreshProductsManual()" class="retry-products-btn">
+              تلاش مجدد
+            </button>
+          </div>
 
-        <swiper
-          v-else-if="products.length > 0"
-          :modules="[SwiperNavigation]"
-          :breakpoints="config.breakpoints"
-          class="products-swiper py-2 px-2"
-          :navigation="{
-            nextEl: '.tab-products-next-nav-btn',
-            prevEl: '.tab-products-prev-nav-btn',
-          }"
-        >
-          <swiper-slide v-for="product in products" :key="product._id">
-            <ProductItem :product="product" />
-          </swiper-slide>
-        </swiper>
+          <swiper v-else-if="products.length > 0" :modules="[SwiperNavigation]" :breakpoints="config.breakpoints"
+            class="products-swiper py-2 px-2" :navigation="{
+              nextEl: '.tab-products-next-nav-btn',
+              prevEl: '.tab-products-prev-nav-btn',
+            }">
+            <swiper-slide v-for="product in products" :key="product._id">
+              <ProductItem :product="product" />
+            </swiper-slide>
+          </swiper>
 
-        <div v-else class="products-empty">
-          <p>هیچ محصولی یافت نشد</p>
-        </div>
+          <div v-else class="products-empty">
+            <p>هیچ محصولی یافت نشد</p>
+          </div>
+
+          <template #fallback>
+            <div class="products-loading">
+              <div class="loading-grid">
+                <div v-for="i in 6" :key="i" class="product-loading-item">
+                  <div class="loading-skeleton-image"></div>
+                  <div class="loading-skeleton-text-container">
+                    <div class="loading-skeleton-text-title"></div>
+                    <div class="loading-skeleton-text-price"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </ClientOnly>
       </div>
     </div>
   </div>
@@ -254,12 +249,14 @@ const config = ref({
   transform: translateY(-50%);
   cursor: pointer;
 }
+
 .tab-products-prev-nav-btn.swiper-button-disabled i,
 .tab-products-next-nav-btn.swiper-button-disabled i {
   color: #4242424d !important;
 }
 
 @media (min-width: 960px) {
+
   .tab-products-prev-nav-btn,
   .tab-products-next-nav-btn {
     display: flex;
@@ -269,9 +266,11 @@ const config = ref({
 .tab-products-prev-nav-btn {
   right: -1%;
 }
+
 .tab-products-next-nav-btn {
   left: -1%;
 }
+
 .products-tab-container {
   margin-top: 70px;
   margin-bottom: 30px;
@@ -283,16 +282,19 @@ const config = ref({
   padding: 32px 0 32px 0;
   position: relative;
 }
+
 .products-slider-header {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
+
 .products-slider-header-right {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .filter-menu-item {
   font-size: 1rem;
   color: #232323;
@@ -301,14 +303,17 @@ const config = ref({
   min-width: 120px;
   justify-content: center;
 }
+
 .filter-menu-item.active {
   color: #e91e63;
   font-weight: 700;
   position: relative;
 }
+
 .filter-menu-item.active span {
   position: relative;
 }
+
 .filter-menu-item.active span::after {
   content: "";
   display: block;
@@ -318,6 +323,7 @@ const config = ref({
   border-radius: 2px;
   margin: 4px 0 0 auto;
 }
+
 .products-swiper {
   padding: 0 24px;
 }
@@ -375,6 +381,7 @@ const config = ref({
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
