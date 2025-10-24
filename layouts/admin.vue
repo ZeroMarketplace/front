@@ -1,7 +1,9 @@
 <template>
-  <FullLayout>
-    <slot />
-  </FullLayout>
+  <div>
+    <FullLayout>
+      <slot />
+    </FullLayout>
+  </div>
 </template>
 
 <script setup>
