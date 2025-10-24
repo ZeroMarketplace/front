@@ -1,7 +1,11 @@
 <template>
-  <FullLayout>
-    <slot />
-  </FullLayout>
+  <div>
+    <v-theme-provider theme="spikeLight">
+      <FullLayout>
+        <slot />
+      </FullLayout>
+    </v-theme-provider>
+  </div>
 </template>
 
 <script setup>
