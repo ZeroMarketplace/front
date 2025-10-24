@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router';
 <template>
     <div class="logo">
         <RouterLink to="/">
-            <v-img  src="/img/TypoLogo.svg" width="50" height="50" alt="Logo" style="object-fit: contain;" lazy-src transition="fade-transition" eager/>
+            <img  src="/img/TypoLogo.svg" width="50" height="50" alt="Logo" style="object-fit: contain;" lazy-src transition="fade-transition" eager/>
         </RouterLink>
     </div>
 </template>
