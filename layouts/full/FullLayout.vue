@@ -13,53 +13,47 @@ const customizer = useCustomizerStore();
 <template>
   <!-----RTL LAYOUT------->
   <v-locale-provider v-if="customizer.setRTLLayout" rtl>
-    <v-app
-      :theme="customizer.actTheme"
-      :class="[
-        customizer.actTheme,
-        customizer.mini_sidebar ? 'mini-sidebar' : '',
-        customizer.setHorizontalLayout ? 'horizontalLayout' : 'verticalLayout',
-        customizer.setBorderCard ? 'cardBordered' : '',
-      ]"
-    >
-      <!---Customizer location left side--->
-      <v-navigation-drawer
-        app
-        temporary
-        elevation="10"
-        location="left"
-        v-model="customizer.Customizer_drawer"
-        width="320"
-        class="left-customizer"
-      >
-        <!-- <Customizer /> -->
-      </v-navigation-drawer>
-      <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" />
-      <div :class="customizer.boxed ? 'maxWidth' : 'full-header'">
-        <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
-      </div>
-      <div :class="customizer.boxed ? 'maxWidth' : 'full-header'">
-        <HorizontalHeader v-if="customizer.setHorizontalLayout" />
-      </div>
-      <HorizontalSidebar v-if="customizer.setHorizontalLayout" />
-
-      <v-main>
-        <div class="rtl-lyt mb-3 hr-layout">
-          <v-container fluid class="page-wrapper px-sm-5 px-4 pt-12 rounded-xl">
-            <div class="">
-              <div :class="customizer.boxed ? 'maxWidth' : ''">
-                <NuxtPage />
-                <!-- <v-btn class="customizer-btn" size="large" icon variant="flat" color="primary"
-                                @click.stop="customizer.SET_CUSTOMIZER_DRAWER(!customizer.Customizer_drawer)">
-                                <SettingsIcon />
-                            </v-btn> -->
-              </div>
-            </div>
-          </v-container>
+    <v-app :theme="customizer.actTheme" :class="[
+      customizer.actTheme,
+      customizer.mini_sidebar ? 'mini-sidebar' : '',
+      customizer.setHorizontalLayout ? 'horizontalLayout' : 'verticalLayout',
+      customizer.setBorderCard ? 'cardBordered' : '',
+    ]">
+      <v-theme-provider theme="spikeLight">
+        <!---Customizer location left side--->
+        <v-navigation-drawer app temporary elevation="10" location="left" v-model="customizer.Customizer_drawer"
+          width="320" class="left-customizer">
+          <!-- <Customizer /> -->
+        </v-navigation-drawer>
+        <VerticalSidebarVue v-if="!customizer.setHorizontalLayout" />
+        <div :class="customizer.boxed ? 'maxWidth' : 'full-header'">
+          <VerticalHeaderVue v-if="!customizer.setHorizontalLayout" />
         </div>
-      </v-main>
+        <div :class="customizer.boxed ? 'maxWidth' : 'full-header'">
+          <HorizontalHeader v-if="customizer.setHorizontalLayout" />
+        </div>
+        <HorizontalSidebar v-if="customizer.setHorizontalLayout" />
+
+        <v-main>
+          <div class="rtl-lyt mb-3 hr-layout">
+            <v-container fluid class="page-wrapper px-sm-5 px-4 pt-12 ">
+              <div>
+                <div :class="customizer.boxed ? 'maxWidth' : ''">
+                  <NuxtPage />
+                </div>
+              </div>
+            </v-container>
+          </div>
+        </v-main>
+
+        <!-- Notification System -->
+        <Notifier />
+      </v-theme-provider>
     </v-app>
   </v-locale-provider>
+
+
+
 </template>
 <style lang="scss">
 @import "../../assets/scss/layout/_rtl";

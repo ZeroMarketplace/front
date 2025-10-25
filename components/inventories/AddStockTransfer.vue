@@ -1,5 +1,5 @@
 <template>
-  <v-form :readonly="loading" @submit.prevent="submit" ref="stockTransfersForm">
+  <v-form :readonly="loading" @submit.prevent="submit" ref="stockTransfersForm" validate-on="submit lazy">
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>
     <v-label class="text-black font-weight-bold mx-3">مشخصات انتقال</v-label>

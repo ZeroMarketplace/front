@@ -3,6 +3,7 @@
     :readonly="loading"
     @submit.prevent="submit"
     ref="addAccountingDocumentForm"
+    validate-on="submit lazy"
   >
     <!--    Information     -->
     <v-icon class="mt-1 mr-2" color="grey">mdi-information-outline</v-icon>

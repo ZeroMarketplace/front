@@ -7,7 +7,6 @@
     item-value="_id"
     item-title="title"
     label="ویژگی‌ها"
-    density="compact"
     variant="outlined"
     @scroll:bottom="loadMoreItems"
     @update:search="handleSearchUpdate"

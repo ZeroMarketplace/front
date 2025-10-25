@@ -3,6 +3,7 @@
     :readonly="loading"
     @submit.prevent="submit"
     ref="addSalesInvoiceForm"
+    validate-on="submit lazy"
   >
     <!--  Settlement Dialog  -->
     <SettlementDialog

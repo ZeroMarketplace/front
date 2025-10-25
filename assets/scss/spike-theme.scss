@@ -1,0 +1,294 @@
+// Spike Theme Colors and Styles
+// Based on the Spike Vue RTL template
+@import "./components/VExpansionpanel";
+@import "./components/VTimeline";
+@import "./components/VDialog";
+@import "./components/Vpagination";
+@import "./components/VDatatables";
+@import "./components/VStepper";
+@import "./components/VLabs";
+
+// Color Variables
+$primary: #0085db;
+$secondary: #707a82;
+$info: #46caeb;
+$success: #4bd08b;
+$warning: #f8c076;
+$error: #fb977d;
+$indigo: #8763da;
+
+// Light variants
+$lightprimary: #e5f3fb;
+$lightinfo: #e1f5fa;
+$lightsecondary: #e7ecf0;
+$lightsuccess: #dffff3;
+$lighterror: #ffede9;
+$lightwarning: #fff6ea;
+$lightindigo: #f1ebff;
+
+// Text colors
+$textPrimary: #2a3547;
+$textSecondary: #2a3547;
+
+// Border and background
+$borderColor: #e5eaef;
+$inputBorder: #dfe5ef;
+$containerBg: #ffffff;
+$background: #f0f5f9;
+$hoverColor: #f6f9fc;
+$surface: #fff;
+
+// Grey shades
+$grey100: #707a82;
+$grey200: #111c2d;
+
+// Dark variants
+$darkbg: #2a3447;
+$bglight: #ffffff00;
+$bgdark: #111c2d;
+
+// Spike Table Styles
+.spike-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .v-table {
+    background: white !important;
+
+    thead tr th {
+      background-color: $bglight !important;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      color: $textPrimary !important;
+      border-bottom: 1px solid $borderColor !important;
+      padding: 16px !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+    }
+
+    tbody tr {
+      &:hover {
+        background-color: $hoverColor !important;
+      }
+
+      td {
+        padding: 16px !important;
+        border-bottom: 1px solid $borderColor !important;
+        font-size: 14px !important;
+        color: $textPrimary !important;
+      }
+
+      &:last-child td {
+        border-bottom: none !important;
+      }
+    }
+  }
+}
+
+// Spike Card Styles
+.spike-card {
+  border: 1px solid $borderColor !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+
+  &.elevation-10 {
+    box-shadow: 0 7px 30px rgba(90, 114, 123, 0.11) !important;
+  }
+}
+
+// Spike Chip Styles
+.spike-chip {
+  font-weight: 600 !important;
+  font-size: 12px !important;
+
+  &.v-chip--variant-tonal {
+    .v-chip__underlay {
+      opacity: 0.12 !important;
+    }
+  }
+}
+
+// Spike Button Styles
+.v-btn--variant-flat {
+  &.bg-success,
+  &[color="success"] {
+    color: white !important;
+  }
+
+  &.bg-error,
+  &[color="error"] {
+    color: white !important;
+  }
+
+  &.bg-primary,
+  &[color="primary"] {
+    color: white !important;
+  }
+
+  &.bg-warning,
+  &[color="warning"] {
+    color: white !important;
+  }
+
+  &.bg-info,
+  &[color="info"] {
+    color: white !important;
+  }
+}
+
+// Spike Form Styles
+.spike-form {
+  .v-text-field,
+  .v-select,
+  .v-textarea,
+  .v-autocomplete {
+    .v-field {
+      border: 1px solid $inputBorder;
+      border-radius: 8px;
+
+      &:hover {
+        border-color: $primary;
+      }
+
+      &.v-field--focused {
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba(0, 133, 219, 0.1);
+      }
+    }
+  }
+
+  .v-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: $textPrimary;
+    margin-bottom: 8px;
+  }
+}
+
+.v-text-field input {
+  font-size: 0.875rem;
+}
+.v-field__outline {
+  color: rgb(var(--v-theme-inputBorder));
+  --v-field-border-opacity: 1 !important;
+}
+.input {
+  .v-field--variant-outlined {
+    background-color: rgba(0, 0, 0, 0.025);
+  }
+}
+
+.v-textarea input {
+  font-size: 0.875rem;
+  font-weight: 500;
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.38);
+  }
+}
+
+// Spike Button Styles
+.spike-btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+
+  &.v-btn--size-default {
+    padding: 0 24px !important;
+    height: 42px !important;
+  }
+
+  &.v-btn--size-large {
+    padding: 0 32px !important;
+    height: 48px !important;
+  }
+
+  &.v-btn--size-small {
+    padding: 0 16px !important;
+    height: 36px !important;
+  }
+}
+
+// Spike Chip Styles
+.spike-chip {
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+
+  &.v-chip--size-small {
+    height: 24px !important;
+    padding: 0 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+// Spike Avatar Styles
+.spike-avatar {
+  border: 2px solid $borderColor;
+
+  &.avtar-border {
+    border: 2px solid $surface;
+  }
+}
+
+// Utility Classes
+.bg-bglight {
+  background-color: $bglight !important;
+  border-radius: 20px;
+}
+
+.bg-primary {
+  background-color: $primary !important;
+}
+
+.bg-lightprimary {
+  background-color: $lightprimary !important;
+}
+
+.bg-lightsuccess {
+  background-color: $lightsuccess !important;
+}
+
+.bg-lighterror {
+  background-color: $lighterror !important;
+}
+
+.bg-lightwarning {
+  background-color: $lightwarning !important;
+}
+
+.text-grey100 {
+  color: $grey100 !important;
+}
+
+.border-table {
+  border: 1px solid $borderColor;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// Month table specific styles (from Spike)
+.month-table {
+  thead tr th {
+    background-color: $bglight !important;
+    font-weight: 600 !important;
+    color: $textPrimary !important;
+  }
+
+  tbody tr {
+    &:hover {
+      background-color: $hoverColor !important;
+    }
+
+    &.month-item {
+      td {
+        padding: 16px !important;
+        border-bottom: 1px solid $borderColor !important;
+      }
+
+      &:hover {
+        background-color: $hoverColor !important;
+      }
+    }
+  }
+}

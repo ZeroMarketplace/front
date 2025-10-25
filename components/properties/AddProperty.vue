@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="submit" ref="addPropertyForm">
+  <v-form @submit.prevent="submit" ref="addPropertyForm" validate-on="submit lazy">
     <v-row class="mt-2 mx-4">
       <!--      Title      -->
       <v-col class="mt-n1 mt-md-0" cols="12" md="4">

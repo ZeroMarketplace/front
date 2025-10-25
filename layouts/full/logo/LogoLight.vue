@@ -5,7 +5,7 @@ import { RouterLink } from 'vue-router';
 <template>
     <div class="logo">
         <RouterLink to="/">
-            <img src="/img/logo.png" width="110" height="50" alt="Logo" style="object-fit: contain;">
+            <img src="/img/logo.svg" width="50" height="50" alt="Logo" style="object-fit: contain;" eager />
         </RouterLink>
     </div>
 </template>

@@ -10,7 +10,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+      link: [{ rel: "icon", type: "image/x-icon", href: "/img/logo.svg" }],
       title: "فروشگاه زیرو",
     },
     meta: [
@@ -32,8 +32,9 @@ export default defineNuxtConfig({
   css: [
     "vuetify/lib/styles/main.sass",
     "@mdi/font/css/materialdesignicons.min.css",
-    'assets/css/style.scss',
-    'leaflet/dist/leaflet.css'
+    "assets/scss/spike-theme.scss",
+    "assets/css/style.scss",
+    "leaflet/dist/leaflet.css",
   ],
 
   build: {
@@ -83,15 +84,15 @@ export default defineNuxtConfig({
 
     // Keys within public, will be also exposed to the client-side
     public: {
-      API_BASE_URL: process.env.API_BASE_URL,
-      STATICS_URL: process.env.STATICS_URL,
-      SOCKET_URL: process.env.SOCKET_URL,
+      API_BASE_URL: process.env.API_BASE_URL || "/api/",
+      STATICS_URL: process.env.STATICS_URL || "",
+      SOCKET_URL: process.env.SOCKET_URL || "",
     },
   },
 
   nitro: {
     devProxy: {
-      '/api': {
+      "/api": {
         target: `${process.env.BACKEND_URL}/api`,
         changeOrigin: true,
       },
@@ -99,8 +100,12 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/api/**': {
-      proxy: `${process.env.BACKEND_URL}/api/**`,
-    },
+    "/api/**": process.env.BACKEND_URL
+      ? {
+          proxy: `${process.env.BACKEND_URL}/api/**`,
+        }
+      : {},
   },
+
+  ssr: true,
 });

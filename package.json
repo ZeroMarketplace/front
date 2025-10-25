@@ -9,8 +9,11 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@iconify/vue": "^5.0.0",
     "@mdi/font": "^7.2.96",
+    "@tabler/icons-vue": "^3.35.0",
     "@vue/compiler-sfc": "^3.4",
+    "axios": "^1.12.2", 
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
@@ -21,23 +24,20 @@
     "plyr": "^3.7.8",
     "sass": "^1.63.6",
     "socket.io-client": "^4.7.5",
+    "svgmap": "^2.14.0",
     "vee-validate": "^4.10.3",
     "vue": "^3.4",
-    "vue3-otp-input": "^0.4.1",
-    "vue3-persian-datetime-picker": "^1.2.2",
     "vue3-apexcharts": "^1.8.0",
+    "vue3-otp-input": "^0.4.1",
     "vue3-perfect-scrollbar": "^2.0.0",
-    "vuetify": "3.8.5",
-    "svgmap": "^2.14.0",
-    "axios": "^1.12.2",
-    "@iconify/vue": "^5.0.0",
-    "@tabler/icons-vue": "^3.35.0"
+    "vue3-persian-datetime-picker": "^1.2.2",
+    "vuetify": "3.8.5"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@types/node": "^18",
+    "axios-mock-adapter": "^2.1.0",
     "nuxt": "^3.10.2",
-    "nuxt-security": "^0.14.4",
-    "axios-mock-adapter": "^2.1.0"
+    "nuxt-security": "^0.14.4"
   }
 }

@@ -9,6 +9,9 @@
 // comfortable
 .v-input--density-comfortable {
     --v-input-control-height: 44px;
+    outline: unset !important;
+    border: unset !important;
+    box-shadow: unset !important;
 }
 
 // compact
