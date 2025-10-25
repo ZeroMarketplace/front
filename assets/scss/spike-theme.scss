@@ -44,7 +44,7 @@ $grey200: #111c2d;
 
 // Dark variants
 $darkbg: #2a3447;
-$bglight: #f5f8fb;
+$bglight: #ffffff00;
 $bgdark: #111c2d;
 
 // Spike Table Styles
@@ -89,7 +89,7 @@ $bgdark: #111c2d;
 // Spike Card Styles
 .spike-card {
   border: 1px solid $borderColor !important;
-  border-radius: 8px !important;
+  border-radius: 10px !important;
   box-shadow: none !important;
 
   &.elevation-10 {
@@ -234,6 +234,7 @@ $bgdark: #111c2d;
 // Utility Classes
 .bg-bglight {
   background-color: $bglight !important;
+  border-radius: 20px;
 }
 
 .bg-primary {
