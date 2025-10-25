@@ -4,7 +4,7 @@
             <h5 class="text-20 mb-7">مدیریت حساب‌ها</h5>
 
             <!-- Summary Cards -->
-            <v-row class="d-flex flex-nowrap">
+            <!-- <v-row class="d-flex flex-nowrap">
                 <v-col cols="10" md="3" sm="6">
                     <div class="pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl"
                         :class="activeFilter === 'all' ? 'bg-bglight' : 'bg-containerBg'" @click="setFilter('all')">
@@ -56,10 +56,10 @@
                         </div>
                     </div>
                 </v-col>
-            </v-row>
+            </v-row> -->
 
             <!-- Search and Actions -->
-            <div class="d-sm-flex justify-space-between align-center my-7">
+            <div class="d-sm-flex justify-space-between align-center my-4">
                 <v-sheet width="255" class="mb-lg-0 mb-4">
                     <v-text-field v-model="searchValue" label="جستجوی حساب..." variant="outlined" hide-details
                         density="compact">

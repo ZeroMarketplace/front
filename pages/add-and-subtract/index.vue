@@ -2,7 +2,7 @@
   <v-card class="spike-card" elevation="10">
     <v-card-item>
       <!-- Summary Cards Section -->
-      <div class="overflow-x-responsive">
+      <!-- <div class="overflow-x-responsive">
         <v-row class="d-flex flex-nowrap">
           <v-col cols="12" md="4" sm="6">
             <div :class="[
@@ -47,10 +47,10 @@
             </div>
           </v-col>
         </v-row>
-      </div>
+      </div> -->
 
       <!-- Search and Actions -->
-      <div class="d-sm-flex justify-space-between align-center my-7">
+      <div class="d-sm-flex justify-space-between align-center my-4">
         <v-sheet width="255" class="mb-lg-0 mb-4">
           <v-text-field v-model="searchValue" label="جستجوی تراکنش" variant="outlined" hide-details class="w-100"
             density="compact">
