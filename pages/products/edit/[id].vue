@@ -282,8 +282,6 @@ const uploadNewImages = async (productId) => {
     // Use axios directly like the old code (handles multipart/form-data properly)
     const { $axios } = useNuxtApp();
     const response = await $axios.post(`products/${productId}/files`, formData);
-
-    $notify('تصاویر با موفقیت بارگذاری شدند', 'success');
     return response.data;
   } catch (error) {
     console.error('Error uploading images:', error);
@@ -320,7 +318,6 @@ const getProduct = async () => {
       images: imageUrls,
       fileNames: data.files || [] // Keep original filenames for deletion
     };
-    $notify('اطلاعات محصول بارگذاری شد', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری اطلاعات محصول پیش آمد', 'error');
     router.push('/products');

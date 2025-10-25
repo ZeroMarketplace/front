@@ -212,7 +212,6 @@ const getAccountingDocuments = async () => {
     const data = await useApiService.get("accounting-documents?" + filter());
     list.value = data.list || [];
     pageCount.value = Math.ceil(data.total / perPage.value);
-    $notify("اسناد حسابداری با موفقیت بارگذاری شدند", "success");
   } catch (error) {
     $notify("مشکلی در بارگذاری داده‌ها پیش آمد", "error");
   } finally {

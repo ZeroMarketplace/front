@@ -3,12 +3,7 @@
     <v-card-item>
       <div class="d-flex justify-space-between align-center mb-6">
         <h5 class="text-20">ویرایش تراکنش</h5>
-        <v-btn
-          color="error"
-          variant="flat"
-          rounded="pill"
-          to="/add-and-subtract"
-        >
+        <v-btn color="error" variant="flat" rounded="pill" to="/add-and-subtract">
           <Icon icon="solar:arrow-right-linear" height="18" class="ml-2" />
           بازگشت به لیست
         </v-btn>
@@ -17,11 +12,7 @@
       <Loading :loading="loading" />
 
       <div v-if="!loading" class="bg-bglight pa-6 rounded-md">
-        <AddAndSubtractAdd
-          ref="formRef"
-          @exit="handleExit"
-          @refresh="handleRefresh"
-        />
+        <AddAndSubtractAdd ref="formRef" @exit="handleExit" @refresh="handleRefresh" />
       </div>
     </v-card-item>
   </v-card>
@@ -54,7 +45,6 @@ const loadData = async () => {
     const data = await useApiService.get(`add-and-subtract/${route.params.id}`);
     if (data && formRef.value) {
       formRef.value.setEdit(data);
-      $notify("اطلاعات تراکنش بارگذاری شد", "success");
     }
   } catch (error) {
     $notify("مشکلی در بارگذاری داده‌ها پیش آمد", "error");

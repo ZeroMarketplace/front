@@ -5,13 +5,10 @@
       <div class="overflow-x-responsive">
         <v-row class="d-flex flex-nowrap">
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'all' }
-              ]"
-              @click="setStatusFilter('all')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'all' }
+            ]" @click="setStatusFilter('all')">
               <v-avatar size="56" class="border border-md border-primary">
                 <Icon icon="solar:folder-with-files-linear" height="25" class="text-primary" />
               </v-avatar>
@@ -22,13 +19,10 @@
             </div>
           </v-col>
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'active' }
-              ]"
-              @click="setStatusFilter('active')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'active' }
+            ]" @click="setStatusFilter('active')">
               <v-avatar size="56" class="border border-md border-success">
                 <Icon icon="solar:check-circle-linear" height="25" class="text-success" />
               </v-avatar>
@@ -39,13 +33,10 @@
             </div>
           </v-col>
           <v-col cols="12" md="4" sm="6">
-            <div
-              :class="[
-                'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
-                { 'bg-bglight': statusFilter === 'inactive' }
-              ]"
-              @click="setStatusFilter('inactive')"
-            >
+            <div :class="[
+              'pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl',
+              { 'bg-bglight': statusFilter === 'inactive' }
+            ]" @click="setStatusFilter('inactive')">
               <v-avatar size="56" class="border border-md border-error">
                 <Icon icon="solar:close-circle-linear" height="25" class="text-error" />
               </v-avatar>
@@ -61,14 +52,8 @@
       <!-- Search and Actions -->
       <div class="d-sm-flex justify-space-between align-center my-7">
         <v-sheet width="255" class="mb-lg-0 mb-4">
-          <v-text-field
-            v-model="searchValue"
-            label="جستجوی دسته‌بندی"
-            variant="outlined"
-            hide-details
-            class="w-100"
-            density="compact"
-          >
+          <v-text-field v-model="searchValue" label="جستجوی دسته‌بندی" variant="outlined" hide-details class="w-100"
+            density="compact">
             <template v-slot:prepend-inner>
               <Icon icon="solar:magnifer-linear" height="18" width="25" />
             </template>
@@ -84,14 +69,8 @@
 
       <!-- Hierarchical List -->
       <div v-if="!loading && filteredList.length" class="category-list">
-        <CategoryTreeItem
-          v-for="item in filteredList"
-          :key="item._id"
-          :item="item"
-          @toggle-status="handleToggleStatus"
-          @delete="handleDeleteCategory"
-          @add-child="handleAddChild"
-        />
+        <CategoryTreeItem v-for="item in filteredList" :key="item._id" :item="item" @toggle-status="handleToggleStatus"
+          @delete="handleDeleteCategory" @add-child="handleAddChild" />
       </div>
 
       <!-- Empty List Alert -->
@@ -216,7 +195,6 @@ const getCategories = async () => {
   try {
     const data = await useApiService.get('categories?' + filter());
     list.value = data.list || [];
-    $notify('دسته‌بندی‌ها با موفقیت بارگذاری شدند', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری داده‌ها پیش آمد', 'error');
   } finally {

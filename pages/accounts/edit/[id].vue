@@ -44,7 +44,6 @@ const loadAccount = async () => {
         const data = await useApiService.get(`accounts/${route.params.id}`);
         if (data && formRef.value) {
             formRef.value.setEdit(data);
-            $notify('اطلاعات حساب بارگذاری شد', 'success');
         }
     } catch (error) {
         $notify('مشکلی در بارگذاری اطلاعات حساب پیش آمد', 'error');

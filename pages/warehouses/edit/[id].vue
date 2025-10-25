@@ -83,7 +83,6 @@ const getWarehouse = async () => {
       onlineSales: data.onlineSales || false,
       retail: data.retail || false
     };
-    $notify('اطلاعات انبار بارگذاری شد', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری اطلاعات انبار پیش آمد', 'error');
     router.push('/warehouses');

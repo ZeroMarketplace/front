@@ -237,7 +237,6 @@ const getProperties = async () => {
     const data = await useApiService.get('properties?' + filter());
     list.value = data.list || [];
     pageCount.value = Math.ceil(data.total / perPage.value);
-    $notify('ویژگی‌ها با موفقیت بارگذاری شدند', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری داده‌ها پیش آمد', 'error');
   } finally {

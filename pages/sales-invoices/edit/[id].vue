@@ -12,11 +12,7 @@
       <Loading :loading="loading" />
 
       <div v-if="!loading" class="bg-bglight pa-6 rounded-md">
-        <AddSalesInvoice
-          ref="formRef"
-          @exit="handleExit"
-          @refresh="handleRefresh"
-        />
+        <AddSalesInvoice ref="formRef" @exit="handleExit" @refresh="handleRefresh" />
       </div>
     </v-card-item>
   </v-card>
@@ -49,7 +45,6 @@ const loadData = async () => {
     const data = await useApiService.get(`sales-invoices/${route.params.id}`);
     if (data && formRef.value) {
       formRef.value.setEdit(data);
-      $notify("اطلاعات فاکتور بارگذاری شد", "success");
     }
   } catch (error) {
     $notify("مشکلی در بارگذاری داده‌ها پیش آمد", "error");

@@ -259,7 +259,6 @@ const getWarehouses = async () => {
     const data = await useApiService.get('warehouses?' + filter());
     list.value = data.list || [];
     pageCount.value = Math.ceil(data.total / perPage.value);
-    $notify('انبارها با موفقیت بارگذاری شدند', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری داده‌ها پیش آمد', 'error');
   } finally {

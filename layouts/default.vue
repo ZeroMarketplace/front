@@ -16,6 +16,9 @@ import '~/assets/css/style.scss'
 
         <!-- Footer -->
         <Footer />
+
+        <!-- Notification System -->
+        <Notifier />
       </v-app>
     </v-theme-provider>
   </div>

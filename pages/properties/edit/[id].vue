@@ -111,7 +111,6 @@ const getProperty = async () => {
       variant: data.variant || false,
       values: data.values || [{ title: '', value: '' }]
     };
-    $notify('اطلاعات ویژگی بارگذاری شد', 'success');
   } catch (error) {
     $notify('مشکلی در بارگذاری اطلاعات ویژگی پیش آمد', 'error');
     router.push('/properties');

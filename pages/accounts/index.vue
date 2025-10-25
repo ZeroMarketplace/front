@@ -114,41 +114,37 @@
                                 <div class="text-center">
                                     <v-menu v-if="item.type !== 'system'">
                                         <template v-slot:activator="{ props }">
-                                            <v-btn
-                                                icon
-                                                variant="text"
-                                                v-bind="props"
-                                                size="small"
-                                            >
+                                            <v-btn icon variant="text" v-bind="props" size="small">
                                                 <Icon icon="solar:menu-dots-bold" height="20" />
                                             </v-btn>
                                         </template>
                                         <v-list density="compact" min-width="200">
                                             <v-list-item @click="$router.push(`/accounts/edit/${item._id}`)">
                                                 <template v-slot:prepend>
-                                                    <Icon icon="solar:pen-linear" height="18" class="text-success me-3" />
+                                                    <Icon icon="solar:pen-linear" height="18"
+                                                        class="text-success me-3" />
                                                 </template>
                                                 <v-list-item-title>ویرایش</v-list-item-title>
                                             </v-list-item>
-                                            
+
                                             <v-list-item @click="handleSetDefault(item)">
                                                 <template v-slot:prepend>
-                                                    <Icon 
+                                                    <Icon
                                                         :icon="item.defaultFor ? 'solar:star-bold' : 'solar:star-linear'"
-                                                        height="18" 
-                                                        :class="item.defaultFor ? 'text-warning me-3' : 'text-primary me-3'" 
-                                                    />
+                                                        height="18"
+                                                        :class="item.defaultFor ? 'text-warning me-3' : 'text-primary me-3'" />
                                                 </template>
                                                 <v-list-item-title>
                                                     {{ item.defaultFor ? 'حذف پیش‌فرض' : 'تنظیم پیش‌فرض' }}
                                                 </v-list-item-title>
                                             </v-list-item>
-                                            
+
                                             <v-divider />
-                                            
+
                                             <v-list-item @click="handleDelete(item._id)" class="text-error">
                                                 <template v-slot:prepend>
-                                                    <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
+                                                    <Icon icon="solar:trash-bin-minimalistic-linear" height="18"
+                                                        class="text-error me-3" />
                                                 </template>
                                                 <v-list-item-title>حذف</v-list-item-title>
                                             </v-list-item>
@@ -255,7 +251,6 @@ const getAccounts = async () => {
         const data = await useApiService.get("accounts");
         list.value = data.list || data;
         pageCount.value = Math.ceil((data.total || data.length) / perPage.value);
-        $notify("حساب‌ها با موفقیت بارگذاری شدند", "success");
     } catch (error) {
         $notify("مشکلی در بارگذاری داده‌ها پیش آمد", "error");
     } finally {

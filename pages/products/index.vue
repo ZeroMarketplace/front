@@ -125,12 +125,7 @@
                 <div class="text-center">
                   <v-menu>
                     <template v-slot:activator="{ props }">
-                      <v-btn
-                        icon
-                        variant="text"
-                        v-bind="props"
-                        size="small"
-                      >
+                      <v-btn icon variant="text" v-bind="props" size="small">
                         <Icon icon="solar:menu-dots-bold" height="20" />
                       </v-btn>
                     </template>
@@ -141,29 +136,26 @@
                         </template>
                         <v-list-item-title>ویرایش</v-list-item-title>
                       </v-list-item>
-                      
+
                       <v-list-item @click="handleCopyProduct(item)">
                         <template v-slot:prepend>
                           <Icon icon="solar:copy-linear" height="18" class="text-info me-3" />
                         </template>
                         <v-list-item-title>کپی</v-list-item-title>
                       </v-list-item>
-                      
+
                       <v-list-item @click="handleToggleStatus(item)">
                         <template v-slot:prepend>
-                          <Icon 
-                            :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'"
-                            height="18" 
-                            :class="item.status === 1 ? 'text-warning me-3' : 'text-primary me-3'" 
-                          />
+                          <Icon :icon="item.status === 1 ? 'solar:eye-closed-linear' : 'solar:eye-linear'" height="18"
+                            :class="item.status === 1 ? 'text-warning me-3' : 'text-primary me-3'" />
                         </template>
                         <v-list-item-title>
                           {{ item.status === 1 ? 'غیرفعال کردن' : 'فعال کردن' }}
                         </v-list-item-title>
                       </v-list-item>
-                      
+
                       <v-divider />
-                      
+
                       <v-list-item @click="handleDeleteProduct(item._id)" class="text-error">
                         <template v-slot:prepend>
                           <Icon icon="solar:trash-bin-minimalistic-linear" height="18" class="text-error me-3" />
@@ -285,7 +277,7 @@ const getProducts = async () => {
     const data = await useApiService.get('products?' + filter());
     list.value = data.list || [];
     pageCount.value = Math.ceil(data.total / perPage.value);
-    $notify('محصولات با موفقیت بارگذاری شدند', 'success');
+    // Don't show notification on successful load - only on errors
   } catch (error) {
     $notify('مشکلی در بارگذاری داده‌ها پیش آمد', 'error');
   } finally {
