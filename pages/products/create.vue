@@ -264,20 +264,22 @@ const uploadImages = async (productId) => {
 
   const formData = new FormData();
   form.value.images.forEach((file) => {
-    formData.append('images', file);
+    formData.append('files', file);
   });
 
   try {
     $notify('در حال بارگذاری تصاویر...', 'info');
-    await useApiService.post(`products/${productId}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+
+    // Use axios directly like the old code (handles multipart/form-data properly)
+    const { $axios } = useNuxtApp();
+    const response = await $axios.post(`products/${productId}/files`, formData);
+
     $notify('تصاویر با موفقیت بارگذاری شدند', 'success');
+    return response.data;
   } catch (error) {
     console.error('Error uploading images:', error);
     $notify('مشکلی در بارگذاری تصاویر پیش آمد', 'warning');
+    throw error;
   }
 };
 

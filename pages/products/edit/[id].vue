@@ -175,14 +175,13 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useNuxtApp } from '#app';
 import { Icon } from '@iconify/vue';
 import CategoryInput from '~/components/categories/CategoryInput.vue';
 import BrandInput from '~/components/brands/BrandInput.vue';
 import UnitInput from '~/components/units/UnitInput.vue';
-import { rules as validationRules } from '~/utils/validationRules';
 
 // Page meta
 definePageMeta({
@@ -221,7 +220,8 @@ const form = ref({
   content: '',
   variants: [],
   properties: [],
-  images: []
+  images: [],
+  fileNames: [] // Original filenames from backend
 });
 
 const rules = [(v) => !!v || 'این فیلد الزامی است'];
@@ -248,13 +248,20 @@ const removeNewImage = (index) => {
 
 const removeExistingImage = async (index) => {
   try {
-    const imageUrl = form.value.images[index];
-    await useApiService.delete(`products/${form.value._id}/images`, {
-      data: { imageUrl }
-    });
+    const fileName = form.value.fileNames[index];
+
+    // Extract just the filename from the path (e.g., "/public/products/image.jpg" -> "image.jpg")
+    // Or use the full path if that's what the backend expects
+    const fileNameOnly = fileName.split('/').pop();
+
+    const { $axios } = useNuxtApp();
+    await $axios.delete(`products/${form.value._id}/files/${fileNameOnly}`);
+
     form.value.images.splice(index, 1);
+    form.value.fileNames.splice(index, 1);
     $notify('تصویر حذف شد', 'success');
   } catch (error) {
+    console.error('Error deleting image:', error);
     $notify('مشکلی در حذف تصویر پیش آمد', 'error');
   }
 };
@@ -266,20 +273,22 @@ const uploadNewImages = async (productId) => {
 
   const formData = new FormData();
   newImages.value.forEach((file) => {
-    formData.append('images', file);
+    formData.append('files', file);
   });
 
   try {
     $notify('در حال بارگذاری تصاویر...', 'info');
-    await useApiService.post(`products/${productId}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+
+    // Use axios directly like the old code (handles multipart/form-data properly)
+    const { $axios } = useNuxtApp();
+    const response = await $axios.post(`products/${productId}/files`, formData);
+
     $notify('تصاویر با موفقیت بارگذاری شدند', 'success');
+    return response.data;
   } catch (error) {
     console.error('Error uploading images:', error);
     $notify('مشکلی در بارگذاری تصاویر پیش آمد', 'warning');
+    throw error;
   }
 };
 
@@ -288,6 +297,11 @@ const getProduct = async () => {
   try {
     const productId = route.params.id;
     const data = await useApiService.get(`products/${productId}`);
+
+    // Convert file names to full URLs
+    const config = useRuntimeConfig();
+    const imageUrls = data.files ? data.files.map(fileName => config.public.STATICS_URL + fileName) : [];
+
     form.value = {
       _id: data._id,
       name: data.name,
@@ -303,7 +317,8 @@ const getProduct = async () => {
       content: data.content || '',
       variants: data.variants || [],
       properties: data.properties || [],
-      images: data.images || []
+      images: imageUrls,
+      fileNames: data.files || [] // Keep original filenames for deletion
     };
     $notify('اطلاعات محصول بارگذاری شد', 'success');
   } catch (error) {
