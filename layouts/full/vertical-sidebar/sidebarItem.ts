@@ -96,11 +96,11 @@ const sidebarItem: menu[] = [
                 icon: 'tabler:user-plus',
                 to: '/contacts'
             },
-            {
-                title: 'تسویه حساب اشخاص',
-                icon: 'tabler:cash',
-                to: '/contacts/settlements'
-            },
+            // {
+            //     title: 'تسویه حساب اشخاص',
+            //     icon: 'tabler:cash',
+            //     to: '/contacts/settlements'
+            // },
             {
                 title: 'گزارش لیست مشتریان',
                 icon: 'tabler:list',
