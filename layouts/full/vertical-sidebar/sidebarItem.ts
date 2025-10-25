@@ -284,7 +284,7 @@ const sidebarItem: menu[] = [
         BgColor: 'error',
         children: [
             {
-                title: 'تعریف هزینه',
+                title: 'اضافات و کسورات',
                 icon: 'tabler:cash-off',
                 to: '/add-and-subtract'
             },
@@ -342,6 +342,11 @@ const sidebarItem: menu[] = [
                 title: 'گزارش آماری',
                 icon: 'tabler:chart-bar',
                 to: '/reports/statistics'
+            },
+            {
+                title: 'اسناد حسابداری ',
+                icon: 'tabler:chart-bar',
+                to: '/accounting-documents'
             },
         ]
     },
