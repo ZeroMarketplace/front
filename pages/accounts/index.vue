@@ -22,7 +22,7 @@
                     <div class="pa-6 d-flex ga-3 align-center cursor-pointer rounded-xl"
                         :class="activeFilter === 'bank' ? 'bg-bglight' : 'bg-containerBg'" @click="setFilter('bank')">
                         <v-avatar size="56" class="border border-md border-info">
-                            <Icon icon="solar:bank-linear" height="25" class="text-info" />
+                            <Icon icon="solar:card-search-linear" height="25" class="text-primary" />
                         </v-avatar>
                         <div>
                             <h6 class="text-h6">حساب‌های بانکی</h6>
@@ -93,8 +93,7 @@
                             <td>
                                 <div class="d-flex align-center ga-2">
                                     <v-avatar size="32" :color="getTypeColor(item.type)">
-                                        <Icon :icon="getTypeIcon(item.type)" height="18"
-                                            :class="getTypeTextColor(item.type)" />
+                                        <Icon :icon="getTypeIcon(item.type)" height="18" />
                                     </v-avatar>
                                     <v-chip class="spike-chip" :color="getTypeColor(item.type)" variant="tonal"
                                         size="small" label>
